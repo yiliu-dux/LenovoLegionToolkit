@@ -288,7 +288,15 @@ public class GodModeControllerV4(
             }
 
             Log.Instance.Trace($"Creating StepperValue {c.Id}... [idRaw={(int)c.Id:X}, defaultValue={c.DefaultValue}, min={c.Min}, max={c.Max}, step={c.Step}, steps={string.Join(", ", steps)}]");
-            var stepperValue = new StepperValue(value, c.Min, c.Max, c.Step, steps, c.DefaultValue);
+
+            var minToUse = c.Min;
+
+            if (c.Id == CapabilityID.CPUTemperatureLimit)
+            {
+                minToUse = 60;
+            }
+            //Debug.Print($"Creating StepperValue {c.Id}... [idRaw={(int)c.Id:X}, defaultValue={c.DefaultValue}, min={minToUse}, max={c.Max}, step={c.Step}, steps={string.Join(", ", steps)}]");
+            var stepperValue = new StepperValue(value, minToUse, c.Max, c.Step, steps, c.DefaultValue);
             stepperValues[c.Id] = stepperValue;
         }
 
