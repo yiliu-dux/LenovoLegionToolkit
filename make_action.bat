@@ -13,4 +13,4 @@ dotnet publish LenovoLegionToolkit.SpectrumTester -c release -o build /p:DebugTy
 dotnet publish LenovoLegionToolkit.Probe -c release -o build /p:DebugType=None /p:FileVersion=%VERSION% /p:Version=%VERSION% || exit /b
 dotnet publish LenovoLegionToolkit.CLI -c release -o build /p:DebugType=None /p:FileVersion=%VERSION% /p:Version=%VERSION% || exit /b
 
-iscc make_installer_action.iss /DMyAppVersion=%VERSION% || exit /b
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" make_installer_action.iss /DMyAppVersion=%VERSION% || exit /b
