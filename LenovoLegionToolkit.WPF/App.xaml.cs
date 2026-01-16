@@ -1,4 +1,15 @@
-﻿using LenovoLegionToolkit.Lib;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Management;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
+using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Automation;
 using LenovoLegionToolkit.Lib.Controllers;
 using LenovoLegionToolkit.Lib.Controllers.Sensors;
@@ -27,17 +38,6 @@ using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows;
 using LenovoLegionToolkit.WPF.Windows.FloatingGadgets;
 using LenovoLegionToolkit.WPF.Windows.Utils;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Management;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Interop;
-using System.Windows.Media;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using WinFormsApp = System.Windows.Forms.Application;
@@ -81,8 +81,6 @@ public partial class App
 
     private async void Application_Startup(object sender, StartupEventArgs e)
     {
-        Microsoft.Win32.SystemEvents.SessionEnding += OnSystemSessionEnding;
-
         try
         {
 #if DEBUG
@@ -276,7 +274,6 @@ public partial class App
     private void Application_Exit(object sender, ExitEventArgs e)
     {
         _singleInstanceMutex?.Close();
-        Microsoft.Win32.SystemEvents.SessionEnding -= OnSystemSessionEnding;
     }
 
     public async Task ShutdownAsync()
@@ -331,6 +328,43 @@ public partial class App
             }
         }
         catch { /* Ignore */ }
+    }
+
+    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+    {
+        try
+        {
+            string reason = e.ReasonSessionEnding == ReasonSessionEnding.Logoff ? "Logoff" : "Shutdown";
+            Log.Instance.Trace($"System SessionEnding triggered. Reason: {reason}");
+
+            ExecuteShutdownLogic();
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"CRITICAL ERROR during SessionEnding: {ex}");
+        }
+
+        base.OnSessionEnding(e);
+    }
+
+    private void ExecuteShutdownLogic()
+    {
+        var overclockController = IoCContainer.Resolve<AmdOverclockingController>();
+
+        if (!overclockController.IsActive())
+        {
+            return;
+        }
+
+        var cleanInfo = new ShutdownInfo
+        {
+            Status = "Normal",
+            AbnormalCount = 0
+        };
+
+        overclockController.SaveShutdownInfo(cleanInfo);
+
+        Log.Instance.Trace($"Shutdown info saved successfully.");
     }
 
     #endregion
@@ -455,43 +489,6 @@ public partial class App
                 });
             }
         }, TaskCreationOptions.LongRunning);
-    }
-
-    #endregion
-
-    #region Event Handler
-
-    private void OnSystemSessionEnding(object sender, Microsoft.Win32.SessionEndingEventArgs e)
-    {
-        if (e.Reason != Microsoft.Win32.SessionEndReasons.Logoff &&
-            e.Reason != Microsoft.Win32.SessionEndReasons.SystemShutdown)
-        {
-            return;
-        }
-
-        try
-        {
-            var feature = IoCContainer.Resolve<AmdOverclockingController>();
-
-            if (!feature.IsActive())
-            {
-                return;
-            }
-
-            Log.Instance.Trace($"System session ending detected via SystemEvents. Reason: {e.Reason}");
-
-            var cleanInfo = new ShutdownInfo
-            {
-                Status = "Normal",
-                AbnormalCount = 0
-            };
-
-            feature.SaveShutdownInfo(cleanInfo);
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"Error during session ending cleanup: {ex.Message}", ex);
-        }
     }
 
     #endregion
