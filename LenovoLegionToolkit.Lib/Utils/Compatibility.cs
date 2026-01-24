@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Win32;
@@ -703,59 +704,51 @@ public static partial class Compatibility
         return (series is not (LegionSeries.Legion_7 or LegionSeries.Legion_Pro_7)) || !(gen >= 10);
     }
 
-    public static void PrintMachineInfo()
+    public static async Task PrintMachineInfoAsync()
     {
         if (!Log.Instance.IsTraceEnabled)
             return;
 
-        if (!_machineInformation.HasValue)
-        {
-            Log.Instance.Trace($"Machine information is not retrieved yet.");
-            return;
-        }
+        var info = await GetMachineInformationAsync().ConfigureAwait(false);
 
-        var info = _machineInformation.Value;
+        var sb = new StringBuilder();
+        sb.AppendLine("Retrieved machine information:");
+        sb.Append(FormatMachineInformation(info));
 
-        Log.Instance.Trace($"Retrieved machine information:");
-
-        var lines = FormatMachineInformation(info);
-        foreach (var line in lines)
-        {
-            Log.Instance.Trace($"{line}");
-        }
+        Log.Instance.Trace($"{sb}");
     }
 
-    private static List<string> FormatMachineInformation(MachineInformation info)
+    private static string FormatMachineInformation(MachineInformation info)
     {
-        var lines = new List<string>();
-
+        var sb = new StringBuilder();
         var properties = typeof(MachineInformation).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         foreach (var prop in properties)
         {
             if (prop.Name == "SerialNumber")
-            {
                 continue;
-            }
 
             try
             {
-                Object? value = prop.GetValue(info);
+                var value = prop.GetValue(info);
                 if (value == null)
                 {
-                    lines.Add($" * {prop.Name}: 'null'");
+                    sb.AppendLine($" * {prop.Name}: 'null'");
                     continue;
                 }
-                List<string>? formattedValue = FormatPropertyValue(prop.Name, value, 0);
-                lines.AddRange(formattedValue);
+                var formattedLines = FormatPropertyValue(prop.Name, value, 0);
+                foreach (var line in formattedLines)
+                {
+                    sb.AppendLine(line);
+                }
             }
             catch (Exception ex)
             {
-                lines.Add($" * {prop.Name}: <Error: {ex.Message}>");
+                sb.AppendLine($" * {prop.Name}: <Error: {ex.Message}>");
             }
         }
 
-        return lines;
+        return sb.ToString();
     }
 
     private static List<string> FormatPropertyValue(string propertyName, object? value, int indentLevel)
@@ -779,14 +772,14 @@ public static partial class Compatibility
                 return lines;
 
             case "SupportedPowerModes" when value is PowerModeState[] powerModes:
-                var modes = string.Join(",", powerModes);
+                var modes = string.Join(", ", powerModes);
                 lines.Add($"{prefix}{propertyName}: '{modes}'");
                 return lines;
 
             case "Features" when value is MachineInformation.FeatureData features:
                 var featureStr = features.Source == MachineInformation.FeatureData.SourceType.Unknown
                     ? "Unknown"
-                    : $"{features.Source}:{string.Join(",", features.All)}";
+                    : $"{features.Source}: {string.Join(", ", features.All)}";
                 lines.Add($"{prefix}{propertyName}: {featureStr}");
                 return lines;
 
@@ -797,18 +790,18 @@ public static partial class Compatibility
                 {
                     try
                     {
-                        Object? propValue = prop.GetValue(properties);
+                        var propValue = prop.GetValue(properties);
                         if (propValue == null)
                         {
-                            lines.Add($"{prefix} {prop.Name}: 'null'");
+                            lines.Add($"    {indent}    * {prop.Name}: 'null'");
                             continue;
                         }
-                        List<string>? propLines = FormatPropertyValue(prop.Name, propValue, indentLevel + 1);
+                        var propLines = FormatPropertyValue(prop.Name, propValue, indentLevel + 1);
                         lines.AddRange(propLines);
                     }
                     catch (Exception ex)
                     {
-                        lines.Add($"{prefix} {prop.Name}: <Error: {ex.Message}>");
+                        lines.Add($"    {indent}    * {prop.Name}: <Error: {ex.Message}>");
                     }
                 }
                 return lines;
@@ -818,7 +811,7 @@ public static partial class Compatibility
         {
             var fields = type.GetFields();
             var tupleValues = fields.Select(f => f.GetValue(value)?.ToString() ?? "null");
-            lines.Add($"{prefix}{propertyName}: '{string.Join(", ", tupleValues)}'");
+            lines.Add($"{prefix}{propertyName}: '({string.Join(", ", tupleValues)})'");
             return lines;
         }
 
@@ -831,8 +824,8 @@ public static partial class Compatibility
             }
             else
             {
-                var itemStr = string.Join(",", items);
-                lines.Add($"{prefix}{propertyName}: '{itemStr}'");
+                var itemStr = string.Join(", ", items);
+                lines.Add($"{prefix}{propertyName}: '[{itemStr}]'");
             }
             return lines;
         }

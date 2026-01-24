@@ -126,15 +126,6 @@ public partial class ArgumentWindow
         var currentArgs = LoadCurrentArgs();
         var properties = typeof(AppFlags).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        var isDebugBranch = IoCContainer.Resolve<UpdateChecker>().Branch == "Dev";
-        AddFlagIf(
-            isDebugBranch,
-            nameof(AppFlags.Instance.EnableCustomFanCurve),
-            "--enable-custom-fan-curve",
-            Resource.ArgumentWindow_Category_Hardware_Automation,
-            SymbolRegular.BezierCurveSquare12,
-            Resource.ArgumentWindow_Flag_Enable_Custom_Fan_Curve
-        );
 
         var validProps = properties
             .Where(p => _metadata.ContainsKey(p.Name))

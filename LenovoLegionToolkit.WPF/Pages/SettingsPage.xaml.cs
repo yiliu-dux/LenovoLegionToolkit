@@ -440,6 +440,7 @@ public partial class SettingsPage
         });
 
         Log.Instance.IsTraceEnabled = state.Value;
+        AppFlags.Instance.IsTraceEnabled = state.Value;
         _settings.Store.EnableLogging = state.Value;
         _settings.SynchronizeStore();
 
