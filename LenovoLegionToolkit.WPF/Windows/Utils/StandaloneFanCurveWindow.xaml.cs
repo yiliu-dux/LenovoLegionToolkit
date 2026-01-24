@@ -1,0 +1,142 @@
+﻿using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Extensions;
+using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Controls;
+using System;
+using System.Collections.Generic;
+using System.Windows;
+
+namespace LenovoLegionToolkit.WPF.Windows.Utils;
+
+public partial class StandaloneFanCurveWindow : BaseWindow
+{
+    private readonly FanCurveManager _fanCurveManager = IoCContainer.Resolve<FanCurveManager>();
+    private readonly List<FanCurveControlV3> _fanCurveControls = new();
+
+    public StandaloneFanCurveWindow()
+    {
+        InitializeComponent();
+        Loaded += TestWindow_Loaded;
+        Closing += TestWindow_Closing;
+    }
+
+    private void TestWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            _fanCurveManager.Initialize(true);
+            InitializeFanControls();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed init: {ex.Message}");
+        }
+    }
+
+    private void TestWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        foreach (var ctrl in _fanCurveControls)
+        {
+            _fanCurveManager.UnregisterViewModel(ctrl.FanType, ctrl);
+        }
+    }
+
+    private void InitializeFanControls()
+    {
+        _fanControlStackPanel.Children.Clear();
+        _fanCurveControls.Clear();
+        _fanSelector.Items.Clear();
+
+        var fanTypes = new[] { FanTableType.CPU, FanTableType.GPU };
+
+        foreach (var type in fanTypes)
+        {
+            var fanType = type switch
+            {
+                FanTableType.CPU => FanType.Cpu,
+                FanTableType.GPU => FanType.Gpu,
+                _ => FanType.System
+            };
+
+            var entry = _fanCurveManager.GetEntry(fanType);
+            FanTableData data;
+            
+            if (entry != null)
+            {
+                 data = new FanTableData(type, (byte)(type == FanTableType.CPU ? 1 : 2), (byte)(type == FanTableType.CPU ? 0 : 1), null, null);
+            }
+            else
+            {
+                 data = CreateRandomFanTableData(type);
+            }
+
+            var ctrl = CreateFanControl(data, fanType);
+            _fanCurveControls.Add(ctrl);
+            _fanControlStackPanel.Children.Add(ctrl);
+            _fanSelector.Items.Add(ctrl.Tag);
+        }
+
+        if (_fanSelector.Items.Count > 0)
+        {
+            _fanSelector.SelectedIndex = 0;
+        }
+    }
+
+    private FanTableData CreateRandomFanTableData(FanTableType type)
+    {
+        var speeds = new ushort[] { 0, 20, 35, 45, 55, 65, 75, 85, 95, 100 };
+        var temps = new ushort[] { 30, 45, 50, 55, 60, 65, 70, 80, 90, 100 };
+        
+        return new FanTableData(
+            type,
+            (byte)(type == FanTableType.CPU ? 1 : 2),
+            (byte)(type == FanTableType.CPU ? 0 : 1),
+            speeds,
+            temps
+        );
+    }
+
+    private FanCurveControlV3 CreateFanControl(FanTableData data, FanType fanType)
+    {
+        var entry = _fanCurveManager.GetEntry(fanType);
+        if (entry == null)
+        {
+             var info = new FanTableInfo(new[] { data }, default);
+            entry = FanCurveEntry.FromFanTableInfo(info, (ushort)fanType);
+            _fanCurveManager.AddEntry(entry);
+        }
+
+        var ctrl = new FanCurveControlV3
+        {
+            Margin = new Thickness(0, 40, 0, 20),
+            Tag = fanType.GetDisplayName(),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Visibility = Visibility.Collapsed // Default to collapsed
+        };
+
+        ctrl.Initialize(entry, new[] { data }, fanType, data.FanId);
+
+        ctrl.SettingsChanged += (s, e) =>
+        {
+             _fanCurveManager.UpdateConfig(fanType, entry);
+             _fanCurveManager.UpdateGlobalSettings(entry);
+        };
+
+        _fanCurveManager.RegisterViewModel(fanType, ctrl);
+        
+        return ctrl;
+    }
+
+    private void FanSelector_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (_fanSelector.SelectedIndex < 0 || _fanSelector.SelectedIndex >= _fanCurveControls.Count)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _fanCurveControls.Count; i++)
+        {
+            _fanCurveControls[i].Visibility = (i == _fanSelector.SelectedIndex) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+}
