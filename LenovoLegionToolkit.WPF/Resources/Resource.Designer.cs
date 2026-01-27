@@ -4034,6 +4034,15 @@ namespace LenovoLegionToolkit.WPF.Resources {
         }
         
         /// <summary>
+        ///   查找类似 Fan Curve 的本地化字符串。
+        /// </summary>
+        public static string MainWindow_NavigationItem_FanCurve {
+            get {
+                return ResourceManager.GetString("MainWindow_NavigationItem_FanCurve", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Keyboard 的本地化字符串。
         /// </summary>
         public static string MainWindow_NavigationItem_Keyboard {

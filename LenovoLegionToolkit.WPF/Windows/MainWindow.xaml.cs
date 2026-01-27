@@ -95,7 +95,14 @@ public partial class MainWindow
         _contentGrid.Visibility = Visibility.Hidden;
 
         if (!await KeyboardBacklightPage.IsSupportedAsync())
+        {
             _navigationStore.Items.Remove(_keyboardItem);
+        }
+
+        if (!await StandaloneFanCurvePage.IsSupportedAsync())
+        {
+            _navigationStore.Items.Remove(_fanItem);
+        }
 
         SmartKeyHelper.Instance.BringToForeground = () => Dispatcher.Invoke(BringToForeground);
 

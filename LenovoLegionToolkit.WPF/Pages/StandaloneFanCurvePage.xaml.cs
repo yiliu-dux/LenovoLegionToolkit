@@ -4,23 +4,26 @@ using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Controls;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
+using Wpf.Ui.Controls;
+using MessageBox = System.Windows.MessageBox;
 
-namespace LenovoLegionToolkit.WPF.Windows.Utils;
+namespace LenovoLegionToolkit.WPF.Pages;
 
-public partial class StandaloneFanCurveWindow : BaseWindow
+public partial class StandaloneFanCurvePage : UiPage
 {
     private readonly FanCurveManager _fanCurveManager = IoCContainer.Resolve<FanCurveManager>();
     private readonly List<FanCurveControlV3> _fanCurveControls = new();
 
-    public StandaloneFanCurveWindow()
+    public StandaloneFanCurvePage()
     {
         InitializeComponent();
-        Loaded += TestWindow_Loaded;
-        Closing += TestWindow_Closing;
+        this.Loaded += TestPage_Loaded;
+        this.Unloaded += TestPage_Unloaded;
     }
 
-    private void TestWindow_Loaded(object sender, RoutedEventArgs e)
+    private void TestPage_Loaded(object sender, RoutedEventArgs e)
     {
         try
         {
@@ -33,7 +36,7 @@ public partial class StandaloneFanCurveWindow : BaseWindow
         }
     }
 
-    private void TestWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    private void TestPage_Unloaded(object sender, RoutedEventArgs e)
     {
         foreach (var ctrl in _fanCurveControls)
         {
@@ -60,14 +63,14 @@ public partial class StandaloneFanCurveWindow : BaseWindow
 
             var entry = _fanCurveManager.GetEntry(fanType);
             FanTableData data;
-            
+
             if (entry != null)
             {
-                 data = new FanTableData(type, (byte)(type == FanTableType.CPU ? 1 : 2), (byte)(type == FanTableType.CPU ? 0 : 1), Array.Empty<ushort>(), Array.Empty<ushort>());
+                data = new FanTableData(type, (byte)(type == FanTableType.CPU ? 1 : 2), (byte)(type == FanTableType.CPU ? 0 : 1), Array.Empty<ushort>(), Array.Empty<ushort>());
             }
             else
             {
-                 data = CreateRandomFanTableData(type);
+                data = CreateRandomFanTableData(type);
             }
 
             var ctrl = CreateFanControl(data, fanType);
@@ -86,7 +89,7 @@ public partial class StandaloneFanCurveWindow : BaseWindow
     {
         var speeds = new ushort[] { 0, 20, 35, 45, 55, 65, 75, 85, 95, 100 };
         var temps = new ushort[] { 30, 45, 50, 55, 60, 65, 70, 80, 90, 100 };
-        
+
         return new FanTableData(
             type,
             (byte)(type == FanTableType.CPU ? 1 : 2),
@@ -101,7 +104,7 @@ public partial class StandaloneFanCurveWindow : BaseWindow
         var entry = _fanCurveManager.GetEntry(fanType);
         if (entry == null)
         {
-             var info = new FanTableInfo(new[] { data }, default);
+            var info = new FanTableInfo(new[] { data }, default);
             entry = FanCurveEntry.FromFanTableInfo(info, (ushort)fanType);
             _fanCurveManager.AddEntry(entry);
         }
@@ -111,19 +114,19 @@ public partial class StandaloneFanCurveWindow : BaseWindow
             Margin = new Thickness(0, 40, 0, 20),
             Tag = fanType.GetDisplayName(),
             HorizontalAlignment = HorizontalAlignment.Stretch,
-            Visibility = Visibility.Collapsed // Default to collapsed
+            Visibility = Visibility.Collapsed
         };
 
         ctrl.Initialize(entry, new[] { data }, fanType, data.FanId);
 
         ctrl.SettingsChanged += (s, e) =>
         {
-             _fanCurveManager.UpdateConfig(fanType, entry);
-             _fanCurveManager.UpdateGlobalSettings(entry);
+            _fanCurveManager.UpdateConfig(fanType, entry);
+            _fanCurveManager.UpdateGlobalSettings(entry);
         };
 
         _fanCurveManager.RegisterViewModel(fanType, ctrl);
-        
+
         return ctrl;
     }
 
@@ -137,6 +140,21 @@ public partial class StandaloneFanCurveWindow : BaseWindow
         for (int i = 0; i < _fanCurveControls.Count; i++)
         {
             _fanCurveControls[i].Visibility = (i == _fanSelector.SelectedIndex) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    public static async Task<bool> IsSupportedAsync()
+    {
+        try
+        {
+            var feature = IoCContainer.Resolve<FanCurveManager>();
+            var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
+            return feature.IsEnabled && mi.LegionSeries == LegionSeries.ThinkBook;
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Error checking keyboard support: {ex.Message}");
+            return false;
         }
     }
 }

@@ -2825,4 +2825,7 @@ Do not proceed unless you possess the necessary technical expertise.</value>
   <data name="FanMaxSpeedAutomationStepControl_Message" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
+  <data name="MainWindow_NavigationItem_FanCurve" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
 </root>

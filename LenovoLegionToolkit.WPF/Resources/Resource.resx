@@ -2826,4 +2826,7 @@ Do not proceed unless you possess the necessary technical expertise.</value>
   <data name="FanMaxSpeedAutomationStepControl_Message" xml:space="preserve">
     <value>Set fan to maximum speed.</value>
   </data>
+  <data name="MainWindow_NavigationItem_FanCurve" xml:space="preserve">
+    <value>Fan Curve</value>
+  </data>
 </root>
