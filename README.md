@@ -1,3 +1,18 @@
+<!--
+
+
+del LenovoLegionToolkit.cer
+del LenovoLegionToolkit.pfx
+
+Set-ExecutionPolicy -Scope Process Bypass
+$env:LLT_CERT_PASSWORD = "PickAPassword"
+.\generate_certificate.ps1 -Password "PickAPassword"
+
+.\make_action.bat
+
+
+ -->
+
 <div align="center">
   <img height="128" src="assets/logo.png" alt="Lenovo Legion Toolkit Logo">
   
