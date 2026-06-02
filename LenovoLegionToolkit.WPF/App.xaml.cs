@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Security.Principal;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Automation;
 using LenovoLegionToolkit.Lib.Controllers;
@@ -33,7 +32,11 @@ using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
 using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.Lib.Station.Core;
 using LenovoLegionToolkit.WPF.CLI;
+using LenovoLegionToolkit.WPF.Station.Core;
+using LenovoLegionToolkit.WPF.Station.Services;
+using LenovoLegionToolkit.WPF.Controls.Custom;
 using LenovoLegionToolkit.WPF.Extensions;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
@@ -98,6 +101,7 @@ public partial class App
 
             await InitializeSettingsAndCompatibilityAsync();
             await InitializeHardwareAndFeaturesAsync();
+            IoCContainer.Resolve<ExtensionManager>().Load();
             var deferredInitTask = StartBackgroundServicesAsync();
             await InitializeUIAsync();
             await deferredInitTask;
@@ -111,6 +115,7 @@ public partial class App
 
                 Compatibility.PrintControllerVersionAsync().ConfigureAwait(false);
                 InitOsd();
+                InitAppMessages();
                 LogIdentityStatus();
 
                 if (AppFlags.Instance.Debug)
@@ -134,17 +139,6 @@ public partial class App
 
     private async Task<bool> InitializeCoreEnvironmentAsync(StartupEventArgs e)
     {
-        if (!EnsureSingleInstance())
-        {
-            return false;
-        }
-
-        if (!IsAdministrator())
-        {
-            Elevate(e.Args);
-            return false;
-        }
-
 #if DEBUG
         if (Debugger.IsAttached)
         {
@@ -166,6 +160,11 @@ public partial class App
         {
             InitializeDebugConsole();
             Console.WriteLine(@"[Startup] Ensuring Single Instance...");
+        }
+
+        if (!EnsureSingleInstance())
+        {
+            return false;
         }
 
         await Compatibility.PrintMachineInfoAsync().ConfigureAwait(false);
@@ -214,6 +213,8 @@ public partial class App
             RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
         }
 
+        CardControl.IsCompact = settings.Store.CompactMode;
+
         MigrateSettingsToNew();
         ConfigureFeatureFlags();
     }
@@ -241,10 +242,9 @@ public partial class App
             SafeInitAsync(InitGpuOverclockControllerAsync, "GPU Overclock"),
             SafeInitAsync(InitLampArrayControllerAsync, "LampArray"),
             SafeInitAsync(InitHybridModeAsync, "Hybrid Mode"),
-            SafeInitAsync(InitFanManagerExtension, "Fan Manager"),
             SafeInitAsync(InitAutomationLocalization, "Automation Localization"),
             SafeInitAsync(InitAMDOverclocking, "AMD Overclocking"),
-            SafeInitAsync(InitSetPowerMode, "Set Power Mode"),
+            // SafeInitAsync(InitSetPowerMode, "Set Power Mode"),
         };
 
         await Task.WhenAll(initTasks);
@@ -364,34 +364,8 @@ public partial class App
         Environment.Exit(-1);
     }
 
-    private async void Application_Exit(object sender, ExitEventArgs e)
+    private void Application_Exit(object sender, ExitEventArgs e)
     {
-        try
-        {
-            var controller = IoCContainer.TryResolve<AmdOverclockingController>();
-            var fanManager = IoCContainer.TryResolve<FanCurveManager>();
-
-            if (controller != null && controller.IsActive())
-            {
-                var cleanInfo = new ShutdownInfo
-                {
-                    Status = "Normal",
-                    AbnormalCount = 0
-                };
-
-                controller.SaveShutdownInfo(cleanInfo);
-            }
-
-            if (fanManager != null && await fanManager.IsSupportedAsync().ConfigureAwait(false))
-            {
-                await fanManager.SetRegisterAsync(false).ConfigureAwait(false);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"Application_Exit save status failed: {ex.Message}");
-        }
-
         _singleInstanceMutex?.Close();
     }
 
@@ -414,6 +388,7 @@ public partial class App
         await SafeExecuteAsync<HWiNFOIntegration>(c => c.StopAsync());
         await SafeExecuteAsync<IpcServer>(c => c.StopAsync());
         await SafeExecuteAsync<BatteryDischargeRateMonitorService>(c => c.StopAsync());
+        await SafeExecuteAsync<ExtensionManager>(c => c.StopAsync());
 
         var feature = IoCContainer.Resolve<AmdOverclockingController>();
 
@@ -426,12 +401,6 @@ public partial class App
             };
 
             feature.SaveShutdownInfo(cleanInfo);
-        }
-
-        var fanManager = IoCContainer.Resolve<FanCurveManager>();
-        if (fanManager != null && await fanManager.IsSupportedAsync().ConfigureAwait(false))
-        {
-            await fanManager.SetRegisterAsync(false).ConfigureAwait(false);
         }
 
         Dispatcher.Invoke(Shutdown);
@@ -499,15 +468,33 @@ public partial class App
 
         try
         {
-            if (!await CheckBasicCompatibilityAsync())
+            var basicTask = Compatibility.CheckBasicCompatibilityAsync();
+            var fullTask = Compatibility.IsCompatibleAsync();
+
+            await Task.WhenAll(basicTask, fullTask);
+
+            bool isBasicCompatible = basicTask.Result;
+            var (isFullCompatible, mi) = fullTask.Result;
+
+            if (isBasicCompatible || isFullCompatible)
             {
+                Log.Instance.Trace($"Compatibility check passed. (Basic={isBasicCompatible}, Full={isFullCompatible}) [Vendor={mi.Vendor}, Model={mi.Model}, MachineType={mi.MachineType}, BIOS={mi.BiosVersion}]");
                 return;
             }
 
-            if (!await CheckCompatibilityAsync())
+            Log.Instance.Trace($"Incompatible system detected. [Vendor={mi.Vendor}, Model={mi.Model}, MachineType={mi.MachineType}, BIOS={mi.BiosVersion}]");
+
+            var unsupportedWindow = new UnsupportedWindow(mi);
+            unsupportedWindow.Show();
+
+            if (await unsupportedWindow.ShouldContinue)
             {
+                Log.Instance.IsTraceEnabled = true;
+                Log.Instance.Trace($"Compatibility check OVERRIDE. [Vendor={mi.Vendor}, Model={mi.Model}, MachineType={mi.MachineType}]");
                 return;
             }
+
+            Shutdown(202);
         }
         catch (Exception ex)
         {
@@ -520,44 +507,6 @@ public partial class App
             MessageBox.Show(Resource.CompatibilityCheckError_Message, Resource.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(200);
         }
-    }
-
-    private async Task<bool> CheckBasicCompatibilityAsync()
-    {
-        if (await Compatibility.CheckBasicCompatibilityAsync())
-        {
-            return true;
-        }
-
-        MessageBox.Show(Resource.IncompatibleDevice_Message, Resource.AppName, MessageBoxButton.OK, MessageBoxImage.Error);
-        Shutdown(201);
-        return false;
-    }
-
-    private async Task<bool> CheckCompatibilityAsync()
-    {
-        var (isCompatible, mi) = await Compatibility.IsCompatibleAsync();
-
-        if (isCompatible)
-        {
-            Log.Instance.Trace($"Compatibility check passed. [Vendor={mi.Vendor}, Model={mi.Model}, MachineType={mi.MachineType}, BIOS={mi.BiosVersion}]");
-            return true;
-        }
-
-        Log.Instance.Trace($"Incompatible system detected. [Vendor={mi.Vendor}, Model={mi.Model}, MachineType={mi.MachineType}, BIOS={mi.BiosVersion}]");
-
-        var unsupportedWindow = new UnsupportedWindow(mi);
-        unsupportedWindow.Show();
-
-        if (await unsupportedWindow.ShouldContinue)
-        {
-            Log.Instance.IsTraceEnabled = true;
-            Log.Instance.Trace($"Compatibility check OVERRIDE. [Vendor={mi.Vendor}, Model={mi.Model}, MachineType={mi.MachineType}]");
-            return true;
-        }
-
-        Shutdown(202);
-        return false;
     }
 
     #endregion
@@ -635,40 +584,6 @@ public partial class App
         return true;
     }
 
-    private static bool IsAdministrator()
-    {
-        using var identity = WindowsIdentity.GetCurrent();
-        var principal = new WindowsPrincipal(identity);
-        return principal.IsInRole(WindowsBuiltInRole.Administrator);
-    }
-
-    private static void Elevate(string[] args)
-    {
-        var exePath = Environment.ProcessPath;
-        if (string.IsNullOrEmpty(exePath))
-        {
-            return;
-        }
-
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = exePath,
-            Arguments = string.Join(" ", args.Select(arg => arg.Contains(' ') ? $"\"{arg}\"" : arg)),
-            Verb = "runas",
-            UseShellExecute = true
-        };
-
-        try
-        {
-            Process.Start(startInfo);
-            Environment.Exit(0);
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"Elevation failed: {ex.Message}");
-            Environment.Exit(-1);
-        }
-    }
 
     #endregion
 
@@ -802,10 +717,28 @@ public partial class App
         try
         {
             var feature = IoCContainer.Resolve<ITSModeFeature>();
+            var settings = IoCContainer.Resolve<ITSModeSettings>();
 
             if (await feature.IsSupportedAsync())
             {
-                await feature.SetStateAsync(await feature.GetStateAsync());
+                var currentState = await feature.GetStateAsync();
+                var savedState = settings.Store.LastState;
+
+                if (savedState != ITSMode.None && savedState != currentState)
+                {
+                    Log.Instance.Trace($"Restoring saved ITS mode: {savedState}");
+                    await feature.SetStateAsync(savedState);
+                }
+                else
+                {
+                    await feature.SetStateAsync(currentState);
+
+                    if (savedState != currentState)
+                    {
+                        settings.Store.LastState = currentState;
+                        settings.SynchronizeStore();
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -1066,49 +999,7 @@ public partial class App
         }
     }
 
-    private static async Task InitFanManagerExtension()
-    {
-        try
-        {
-            Log.Instance.Trace($"Resolving and initializing FanCurveManager...");
-            var fanManager = IoCContainer.Resolve<FanCurveManager>();
-
-            if (!await fanManager.IsSupportedAsync().ConfigureAwait(false))
-            {
-                Log.Instance.Trace($"Extension is not supported or missing.");
-                return;
-            }
-
-            await fanManager.InitializeAsync().ConfigureAwait(false);
-
-            var mi = await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
-            if (mi.LegionSeries <= LegionSeries.Legion_Legacy)
-            {
-                var powerMode = IoCContainer.Resolve<PowerModeFeature>();
-                if (await powerMode.GetStateAsync().ConfigureAwait(false) != PowerModeState.GodMode)
-                {
-                    return;
-                }
-            }
-
-            var fanSettings = IoCContainer.Resolve<FanCurveSettings>();
-
-            if (fanSettings.Store.Entries.Count == 0)
-            {
-                fanSettings.Save();
-            }
-
-            Log.Instance.Trace($"Applying {fanSettings.Store.Entries.Count} fan curves from settings...");
-            await fanManager.LoadAndApply(fanSettings.Store.Entries).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            Log.Instance.Trace($"Failed to apply profile on startup: {ex.Message}", ex);
-        }
-    }
-
     #endregion
-
     #region UI Helpers
 
     public void InitOsd()
@@ -1125,46 +1016,45 @@ public partial class App
 
         if (OsdSettings.Store.ShowOsd)
         {
-            HandleOsdCommand(OsdState.Show);
+            HandleOsdCommand(ToggleState.On);
         }
     }
 
-    private void HandleOsdCommand(OsdState command)
+    private void InitAppMessages()
+    {
+        MessagingCenter.Subscribe<ShowAppMessage>(this, _ =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (MainWindowInstance is { } window)
+                {
+                    window.BringToForeground();
+                }
+            });
+        });
+    }
+
+    private void HandleOsdCommand(ToggleState command)
     {
         var OsdSettings = IoCContainer.Resolve<OsdSettings>();
         bool shouldBeBar = OsdSettings.Store.SelectedStyleIndex == 1;
 
-        switch (command)
+        bool show = command switch
         {
-            case OsdState.Hidden:
-                if (OsdWindow != null)
-                {
-                    OsdWindow.Hide();
-                }
-                break;
+            ToggleState.On => true,
+            ToggleState.Off => false,
+            ToggleState.Toggle => !(OsdWindow?.IsVisible ?? false),
+            _ => throw new ArgumentOutOfRangeException(nameof(command), command, null)
+        };
 
-            case OsdState.Show:
-                EnsureCorrectOsdStyle(shouldBeBar);
-                if (OsdWindow != null)
-                {
-                    OsdWindow.Show();
-                }
-                break;
-
-            case OsdState.Toggle:
-                if (OsdWindow is { IsVisible: true })
-                {
-                    OsdWindow.Hide();
-                }
-                else
-                {
-                    EnsureCorrectOsdStyle(shouldBeBar);
-                    if (OsdWindow != null)
-                    {
-                        OsdWindow.Show();
-                    }
-                }
-                break;
+        if (show)
+        {
+            EnsureCorrectOsdStyle(shouldBeBar);
+            OsdWindow?.Show();
+        }
+        else
+        {
+            OsdWindow?.Hide();
         }
 
         OsdSettings.Store.ShowOsd = OsdWindow?.IsVisible ?? false;

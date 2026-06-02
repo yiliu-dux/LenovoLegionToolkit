@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -153,6 +153,9 @@
   <data name="AutorunState_EnabledDelayed" xml:space="preserve">
     <value>Увімкнено із затримкою</value>
   </data>
+  <data name="Balanced" xml:space="preserve">
+    <value>Збалансований</value>
+  </data>
   <data name="BatteryNightChargeState_Off" xml:space="preserve">
     <value>Вимкнене</value>
   </data>
@@ -168,6 +171,12 @@
   <data name="BatteryState_RapidCharge" xml:space="preserve">
     <value>Швидка зарядка</value>
   </data>
+  <data name="BestPerformance" xml:space="preserve">
+    <value>Кращі результати</value>
+  </data>
+  <data name="BestPowerEfficiency" xml:space="preserve">
+    <value>Ефективність найкращої потужності</value>
+  </data>
   <data name="CustomFanCurveControl_Fan_CPU" xml:space="preserve">
     <value>Вентилятор ЦП</value>
   </data>
@@ -177,14 +186,11 @@
   <data name="CustomFanCurveControl_Fan_System" xml:space="preserve">
     <value>Системний вентилятор</value>
   </data>
-  <data name="FanMaxSpeedState_Off" xml:space="preserve">
-    <value>Викл</value>
+  <data name="CustomSpecialKey_Custom" xml:space="preserve">
+    <value>Користувацька</value>
   </data>
-  <data name="FanMaxSpeedState_On" xml:space="preserve">
-    <value>Вкл</value>
-  </data>
-  <data name="FanMaxSpeedState_Toggle" xml:space="preserve">
-    <value>Перемикач</value>
+  <data name="CustomSpecialKey_Default" xml:space="preserve">
+    <value>Типово</value>
   </data>
   <data name="FlipToStartState_Off" xml:space="preserve">
     <value>Вимкнено</value>
@@ -202,11 +208,20 @@
     <value>Увімкнено</value>
     <comment>Informs the user that Fn Lock is or will be turned on.</comment>
   </data>
+  <data name="GB" xml:space="preserve">
+    <value>ГБ</value>
+  </data>
   <data name="GPUController_PoweredOff" xml:space="preserve">
     <value>Вимкнений</value>
   </data>
   <data name="GPUController_PoweredOn" xml:space="preserve">
     <value>Увімкнений</value>
+  </data>
+  <data name="HardwareSensorsState_Off" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="HardwareSensorsState_On" xml:space="preserve">
+    <value>Увімк</value>
   </data>
   <data name="HDRState_Off" xml:space="preserve">
     <value>Вимкнено</value>
@@ -323,7 +338,7 @@
     <value>Температура диску 2</value>
   </data>
   <data name="OsdItem_E_Core_Frequency" xml:space="preserve">
-    <value>E-Core Clock</value>
+    <value>Частота Е-ядра</value>
   </data>
   <data name="OsdItem_Fan" xml:space="preserve">
     <value>Вентилятор</value>
@@ -350,7 +365,7 @@
     <value>Потужність</value>
   </data>
   <data name="OsdItem_P_Core_Frequency" xml:space="preserve">
-    <value>P-Core Clock</value>
+    <value>Частота П-ядра</value>
   </data>
   <data name="OsdItem_Temperature" xml:space="preserve">
     <value>Температура</value>
@@ -359,19 +374,10 @@
     <value>Використання</value>
   </data>
   <data name="OsdItem_VramTemperature" xml:space="preserve">
-    <value>VRAM Temperature</value>
+    <value>Температура відеопам'яті</value>
   </data>
   <data name="OsdItem_VramUtilization" xml:space="preserve">
-    <value>VRAM Utilization</value>
-  </data>
-  <data name="OsdState_Hidden" xml:space="preserve">
-    <value>Сховати</value>
-  </data>
-  <data name="OsdState_Show" xml:space="preserve">
-    <value>Показувати</value>
-  </data>
-  <data name="OsdState_Toggle" xml:space="preserve">
-    <value>Перемикач</value>
+    <value>Використання відеопам'яті</value>
   </data>
   <data name="OverdriveState_Off" xml:space="preserve">
     <value>Вимкнений</value>
@@ -464,6 +470,9 @@
   </data>
   <data name="RGBKeyboardBacklightSpeed_Slowest" xml:space="preserve">
     <value>Найповільніша</value>
+  </data>
+  <data name="SharedMemory" xml:space="preserve">
+    <value>Загальні / Динамічні</value>
   </data>
   <data name="SpeakerState_Mute" xml:space="preserve">
     <value>Вимкнути звук</value>
@@ -558,6 +567,15 @@
   <data name="Theme_System" xml:space="preserve">
     <value>Системна</value>
   </data>
+  <data name="ToggleState_Off" xml:space="preserve">
+    <value>Вимкнено</value>
+  </data>
+  <data name="ToggleState_On" xml:space="preserve">
+    <value>Увімк</value>
+  </data>
+  <data name="ToggleState_Toggle" xml:space="preserve">
+    <value>Переключити</value>
+  </data>
   <data name="TouchpadLockState_Off" xml:space="preserve">
     <value>Вимкнений</value>
     <comment>Informs the user that Touchpad Lock is or will be turned off.</comment>
@@ -574,6 +592,9 @@
   </data>
   <data name="UpdateChannel_Stable" xml:space="preserve">
     <value>Стабільний</value>
+  </data>
+  <data name="UpdateChannel_Test" xml:space="preserve">
+    <value>Тест</value>
   </data>
   <data name="UpdateChecker_Security_Invalid" xml:space="preserve">
     <value>Завантажене оновлення не підписано сертифікатом довіреного сервера {0}</value>

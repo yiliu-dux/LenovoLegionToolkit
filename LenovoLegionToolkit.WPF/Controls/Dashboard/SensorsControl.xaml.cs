@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,7 +38,7 @@ public partial class SensorsControl
         ContextMenu = new ContextMenu();
         ContextMenu.Items.Add(new MenuItem { Header = Resource.SensorsControl_RefreshInterval, IsEnabled = false });
 
-        foreach (var interval in new[] { 1, 2, 3, 5 })
+        foreach (var interval in new double[] { 0.5, 1, 2, 3, 4, 5 })
         {
             var item = new MenuItem
             {
@@ -91,7 +91,8 @@ public partial class SensorsControl
             {
                 Log.Instance.Trace($"Sensors not supported.");
 
-                Dispatcher.Invoke(() => Visibility = Visibility.Collapsed);
+                if (!AppFlags.Instance.Debug)
+                    Dispatcher.Invoke(() => Visibility = Visibility.Collapsed);
                 return;
             }
 
@@ -121,7 +122,7 @@ public partial class SensorsControl
     private void UpdateValues(SensorsData data)
     {
         UpdateValue(_cpuUtilizationBar, _cpuUtilizationLabel, data.CPU.MaxUtilization, data.CPU.Utilization,
-            $"{data.CPU.Utilization}%");
+            $"{data.CPU.Utilization}{Resource.Percent}");
         UpdateValue(_cpuCoreClockBar, _cpuCoreClockLabel, data.CPU.MaxCoreClock, data.CPU.CoreClock,
             $"{data.CPU.CoreClock / 1000.0:0.0} {Resource.GHz}", $"{data.CPU.MaxCoreClock / 1000.0:0.0} {Resource.GHz}");
         UpdateValue(_cpuTemperatureBar, _cpuTemperatureLabel, data.CPU.MaxTemperature, data.CPU.Temperature,
@@ -130,7 +131,7 @@ public partial class SensorsControl
             $"{data.CPU.FanSpeed} {Resource.RPM}", $"{data.CPU.MaxFanSpeed} {Resource.RPM}");
 
         UpdateValue(_gpuUtilizationBar, _gpuUtilizationLabel, data.GPU.MaxUtilization, data.GPU.Utilization,
-            $"{data.GPU.Utilization} %");
+            $"{data.GPU.Utilization} {Resource.Percent}");
         UpdateValue(_gpuCoreClockBar, _gpuCoreClockLabel, data.GPU.MaxCoreClock, data.GPU.CoreClock,
             $"{data.GPU.CoreClock} {Resource.MHz}", $"{data.GPU.MaxCoreClock} {Resource.MHz}");
         UpdateValue(_gpuMemoryClockBar, _gpuMemoryClockLabel, data.GPU.MaxMemoryClock, data.GPU.MemoryClock,
@@ -143,11 +144,12 @@ public partial class SensorsControl
 
     private string GetTemperatureText(double temperature)
     {
+        if (double.IsNaN(temperature) || temperature < 0) return "-";
+
         if (_applicationSettings.Store.TemperatureUnit == TemperatureUnit.F)
         {
-            temperature *= 9.0 / 5.0;
-            temperature += 32;
-            return $"{temperature:0} {Resource.Fahrenheit}";
+            var fahrenheit = temperature * 9.0 / 5.0 + 32.0;
+            return $"{fahrenheit:0} {Resource.Fahrenheit}";
         }
 
         return $"{temperature:0} {Resource.Celsius}";
@@ -155,7 +157,7 @@ public partial class SensorsControl
 
     private static void UpdateValue(RangeBase bar, ContentControl label, double max, double value, string text, string? toolTipText = null)
     {
-        if (max < 0 || value < 0)
+        if (double.IsNaN(max) || double.IsNaN(value) || max < 0 || value < 0)
         {
             bar.Minimum = 0;
             bar.Maximum = 1;

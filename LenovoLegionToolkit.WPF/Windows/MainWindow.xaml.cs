@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -12,27 +11,29 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shell;
+using Microsoft.Xaml.Behaviors.Core;
 using Windows.Win32;
 using Windows.Win32.System.Threading;
+using Wpf.Ui.Controls;
 using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Listeners;
 using LenovoLegionToolkit.Lib.Messaging;
 using LenovoLegionToolkit.Lib.Messaging.Messages;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
+using LenovoLegionToolkit.Lib.Station.Services;
 using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Controls.Custom;
 using LenovoLegionToolkit.WPF.Extensions;
 using LenovoLegionToolkit.WPF.Pages;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows.Utils;
-using Microsoft.Xaml.Behaviors.Core;
-using Wpf.Ui.Controls;
-#if !DEBUG
-using LenovoLegionToolkit.Lib.Extensions;
-#endif
-
-#pragma warning disable CA1416
+using CustomNavigationItem = LenovoLegionToolkit.WPF.Controls.Custom.NavigationItem;
+using Wpf.Ui.Controls.Interfaces;
+using Wpf.Ui.Common;
 
 namespace LenovoLegionToolkit.WPF.Windows;
 
@@ -40,13 +41,21 @@ public partial class MainWindow
 {
     private readonly ApplicationSettings _applicationSettings = IoCContainer.Resolve<ApplicationSettings>();
     private readonly SpecialKeyListener _specialKeyListener = IoCContainer.Resolve<SpecialKeyListener>();
+    private readonly DriverKeyListener _driverKeyListener = IoCContainer.Resolve<DriverKeyListener>();
     private readonly VantageDisabler _vantageDisabler = IoCContainer.Resolve<VantageDisabler>();
     private readonly LegionSpaceDisabler _legionSpaceDisabler = IoCContainer.Resolve<LegionSpaceDisabler>();
     private readonly LegionZoneDisabler _legionZoneDisabler = IoCContainer.Resolve<LegionZoneDisabler>();
     private readonly FnKeysDisabler _fnKeysDisabler = IoCContainer.Resolve<FnKeysDisabler>();
+    private readonly INavigationService _extensionNavigationService = IoCContainer.Resolve<INavigationService>();
     private readonly UpdateChecker _updateChecker = IoCContainer.Resolve<UpdateChecker>();
 
+    private const double CompactMinWidth = 550;
+    private const double CompactMinHeight = 480;
+    private const double CompactDefaultWidth = 900;
+    private const double CompactDefaultHeight = 620;
+
     private TrayHelper? _trayHelper;
+    private bool _windowSizeLocked;
 
     public bool TrayTooltipEnabled { get; init; } = true;
     public bool DisableConflictingSoftwareWarning { get; set; }
@@ -94,34 +103,30 @@ public partial class MainWindow
     {
         _contentGrid.Visibility = Visibility.Hidden;
 
-        if (!await KeyboardBacklightPage.IsSupportedAsync())
+        if (!AppFlags.Instance.Debug)
         {
-            _navigationStore.Items.Remove(_keyboardItem);
+            if (!await KeyboardBacklightPage.IsSupportedAsync())
+            {
+                _navigationStore.Items.Remove(_keyboardItem);
+            }
+
+            if (!await LampArrayRGBKeyboardPage.IsSupportedAsync())
+            {
+                _navigationStore.Items.Remove(_lampArrayKeyboardItem);
+            }
+
+            var mi = await Compatibility.GetMachineInformationAsync();
+            if (!(mi.LegionSeries == LegionSeries.Legion_Pro_7 && mi.Generation >= 10))
+            {
+                _navigationStore.Items.Remove(_lampArrayKeyboardItem);
+            }
         }
 
-        if (!await LampArrayRGBKeyboardPage.IsSupportedAsync())
-        {
-            _navigationStore.Items.Remove(_lampArrayKeyboardItem);
-        }
+        var actionManager = IoCContainer.Resolve<SpecialKeyActionManager>();
+        actionManager.WireUp(_specialKeyListener, () => Dispatcher.Invoke(BringToForeground));
+        actionManager.WireUp(_driverKeyListener);
 
-        if (!await StandaloneFanCurvePage.IsSupportedAsync())
-        {
-            _navigationStore.Items.Remove(_fanItem);
-        }
-
-        var mi = await Compatibility.GetMachineInformationAsync();
-        if (!(mi.LegionSeries == LegionSeries.Legion_Pro_7 && mi.Generation >= 10))
-        {
-            _navigationStore.Items.Remove(_lampArrayKeyboardItem);
-        }
-
-        SmartKeyHelper.Instance.BringToForeground = () => Dispatcher.Invoke(BringToForeground);
-
-        _specialKeyListener.Changed += (_, args) =>
-        {
-            if (args.SpecialKey == SpecialKey.FnN)
-                Dispatcher.Invoke(BringToForeground);
-        };
+        AddExtensionNavigationItems();
 
         _contentGrid.Visibility = Visibility.Visible;
 
@@ -133,13 +138,65 @@ public partial class MainWindow
         InputBindings.Add(new KeyBinding(new ActionCommand(_navigationStore.NavigateToPrevious), Key.Tab, ModifierKeys.Control | ModifierKeys.Shift));
 
         var key = (int)Key.D1;
-        foreach (var item in _navigationStore.Items.OfType<NavigationItem>())
+        foreach (var item in _navigationStore.Items.OfType<CustomNavigationItem>())
             InputBindings.Add(new KeyBinding(new ActionCommand(() => _navigationStore.Navigate(item.PageTag)), (Key)key++, ModifierKeys.Control));
 
         var trayHelper = new TrayHelper(_navigationStore, BringToForeground, TrayTooltipEnabled);
         await trayHelper.InitializeAsync();
         trayHelper.MakeVisible();
         _trayHelper = trayHelper;
+
+        ApplyCompactLayout();
+    }
+
+    private void ApplyCompactLayout()
+    {
+        if (_applicationSettings.Store.CompactMode)
+        {
+            _contentGrid.Margin = new Thickness(4, 2, 0, 0);
+
+            _contentGrid.ColumnDefinitions[0].Width = GridLength.Auto;
+            _navigationStore.Margin = new Thickness(0, 0, 0, 4);
+
+            _title.FontSize = 11;
+            if (_title.Parent is Grid titleGrid)
+            {
+                titleGrid.Margin = new Thickness(8, 2, 150, 2);
+            }
+
+            _openLogIndicator.LayoutTransform = new ScaleTransform(0.8, 0.8);
+            _openLogIndicator.Margin = new Thickness(0, 0, 4, 0);
+
+            _deviceInfoIndicator.LayoutTransform = new ScaleTransform(0.8, 0.8);
+            _deviceInfoIndicator.Margin = new Thickness(0, 0, 4, 0);
+
+            foreach (var item in _navigationStore.Items.OfType<Wpf.Ui.Controls.NavigationItem>())
+            {
+                if (item.Content != null)
+                {
+                    item.ToolTip = item.Content;
+                    item.Content = null;
+                }
+                item.HorizontalAlignment = HorizontalAlignment.Left;
+                item.Margin = new Thickness(6, 2, 6, 2);
+            }
+            foreach (var item in _navigationStore.Footer.OfType<Wpf.Ui.Controls.NavigationItem>())
+            {
+                if (item.Content != null)
+                {
+                    item.ToolTip = item.Content;
+                    item.Content = null;
+                }
+                item.HorizontalAlignment = HorizontalAlignment.Left;
+                item.Margin = new Thickness(6, 2, 6, 2);
+            }
+
+            _vantageIndicator.Padding = new Thickness(4, 2, 4, 2);
+            _legionZoneIndicator.Padding = new Thickness(4, 2, 4, 2);
+            _legionSpaceIndicator.Padding = new Thickness(4, 2, 4, 2);
+            _fnKeysIndicator.Padding = new Thickness(4, 2, 4, 2);
+            _updateIndicator.Padding = new Thickness(4, 2, 4, 2);
+        }
     }
 
     private async void MainWindow_Closing(object? sender, CancelEventArgs e)
@@ -175,6 +232,12 @@ public partial class MainWindow
     {
         Log.Instance.Trace($"Window state changed to {WindowState}");
 
+        if (_windowSizeLocked && WindowState == WindowState.Maximized)
+        {
+            WindowState = WindowState.Normal;
+            return;
+        }
+
         switch (WindowState)
         {
             case WindowState.Minimized:
@@ -191,17 +254,59 @@ public partial class MainWindow
     private void MainWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         var settings = IoCContainer.Resolve<ApplicationSettings>();
-        if (settings.Store.LockWindowSize)
-        {
-            ResizeMode = ResizeMode.NoResize;
-            SizeToContent = SizeToContent.Manual;
-        }
+        ApplyWindowLock(settings.Store.LockWindowSize);
+        Topmost = settings.Store.AlwaysOnTop;
 
         if (!IsVisible)
             return;
 
         CheckForUpdates();
         SetVisual();
+    }
+
+    public void ApplyWindowLock(bool locked)
+    {
+        _windowSizeLocked = locked;
+        if (locked)
+        {
+            ResizeMode = ResizeMode.NoResize;
+            SizeToContent = SizeToContent.Manual;
+        }
+        else
+        {
+            ResizeMode = ResizeMode.CanResize;
+        }
+
+        var chrome = WindowChrome.GetWindowChrome(this);
+        if (chrome is not null)
+        {
+            var newChrome = (WindowChrome)chrome.Clone();
+            newChrome.ResizeBorderThickness = locked ? new Thickness(0) : SystemParameters.WindowResizeBorderThickness;
+            WindowChrome.SetWindowChrome(this, newChrome);
+        }
+    }
+
+    private void AddExtensionNavigationItems()
+    {
+        foreach (var item in _extensionNavigationService.Items.Where(i => !i.IsFooter))
+        {
+            if (_navigationStore.Items.OfType<CustomNavigationItem>().Any(existing => string.Equals(existing.PageTag, item.PageTag, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            _navigationStore.Items.Add(new CustomNavigationItem
+            {
+                Content = item.Title,
+                Icon = item.Icon switch
+                {
+                    ExtensionIcon.Gauge => SymbolRegular.Gauge24,
+                    _ => SymbolRegular.Empty,
+                },
+                PageTag = item.PageTag,
+                PageType = item.PageType
+            });
+        }
     }
 
     private void OpenLogIndicator_Click(object sender, MouseButtonEventArgs e) => OpenLog();
@@ -347,8 +452,21 @@ public partial class MainWindow
 
     private void RestoreSize()
     {
+        if (_applicationSettings.Store.CompactMode)
+        {
+            MinWidth = CompactMinWidth;
+            MinHeight = CompactMinHeight;
+        }
+
         if (!_applicationSettings.Store.WindowSize.HasValue)
+        {
+            if (_applicationSettings.Store.CompactMode)
+            {
+                Width = CompactDefaultWidth;
+                Height = CompactDefaultHeight;
+            }
             return;
+        }
 
         Width = Math.Max(MinWidth, _applicationSettings.Store.WindowSize.Value.Width);
         Height = Math.Max(MinHeight, _applicationSettings.Store.WindowSize.Value.Height);
@@ -360,8 +478,18 @@ public partial class MainWindow
             return;
 
         var desktopWorkingArea = primaryScreen.Value.WorkArea;
-        Left = (desktopWorkingArea.Width - Width) / 2 + desktopWorkingArea.Left;
-        Top = (desktopWorkingArea.Height - Height) / 2 + desktopWorkingArea.Top;
+
+        if (_applicationSettings.Store.WindowPosition.HasValue)
+        {
+            var pos = _applicationSettings.Store.WindowPosition.Value;
+            Left = Math.Max(desktopWorkingArea.Left, Math.Min(pos.Left, desktopWorkingArea.Right - Width));
+            Top = Math.Max(desktopWorkingArea.Top, Math.Min(pos.Top, desktopWorkingArea.Bottom - Height));
+        }
+        else
+        {
+            Left = (desktopWorkingArea.Width - Width) / 2 + desktopWorkingArea.Left;
+            Top = (desktopWorkingArea.Height - Height) / 2 + desktopWorkingArea.Top;
+        }
     }
 
     private void SaveSize()
@@ -369,6 +497,9 @@ public partial class MainWindow
         _applicationSettings.Store.WindowSize = WindowState != WindowState.Normal
             ? new(RestoreBounds.Width, RestoreBounds.Height)
             : new(Width, Height);
+        _applicationSettings.Store.WindowPosition = WindowState != WindowState.Normal
+            ? new(RestoreBounds.Left, RestoreBounds.Top)
+            : new(Left, Top);
         _applicationSettings.SynchronizeStore();
     }
 
@@ -456,42 +587,22 @@ public partial class MainWindow
 
     public void SetWindowOpacity(double opacity)
     {
-        var rootElement = App.MainWindowInstance!.Content as DependencyObject;
-
-        if (rootElement != null)
-        {
-            var allBorders = FindVisualChildren<Border>(rootElement);
-            foreach (var border in allBorders)
-            {
-                SetBorderOpacity(border, opacity);
-            }
-
-            var allCardControls = FindVisualChildren<CardControl>(rootElement);
-            foreach (var cardControl in allCardControls)
-            {
-                SetCardControlOpacity(cardControl, opacity);
-            }
-        }
+        _backgroundDimOverlay.Opacity = opacity;
     }
 
-    private IEnumerable<T> FindVisualChildren<T>(DependencyObject? parent) where T : DependencyObject
+    public void SetBackgroundBlur(int radius)
     {
-        if (parent == null) yield break;
+        _backgroundBlurEffect.Radius = radius;
+    }
 
-        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+    public void SetBackgroundStretch(BackgroundImageStretchMode stretch)
+    {
+        _backgroundImage.Stretch = stretch switch
         {
-            var child = VisualTreeHelper.GetChild(parent, i);
-
-            if (child is T result)
-            {
-                yield return result;
-            }
-
-            foreach (var childOfChild in FindVisualChildren<T>(child))
-            {
-                yield return childOfChild;
-            }
-        }
+            BackgroundImageStretchMode.Fit => Stretch.Uniform,
+            BackgroundImageStretchMode.Crop => Stretch.UniformToFill,
+            _ => Stretch.Fill
+        };
     }
 
     public void SetVisual()
@@ -504,11 +615,15 @@ public partial class MainWindow
             if (result != string.Empty)
             {
                 SetMainWindowBackgroundImage(result);
+                SetWindowOpacity(opacity);
+                SetBackgroundBlur(settings.Store.BackgroundImageBlur);
+                SetBackgroundStretch(settings.Store.BackgroundImageStretch);
             }
-
-            if (opacity != 1)
+            else
             {
-                App.MainWindowInstance?.SetWindowOpacity(opacity);
+                _backgroundImage.ImageSource = null;
+                SetWindowOpacity(0);
+                SetBackgroundBlur(0);
             }
         }
         catch (Exception ex)
@@ -517,52 +632,16 @@ public partial class MainWindow
             Log.Instance.Trace($"Exception occured when executing SetBackgroundImage().", ex);
         }
     }
-    private void SetBorderOpacity(Border border, double opacity)
-    {
-        if (border.Background != null)
-        {
-            var background = border.Background.Clone();
-            background.Opacity = opacity;
-            border.Background = background;
-        }
 
-        if (border.BorderBrush != null)
-        {
-            var borderBrush = border.BorderBrush.Clone();
-            borderBrush.Opacity = opacity;
-            border.BorderBrush = borderBrush;
-        }
-    }
-    private void SetCardControlOpacity(CardControl cardControl, double opacity)
-    {
-        if (cardControl.Background == null)
-        {
-            cardControl.Background = new SolidColorBrush(Colors.Transparent);
-        }
-
-        if (cardControl.Background.IsFrozen || cardControl.Background.IsSealed)
-        {
-            cardControl.Background = cardControl.Background.Clone();
-        }
-        cardControl.Background.Opacity = opacity;
-
-        if (cardControl.BorderBrush != null)
-        {
-            if (cardControl.BorderBrush.IsFrozen || cardControl.BorderBrush.IsSealed)
-            {
-                cardControl.BorderBrush = cardControl.BorderBrush.Clone();
-            }
-            cardControl.BorderBrush.Opacity = opacity;
-        }
-
-        if (cardControl.Content is UIElement content)
-        {
-            content.Opacity = 1.0;
-        }
-    }
-
-    private void NavigationStore_Navigated(Wpf.Ui.Controls.Interfaces.INavigation sender, Wpf.Ui.Common.RoutedNavigationEventArgs e)
+    private void NavigationStore_Navigated(INavigation sender, RoutedNavigationEventArgs e)
     {
         SetVisual();
+    }
+
+    private void SoftwareIndicator_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        SettingsPage.PendingTabKey = "SoftwareControl";
+        _navigationStore.Navigate("settings");
+        SettingsPage.Instance?.ApplyPendingTab();
     }
 }

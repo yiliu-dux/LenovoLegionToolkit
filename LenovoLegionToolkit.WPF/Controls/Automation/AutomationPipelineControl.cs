@@ -23,6 +23,7 @@ using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows.Automation;
 using Wpf.Ui.Common;
+using Wpf.Ui.Controls;
 using Button = Wpf.Ui.Controls.Button;
 using CardExpander = LenovoLegionToolkit.WPF.Controls.Custom.CardExpander;
 using MenuItem = Wpf.Ui.Controls.MenuItem;
@@ -53,12 +54,18 @@ public class AutomationPipelineControl : UserControl
         ColumnDefinitions =
         {
             new() { Width = GridLength.Auto },
-            new() { Width = GridLength.Auto },
             new() { Width = new(1, GridUnitType.Star) },
-            new() { Width = GridLength.Auto },
-            new() { Width = GridLength.Auto },
-            new() { Width = GridLength.Auto },
         }
+    };
+
+    private readonly StackPanel _leftButtonsPanel = new()
+    {
+        Orientation = Orientation.Horizontal,
+    };
+
+    private readonly WrapPanel _rightButtonsPanel = new()
+    {
+        HorizontalAlignment = HorizontalAlignment.Right,
     };
 
     private readonly CheckBox _isExclusiveCheckBox = new()
@@ -219,6 +226,7 @@ public class AutomationPipelineControl : UserControl
         {
             _isExclusiveCheckBox.Visibility = Visibility.Hidden;
             _runOnStartupCheckBox.Visibility = Visibility.Hidden;
+            _leftButtonsPanel.Visibility = Visibility.Collapsed;
         }
 
         if (AutomationPipeline.Trigger is GamesAreRunningAutomationPipelineTrigger
@@ -246,17 +254,18 @@ public class AutomationPipelineControl : UserControl
 
         _deletePipelineButton.Click += (_, _) => OnDelete?.Invoke(this, EventArgs.Empty);
 
-        Grid.SetColumn(_isExclusiveCheckBox, 0);
-        Grid.SetColumn(_runOnStartupCheckBox, 1);
-        Grid.SetColumn(_runNowButton, 3);
-        Grid.SetColumn(_addStepButton, 4);
-        Grid.SetColumn(_deletePipelineButton, 5);
 
-        _buttonsStackPanel.Children.Add(_isExclusiveCheckBox);
-        _buttonsStackPanel.Children.Add(_runOnStartupCheckBox);
-        _buttonsStackPanel.Children.Add(_runNowButton);
-        _buttonsStackPanel.Children.Add(_addStepButton);
-        _buttonsStackPanel.Children.Add(_deletePipelineButton);
+        _leftButtonsPanel.Children.Add(_isExclusiveCheckBox);
+        _leftButtonsPanel.Children.Add(_runOnStartupCheckBox);
+
+        _rightButtonsPanel.Children.Add(_runNowButton);
+        _rightButtonsPanel.Children.Add(_addStepButton);
+        _rightButtonsPanel.Children.Add(_deletePipelineButton);
+
+        Grid.SetColumn(_leftButtonsPanel, 0);
+        Grid.SetColumn(_rightButtonsPanel, 1);
+        _buttonsStackPanel.Children.Add(_leftButtonsPanel);
+        _buttonsStackPanel.Children.Add(_rightButtonsPanel);
 
         _stackPanel.Children.Add(_stepsStackPanel);
         _stackPanel.Children.Add(_validationWarningTextBlock);
@@ -448,6 +457,12 @@ public class AutomationPipelineControl : UserControl
         if (AutomationPipeline.Trigger is IDeviceAutomationPipelineTrigger dt && dt.InstanceIds.Length != 0)
             result += $" | {Resource.DevicePipelineTriggerTabItemContent_Devices}: {dt.InstanceIds.Length}";
 
+        if (AutomationPipeline.Trigger is IBatteryPercentageAutomationPipelineTrigger bt)
+        {
+            var direction = bt.IsBelow ? Resource.BatteryPercentageAutomationPipelineTriggerTabItemContent_Below : Resource.BatteryPercentageAutomationPipelineTriggerTabItemContent_Above;
+            result += $" | {direction.ToLower()} {bt.Percentage}%";
+        }
+
         return result;
     }
 
@@ -487,7 +502,7 @@ public class AutomationPipelineControl : UserControl
             accessoryPanel.Children.Add(button);
         }
 
-        var dragHandle = new Wpf.Ui.Controls.SymbolIcon
+        var dragHandle = new SymbolIcon
         {
             Symbol = SymbolRegular.ReOrderDotsVertical24,
             Margin = new(16, 0, 16, 0),
@@ -526,7 +541,9 @@ public class AutomationPipelineControl : UserControl
             DpiScaleAutomationStep s => new DpiScaleAutomationStepControl(s),
             FlipToStartAutomationStep s => new FlipToStartAutomationStepControl(s),
             FnLockAutomationStep s => new FnLockAutomationStepControl(s),
+            CycleGodModePresetAutomationStep s => new CycleGodModePresetAutomationStepControl(s),
             GodModePresetAutomationStep s => new GodModePresetAutomationStepControl(s),
+            HardwareSensorsAutomationStep s => new HardwareSensorsAutomationStepControl(s),
             HDRAutomationStep s => new HDRAutomationStepControl(s),
             HybridModeAutomationStep s => await HybridModeAutomationStepControlFactory.GetControlAsync(s),
             ITSModeAutomationStep s => new ITSModeAutomationStepControl(s),
@@ -552,13 +569,15 @@ public class AutomationPipelineControl : UserControl
             SpectrumKeyboardBacklightImportProfileAutomationStep s => new SpectrumKeyboardBacklightImportProfileAutomationStepControl(s),
             SpectrumKeyboardBacklightProfileAutomationStep s => new SpectrumKeyboardBacklightProfileAutomationStepControl(s),
             TurnOffMonitorsAutomationStep s => new TurnOffMonitorsAutomationStepControl(s),
-            TurnOffWiFiAutomationStep s => new TurnOffWiFiAutomationStepControl(s),
-            TurnOnWiFiAutomationStep s => new TurnOnWiFiAutomationStepControl(s),
+            WiFiAutomationStep s => new WiFiAutomationStepControl(s),
+            AirplaneModeAutomationStep s => new AirplaneModeAutomationStepControl(s),
             TouchpadLockAutomationStep s => new TouchpadLockAutomationStepControl(s),
             WhiteKeyboardBacklightAutomationStep s => new WhiteKeyboardBacklightAutomationStepControl(s),
             WinKeyAutomationStep s => new WinKeyAutomationStepControl(s),
-            CloseAutomationStep s => new CloseAutomationStepControl(s),
+            CloseAppAutomationStep s => new CloseAppAutomationStepControl(s),
+            ShowAppAutomationStep s => new ShowAppAutomationStepControl(s),
             OsdAutomationStep s => new OsdAutomationStepControl(s),
+            OsdLockPositionAutomationStep s => new OsdLockPositionAutomationStepControl(s),
             FanMaxSpeedAutomationStep s => new FanMaxSpeedAutomationStepControl(s),
             _ => throw new InvalidOperationException("Unknown step type"),
         };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,13 +19,18 @@ using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Settings;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Common;
+using System.Windows.Threading;
+using Label = System.Windows.Controls.Label;
 
 namespace LenovoLegionToolkit.WPF.Windows.Utils;
 
 public partial class StatusWindow
 {
     private readonly ApplicationSettings _settings = IoCContainer.Resolve<ApplicationSettings>();
+    private readonly DashboardSettings _dashboardSettings = IoCContainer.Resolve<DashboardSettings>();
+    private readonly SensorsControlSettings _sensorsControlSettings = IoCContainer.Resolve<SensorsControlSettings>();
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
+
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private DateTime _lastUpdate = DateTime.MinValue;
@@ -42,9 +47,19 @@ public partial class StatusWindow
     private readonly UpdateSettings _updateSettings = IoCContainer.Resolve<UpdateSettings>();
     private readonly SensorsController _sensorsController = IoCContainer.Resolve<SensorsController>();
     private readonly SensorsGroupController _sensorsGroupController = IoCContainer.Resolve<SensorsGroupController>();
+    private readonly HardwareSensorSettings _hardwareSensorSettings = IoCContainer.Resolve<HardwareSensorSettings>();
 
     private MachineInformation? _machineInfo;
     private Type? _cachedControllerType;
+    private bool _isSpecialModel;
+
+    private bool IsSpecialModel => _isSpecialModel;
+
+    private void SetMachineInformation(MachineInformation info)
+    {
+        _machineInfo = info;
+        _isSpecialModel = info.LegionSeries is > LegionSeries.Legion_9 and not LegionSeries.Unknown;
+    }
 
     private readonly struct StatusWindowData(
         PowerModeState? powerModeState,
@@ -87,7 +102,10 @@ public partial class StatusWindow
 
     private async Task InitializeAsync()
     {
-        _machineInfo ??= await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
+        if (!_machineInfo.HasValue)
+        {
+            SetMachineInformation(await Compatibility.GetMachineInformationAsync().ConfigureAwait(false));
+        }
         var token = _cancellationTokenSource.Token;
         try
         {
@@ -96,8 +114,6 @@ public partial class StatusWindow
         }
         catch { }
     }
-
-    private readonly DashboardSettings _dashboardSettings = IoCContainer.Resolve<DashboardSettings>();
 
     public StatusWindow()
     {
@@ -137,7 +153,7 @@ public partial class StatusWindow
         _cpuFanAndPowerLabel.Visibility = sensorVis;
 
         var isV5 = _cachedControllerType == typeof(SensorsControllerV5);
-        _systemFanGrid.Visibility = (useSensors && isV5) ? Visibility.Visible : Visibility.Collapsed;
+        _systemFanGrid.Visibility = (useSensors && isV5 && !IsSpecialModel) ? Visibility.Visible : Visibility.Collapsed;
 
         if (gpuStatus.HasValue)
         {
@@ -162,7 +178,10 @@ public partial class StatusWindow
     private async void StatusWindow_Loaded(object sender, RoutedEventArgs e)
     {
         MoveBottomRightEdgeOfWindowToMousePosition();
-        _machineInfo ??= await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
+        if (!_machineInfo.HasValue)
+        {
+            SetMachineInformation(await Compatibility.GetMachineInformationAsync().ConfigureAwait(false));
+        }
     }
 
     private void StatusWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -170,7 +189,12 @@ public partial class StatusWindow
         if (IsVisible)
         {
             _sensorsGroupController.SensorsUpdated += OnSensorsUpdated;
-            _sensorsGroupController.Start(this, TimeSpan.FromSeconds(_dashboardSettings.Store.SensorsRefreshIntervalSeconds));
+
+            var refreshInterval = _settings.Store.UseNewSensorDashboard
+                ? _sensorsControlSettings.Store.SensorsRefreshIntervalSeconds
+                : _dashboardSettings.Store.SensorsRefreshIntervalSeconds;
+
+            _sensorsGroupController.Start(this, TimeSpan.FromSeconds(refreshInterval));
         }
         else
         {
@@ -180,38 +204,44 @@ public partial class StatusWindow
         }
     }
 
-    private async void OnSensorsUpdated(object? sender, EventArgs e)
+    private async void OnSensorsUpdated(HardwareSensorSnapshot snapshot)
     {
         var token = _cancellationTokenSource.Token;
         try
         {
-            var data = await GetStatusWindowDataAsync(token);
+            var data = await GetStatusWindowDataAsync(token, snapshot: snapshot);
             if (token.IsCancellationRequested) return;
 
             if ((DateTime.Now - _lastUpdate).TotalMilliseconds >= UI_UPDATE_THROTTLE_MS)
             {
                 _lastUpdate = DateTime.Now;
-                await Dispatcher.InvokeAsync(() => ApplyDataToUI(data), System.Windows.Threading.DispatcherPriority.Normal, token);
+                await Dispatcher.InvokeAsync(() => ApplyDataToUI(data), DispatcherPriority.Normal, token);
             }
         }
         catch (Exception ex)
         {
-             Log.Instance.Trace($"StatusWindow update failed: {ex}");
+            Log.Instance.Trace($"StatusWindow update failed: {ex}");
         }
     }
 
-    private async Task<StatusWindowData> GetStatusWindowDataAsync(CancellationToken token, bool skipRetry = false)
+    private async Task<StatusWindowData> GetStatusWindowDataAsync(CancellationToken token, bool skipRetry = false, HardwareSensorSnapshot? snapshot = null)
     {
-        _machineInfo ??= await Compatibility.GetMachineInformationAsync().ConfigureAwait(false);
+        if (!_machineInfo.HasValue)
+        {
+            SetMachineInformation(await Compatibility.GetMachineInformationAsync().ConfigureAwait(false));
+        }
+
+        PowerModeState? state = null;
+        ITSMode? mode = null;
+        string? godModePresetName = null;
+        GPUStatus? gpuStatus = null;
+        BatteryInformation? batteryInfo = null;
+        BatteryState? batteryState = null;
+        bool hasUpdate = false;
+        SensorsData? sensorsData = null;
+        double cpuPower = -1, gpuPower = -1, cpuClock = -1, cpuTemp = -1, gpuClock = -1, gpuTemp = -1;
 
         var tasks = new List<Task>();
-
-        PowerModeState? state = null; ITSMode? mode = null; string? godModePresetName = null;
-        GPUStatus? gpuStatus = null; BatteryInformation? batteryInfo = null; BatteryState? batteryState = null;
-        bool hasUpdate = false; SensorsData? sensorsData = null;
-        double cpuPower = -1; double gpuPower = -1;
-        double cpuClock = -1; double cpuTemp = -1;
-        double gpuClock = -1; double gpuTemp = -1;
 
         tasks.Add(Task.Run(async () => {
             try
@@ -223,7 +253,7 @@ public partial class StatusWindow
                 }
                 else if (await _itsModeFeature.IsSupportedAsync().WaitAsync(token))
                 {
-                     mode = await _itsModeFeature.GetStateAsync().WaitAsync(token);
+                    mode = await _itsModeFeature.GetStateAsync().WaitAsync(token);
                 }
             }
             catch { /* Ignore */ }
@@ -236,33 +266,46 @@ public partial class StatusWindow
 
         await Task.WhenAll(tasks).ConfigureAwait(false);
 
-        if (!_settings.Store.EnableHardwareSensors) return new(state, mode, godModePresetName, gpuStatus, batteryInfo, batteryState, hasUpdate, sensorsData, cpuPower, gpuPower);
-
-        try
+        if (_settings.Store.EnableHardwareSensors)
         {
-            if (await _sensorsController.IsSupportedAsync().WaitAsync(token))
+            try
             {
-                var controller = await _sensorsController.GetControllerAsync().WaitAsync(token);
-                _cachedControllerType = controller?.GetType();
-                
-                sensorsData = await _sensorsController.GetDataAsync().WaitAsync(token);
+                if (!IsSpecialModel && await _sensorsController.IsSupportedAsync().WaitAsync(token))
+                {
+                    var controller = await _sensorsController.GetControllerAsync().WaitAsync(token);
+                    _cachedControllerType = controller?.GetType();
+
+                    sensorsData = await _sensorsController.GetDataAsync().WaitAsync(token);
+                }
+
+                if (_sensorsGroupController.IsLibreHardwareMonitorInitialized())
+                {
+                    var gs = snapshot ?? _sensorsGroupController.Snapshot;
+                    cpuPower = gs.CpuPower;
+                    gpuPower = gs.GpuPower;
+                    cpuTemp = gs.CpuTemp;
+                    gpuClock = gs.GpuClock;
+                    gpuTemp = gs.GpuTemp;
+
+                    if (_sensorsGroupController.IsHybrid)
+                    {
+                        cpuClock = _hardwareSensorSettings.Store.ShowCpuAverageFrequency
+                            ? gs.CpuPAvgClock
+                            : gs.CpuPClock;
+                    }
+                    else
+                    {
+                        cpuClock = _hardwareSensorSettings.Store.ShowCpuAverageFrequency
+                            ? gs.CpuAvgClock
+                            : gs.CpuMaxClock;
+                    }
+                }
             }
-            if (await _sensorsGroupController.IsSupportedAsync().WaitAsync(token) is LibreHardwareMonitorInitialState.Success or LibreHardwareMonitorInitialState.Initialized)
-            {    
-                cpuPower = await _sensorsGroupController.GetCpuPowerAsync().WaitAsync(token);
-                gpuPower = await _sensorsGroupController.GetGpuPowerAsync().WaitAsync(token);
-                cpuClock = await _sensorsGroupController.GetCpuCoreClockAsync().WaitAsync(token);
-                cpuTemp = await _sensorsGroupController.GetCpuTemperatureAsync().WaitAsync(token);
-                gpuClock = await _sensorsGroupController.GetGpuCoreClockAsync().WaitAsync(token);
-                gpuTemp = await _sensorsGroupController.GetGpuTemperatureAsync().WaitAsync(token);
-            }
+            catch { /* Ignore */ }
         }
-        catch { /* Ignore */ }
 
         return new(state, mode, godModePresetName, gpuStatus, batteryInfo, batteryState, hasUpdate, sensorsData, cpuPower, gpuPower, cpuClock, cpuTemp, gpuClock, gpuTemp);
     }
-
-
 
     private void ApplyDataToUI(StatusWindowData data)
     {
@@ -273,28 +316,56 @@ public partial class StatusWindow
 
         if (useSensors)
         {
-            UpdateFreqAndTemp(_cpuFreqAndTempLabel, data.CpuClock, data.CpuTemp);
-            UpdateFanAndPower(_cpuFanAndPowerLabel, data.SensorsData?.CPU.FanSpeed ?? -1, data.CpuPower);
-            
-            if (_cachedControllerType == typeof(SensorsControllerV4) ||
-                _cachedControllerType == typeof(SensorsControllerV5))
-            {
-                UpdateSystemFan(_systemFanLabel, data.SensorsData?.PCH.FanSpeed ?? -1);
-            }
+            ApplySensorsData(data);
         }
 
         if (data.GPUStatus.HasValue)
         {
             _gpuPowerStateValueLabel.Content = data.GPUStatus.Value.PerformanceState ?? "-";
-            if (useSensors && data.GPUStatus.Value.State != GPUState.PoweredOff)
-            {
-                UpdateFreqAndTemp(_gpuFreqAndTempLabel, data.GpuClock, data.GpuTemp);
-                UpdateFanAndPower(_gpuFanAndPowerLabel, data.SensorsData?.GPU.FanSpeed ?? -1, data.GpuPower);
-            }
         }
 
         RefreshBattery(data.BatteryInformation, data.BatteryState);
         RefreshUpdate(data.HasUpdate);
+    }
+
+    private void ApplySensorsData(StatusWindowData data)
+    {
+
+        _cpuFreqAndTempDesc.Content = Resource.StatusWindow_Frequency_And_Temperature;
+        UpdateFreqAndTemp(_cpuFreqAndTempLabel, data.CpuClock, data.CpuTemp);
+
+        if (IsSpecialModel)
+        {
+            _cpuFanAndPowerDesc.Content = Resource.SensorsControl_CPU_Power;
+            UpdatePowerOnly(_cpuFanAndPowerLabel, data.CpuPower);
+        }
+        else
+        {
+            _cpuFanAndPowerDesc.Content = Resource.StatusWindow_Fan_And_Power;
+            UpdateFanAndPower(_cpuFanAndPowerLabel, data.SensorsData?.CPU.FanSpeed ?? -1, data.CpuPower);
+        }
+
+        if (_cachedControllerType == typeof(SensorsControllerV4) || _cachedControllerType == typeof(SensorsControllerV5))
+        {
+            UpdateSystemFan(_systemFanLabel, data.SensorsData?.PCH.FanSpeed ?? -1);
+        }
+
+        if (data.GPUStatus.HasValue && data.GPUStatus.Value.State != GPUState.PoweredOff)
+        {
+            _gpuFreqAndTempDesc.Content = Resource.StatusWindow_Frequency_And_Temperature;
+            UpdateFreqAndTemp(_gpuFreqAndTempLabel, data.GpuClock, data.GpuTemp);
+
+            if (IsSpecialModel)
+            {
+                _gpuFanAndPowerDesc.Content = Resource.SensorsControl_GPU_Power;
+                UpdatePowerOnly(_gpuFanAndPowerLabel, data.GpuPower);
+            }
+            else
+            {
+                _gpuFanAndPowerDesc.Content = Resource.StatusWindow_Fan_And_Power;
+                UpdateFanAndPower(_gpuFanAndPowerLabel, data.SensorsData?.GPU.FanSpeed ?? -1, data.GpuPower);
+            }
+        }
     }
 
     private void RefreshPowerMode(PowerModeState? powerModeState, ITSMode? itsMode, string? godModePresetName)
@@ -323,18 +394,19 @@ public partial class StatusWindow
         _batteryIcon.Symbol = (int)Math.Round(info.BatteryPercentage / 10.0) switch { 10 => SymbolRegular.Battery1024, 9 => SymbolRegular.Battery924, 8 => SymbolRegular.Battery824, 7 => SymbolRegular.Battery724, 6 => SymbolRegular.Battery624, 5 => SymbolRegular.Battery524, 4 => SymbolRegular.Battery424, 3 => SymbolRegular.Battery324, 2 => SymbolRegular.Battery224, 1 => SymbolRegular.Battery124, _ => SymbolRegular.Battery024 };
         if (info.IsCharging) _batteryIcon.Symbol = batteryState == BatteryState.Conservation ? SymbolRegular.BatterySaver24 : SymbolRegular.BatteryCharge24;
         if (info.IsLowBattery) _batteryValueLabel.SetResourceReference(ForegroundProperty, "SystemFillColorCautionBrush"); else _batteryValueLabel.ClearValue(ForegroundProperty);
-        _batteryValueLabel.Content = $"{info.BatteryPercentage}%";
+        _batteryValueLabel.Content = $"{info.BatteryPercentage}{Resource.Percent}";
         _batteryModeValueLabel.Content = batteryState.GetDisplayName();
-        _batteryDischargeValueLabel.Content = $"{info.DischargeRate / 1000.0:+0.00;-0.00;0.00} W";
-        _batteryMinDischargeValueLabel.Content = $"{info.MinDischargeRate / 1000.0:+0.00;-0.00;0.00} W";
-        _batteryMaxDischargeValueLabel.Content = $"{info.MaxDischargeRate / 1000.0:+0.00;-0.00;0.00} W";
+        _batteryDischargeValueLabel.Content = $"{info.DischargeRate / 1000.0:+0.00;-0.00;0.00} {Resource.Watt}";
+        _batteryMinDischargeValueLabel.Content = $"{info.MinDischargeRate / 1000.0:+0.00;-0.00;0.00} {Resource.Watt}";
+        _batteryMaxDischargeValueLabel.Content = $"{info.MaxDischargeRate / 1000.0:+0.00;-0.00;0.00} {Resource.Watt}";
     }
 
     private void RefreshUpdate(bool hasUpdate) => _updateIndicator.Visibility = hasUpdate ? Visibility.Visible : Visibility.Collapsed;
-    private static string GetTemperatureText(double t) { var s = IoCContainer.Resolve<ApplicationSettings>(); return t <= 0 ? "-" : (s.Store.TemperatureUnit == TemperatureUnit.F ? $"{(t * 9 / 5 + 32):0}{Resource.Fahrenheit}" : $"{t:0}{Resource.Celsius}"); }
-    private static void UpdateFreqAndTemp(System.Windows.Controls.Label l, double f, double t) => l.Content = (t < 0 || f < 0) ? "-" : $"{f:0}Mhz | {GetTemperatureText(t)}";
-    private static void UpdateFanAndPower(System.Windows.Controls.Label l, double f, double p) => l.Content = (f < 0 || p < 0) ? "-" : $"{f:0}RPM | {p:0}W";
-    private static void UpdateSystemFan(System.Windows.Controls.Label l, double f) => l.Content = f < 0 ? "-" : $"{f:0}RPM";
+    private string GetTemperatureText(double t) => (double.IsNaN(t) || t < 0) ? "-" : (_settings.Store.TemperatureUnit == TemperatureUnit.F ? $"{(t * 9 / 5 + 32):0}{Resource.Fahrenheit}" : $"{t:0}{Resource.Celsius}");
+    private void UpdateFreqAndTemp(Label l, double f, double t) => l.Content = (t < 0 || f < 0) ? "-" : $"{f:0}{Resource.MHz} | {GetTemperatureText(t)}";
+    private static void UpdateFanAndPower(Label l, double f, double p) => l.Content = (f < 0 || p < 0) ? "-" : $"{f:0}{Resource.RPM} | {p:0}{Resource.Watt}";
+    private static void UpdatePowerOnly(Label l, double p) => l.Content = p < 0 ? "-" : $"{p:0}{Resource.Watt}";
+    private static void UpdateSystemFan(Label l, double f) => l.Content = f < 0 ? "-" : $"{f:0}{Resource.RPM}";
 
     private void MoveBottomRightEdgeOfWindowToMousePosition()
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using static LenovoLegionToolkit.Lib.Settings.GodModeSettings;
 
@@ -9,11 +9,10 @@ public class GodModeSettings() : AbstractSettings<GodModeSettingsStore>("godmode
 {
     public class GodModeSettingsStore
     {
-        public class Preset
+        public record Preset
         {
             public string Name { get; init; } = string.Empty;
-            public Guid? PowerPlanGuid { get; init; }
-            public WindowsPowerMode? PowerMode { get; init; }
+            public Dictionary<PowerOverrideKey, string> Overrides { get; init; } = [];
             public StepperValue? CPULongTermPowerLimit { get; init; }
             public StepperValue? CPUShortTermPowerLimit { get; init; }
             public StepperValue? CPUPeakPowerLimit { get; init; }

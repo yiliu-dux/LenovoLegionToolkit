@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -161,16 +161,22 @@
     <value>删除</value>
   </data>
   <data name="Active" xml:space="preserve">
-    <value>活动中</value>
+    <value>活跃</value>
   </data>
   <data name="Add" xml:space="preserve">
     <value>添加</value>
+  </data>
+  <data name="AddAutomationStepWindow_MultipleSteps" xml:space="preserve">
+    <value>多个步骤...</value>
   </data>
   <data name="AddAutomationStepWindow_Title" xml:space="preserve">
     <value>添加步骤</value>
   </data>
   <data name="AddNew" xml:space="preserve">
     <value>新建</value>
+  </data>
+  <data name="AirplaneModeAutomationStepControl_Title" xml:space="preserve">
+    <value>飞行模式</value>
   </data>
   <data name="AlwaysOnUsbAutomationStepControl_Message" xml:space="preserve">
     <value>在电脑关机、睡眠或休眠时保持 USB 接口供电。
@@ -259,10 +265,10 @@
     <value>网络代理</value>
   </data>
   <data name="ArgumentWindow_Edit_Message" xml:space="preserve">
-    <value>打开参数窗口以方便用户修改启动参数。</value>
+    <value>修改应用程序的启动参数。</value>
   </data>
   <data name="ArgumentWindow_Edit_Title" xml:space="preserve">
-    <value>编辑参数</value>
+    <value>参数</value>
   </data>
   <data name="ArgumentWindow_Flag_AllowAllCerts" xml:space="preserve">
     <value>允许所有证书</value>
@@ -358,7 +364,7 @@
     <value>已知游戏列表</value>
   </data>
   <data name="AutomationPage_Game_Detection_Sub_Title" xml:space="preserve">
-    <value>配置检测方法与黑名单</value>
+    <value>配置检测方法与黑名单。</value>
   </data>
   <data name="AutomationPage_Game_Detection_Title" xml:space="preserve">
     <value>游戏检测</value>
@@ -403,7 +409,7 @@
     <value>独占此条件</value>
   </data>
   <data name="AutomationPipelineControl_Exclusive_ToolTip" xml:space="preserve">
-    <value>当触发此条件后，仅运行当前任务，不运行其它符合条件的任务</value>
+    <value>如果此项选中，除此以外的自动化都不会触发。</value>
   </data>
   <data name="AutomationPipelineControl_Running" xml:space="preserve">
     <value>运行中...</value>
@@ -461,6 +467,9 @@
   </data>
   <data name="AutomationPipelineTriggerConfigurationWindow_Title" xml:space="preserve">
     <value>配置</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>后退</value>
   </data>
   <data name="BalanceModeSettingsWindow_AIEngine_Message" xml:space="preserve">
     <value>启用 Legion AI 引擎以自动检测游戏并调整 CPU/GPU 性能。可能会增加机身温度和风扇噪音。</value>
@@ -555,6 +564,9 @@
   <data name="BatteryPage_FullChargeCapacity_Title" xml:space="preserve">
     <value>满电容量</value>
   </data>
+  <data name="BatteryPage_LiveCharge_Title" xml:space="preserve">
+    <value>当前电量</value>
+  </data>
   <data name="BatteryPage_LowLevel" xml:space="preserve">
     <value>电池电量低</value>
   </data>
@@ -588,6 +600,18 @@
   </data>
   <data name="BatteryPage_Title" xml:space="preserve">
     <value>电池</value>
+  </data>
+  <data name="BatteryPercentageAutomationPipelineTriggerTabItemContent_Above" xml:space="preserve">
+    <value>高于</value>
+  </data>
+  <data name="BatteryPercentageAutomationPipelineTriggerTabItemContent_Below" xml:space="preserve">
+    <value>低于</value>
+  </data>
+  <data name="BatteryPercentageAutomationPipelineTriggerTabItemContent_Percentage" xml:space="preserve">
+    <value>百分比</value>
+  </data>
+  <data name="BiosVersion" xml:space="preserve">
+    <value>BIOS 版本</value>
   </data>
   <data name="BootLogoWindow_Customize" xml:space="preserve">
     <value>自定义</value>
@@ -647,11 +671,11 @@
   <data name="Close" xml:space="preserve">
     <value>关闭</value>
   </data>
-  <data name="CloseAutomationStepControl_Message" xml:space="preserve">
+  <data name="CloseAppAutomationStepControl_Message" xml:space="preserve">
     <value>关闭 Lenovo Legion Toolkit</value>
   </data>
-  <data name="CloseAutomationStepControl_Title" xml:space="preserve">
-    <value>关闭</value>
+  <data name="CloseAppAutomationStepControl_Title" xml:space="preserve">
+    <value>关闭应用程序</value>
   </data>
   <data name="Color_Blue" xml:space="preserve">
     <value>蓝色 (B)</value>
@@ -663,8 +687,7 @@
     <value>红色 (R)</value>
   </data>
   <data name="ComboBoxHybridModeAutomationStepControl_Message" xml:space="preserve">
-    <value>根据你的使用场景选择显卡工作模式。
-各混合模式与独显直连模式互相切换后需要重启生效。</value>
+    <value>根据您的计算机使用情况和电源条件选择 GPU 操作模式。</value>
   </data>
   <data name="ComboBoxHybridModeAutomationStepControl_Title" xml:space="preserve">
     <value>显卡工作模式</value>
@@ -697,44 +720,26 @@
   <data name="CopyAll" xml:space="preserve">
     <value>复制全部</value>
   </data>
+  <data name="Cores" xml:space="preserve">
+    <value>核心</value>
+  </data>
+  <data name="CPU" xml:space="preserve">
+    <value>CPU</value>
+  </data>
   <data name="Create" xml:space="preserve">
     <value>创建</value>
   </data>
   <data name="CreateAutomationPipelineWindow_Title" xml:space="preserve">
     <value>新建</value>
   </data>
-  <data name="CustomFanCurve_Accelerate" xml:space="preserve">
-    <value>加速度</value>
+  <data name="Customize" xml:space="preserve">
+    <value>自定义</value>
   </data>
-  <data name="CustomFanCurve_Accelerate_Tooltip" xml:space="preserve">
-    <value>加速度控制从PWM值为基础上增加多少PWM。</value>
+  <data name="CycleGodModePresetAutomationStepControl_Message" xml:space="preserve">
+    <value>通过可用的自定义模式预设周期。</value>
   </data>
-  <data name="CustomFanCurve_Critical_Temp" xml:space="preserve">
-    <value>临界温度</value>
-  </data>
-  <data name="CustomFanCurve_Critical_Temp_Tooltip" xml:space="preserve">
-    <value>当温度大于或等于此温度时，强制最大速度以防止意外发生。</value>
-  </data>
-  <data name="CustomFanCurve_Deceleration" xml:space="preserve">
-    <value>减速度</value>
-  </data>
-  <data name="CustomFanCurve_Deceleration_Tooltip" xml:space="preserve">
-    <value>减速度控制从PWM值为基础上减少多少PWM。</value>
-  </data>
-  <data name="CustomFanCurve_Fan_Speed" xml:space="preserve">
-    <value>风扇转速 %</value>
-  </data>
-  <data name="CustomFanCurve_PWM_Value" xml:space="preserve">
-    <value>PWM 值</value>
-  </data>
-  <data name="CustomFanCurve_Settings" xml:space="preserve">
-    <value>设置</value>
-  </data>
-  <data name="CustomFanCurve_Temperature" xml:space="preserve">
-    <value>温度 °C </value>
-  </data>
-  <data name="CustomFanCurve_Title" xml:space="preserve">
-    <value>实时监控</value>
+  <data name="CycleGodModePresetAutomationStepControl_Title" xml:space="preserve">
+    <value>循环自定义模式预设</value>
   </data>
   <data name="DashboardBattery_AcConnected" xml:space="preserve">
     <value>交流电</value>
@@ -760,10 +765,11 @@
   <data name="DashboardPage_Title" xml:space="preserve">
     <value>主页</value>
   </data>
+  <data name="DaysRemaining" xml:space="preserve">
+    <value>剩余天数</value>
+  </data>
   <data name="DeactivateGPUAutomationStepControl_Message" xml:space="preserve">
-    <value>在不需要时休眠独立显卡。
-
-警告：在非混合模式或笔记本内置屏幕关闭的情况下此功能将不起作用。</value>
+    <value>禁用离散的 GPU 如果它是不必要的。</value>
   </data>
   <data name="DeactivateGPUAutomationStepControl_Title" xml:space="preserve">
     <value>休眠独立显卡</value>
@@ -780,6 +786,9 @@
   <data name="Delete" xml:space="preserve">
     <value>删除</value>
   </data>
+  <data name="Device" xml:space="preserve">
+    <value>设备</value>
+  </data>
   <data name="DeviceAutomationPipelineTriggerTabItemContent_OnlyConnected" xml:space="preserve">
     <value>仅显示被连接的设备</value>
   </data>
@@ -789,41 +798,11 @@
   <data name="DeviceAutomationPipelineTriggerTabItemContent_OnlySelected" xml:space="preserve">
     <value>仅显示被选中的设备</value>
   </data>
-  <data name="DeviceInformationWindow_BiosVersion_Title" xml:space="preserve">
-    <value>BIOS 版本</value>
-  </data>
-  <data name="DeviceInformationWindow_Device_Title" xml:space="preserve">
-    <value>设备信息</value>
-  </data>
   <data name="DeviceInformationWindow_LenovoSupport" xml:space="preserve">
-    <value>点击访问联想服务网站查看详细保修信息</value>
-  </data>
-  <data name="DeviceInformationWindow_MachineType_Title" xml:space="preserve">
-    <value>设备代号</value>
-  </data>
-  <data name="DeviceInformationWindow_Manufacturer_Title" xml:space="preserve">
-    <value>制造商</value>
-  </data>
-  <data name="DeviceInformationWindow_Model_Title" xml:space="preserve">
-    <value>设备型号</value>
-  </data>
-  <data name="DeviceInformationWindow_Refresh" xml:space="preserve">
-    <value>刷新</value>
-  </data>
-  <data name="DeviceInformationWindow_SerialNumber_Title" xml:space="preserve">
-    <value>序列号</value>
+    <value>访问联想服务网站查看详细信息</value>
   </data>
   <data name="DeviceInformationWindow_Title" xml:space="preserve">
     <value>关于设备</value>
-  </data>
-  <data name="DeviceInformationWindow_WarrantyEndDate_Title" xml:space="preserve">
-    <value>结束时间</value>
-  </data>
-  <data name="DeviceInformationWindow_WarrantyStartDate_Title" xml:space="preserve">
-    <value>开始时间</value>
-  </data>
-  <data name="DeviceInformationWindow_Warranty_Title" xml:space="preserve">
-    <value>保修信息</value>
   </data>
   <data name="DevicePipelineTriggerTabItemContent_Devices" xml:space="preserve">
     <value>设备</value>
@@ -838,29 +817,29 @@
     <value>强制休眠显卡</value>
   </data>
   <data name="DiscreteGPUControl_ForceKillProcessMenu" xml:space="preserve">
-    <value>Force Kill Process</value>
+    <value>强制终止程序</value>
   </data>
   <data name="DiscreteGPUControl_GraphicsPreferencesTabLabel" xml:space="preserve">
-    <value>Graphics Preferences</value>
+    <value>首选 GPU</value>
   </data>
   <data name="DiscreteGPUControl_KillApps" xml:space="preserve">
     <value>关闭占用应用</value>
   </data>
   <data name="DiscreteGPUControl_KillProcessDelayDescription" xml:space="preserve">
-    <value>Wait time before refreshing the active processes list after a forced termination.</value>
+    <value>强制终止程序后刷新活动进程列表前等待时间。</value>
   </data>
   <data name="DiscreteGPUControl_KillProcessDelayTitle" xml:space="preserve">
-    <value>Force Kill Refresh Delay</value>
+    <value>强制终止程序刷新延迟</value>
   </data>
   <data name="DiscreteGPUControl_ManagementWindowTitle" xml:space="preserve">
-    <value>Discrete GPU Management</value>
+    <value>独立显卡管理</value>
   </data>
   <data name="DiscreteGPUControl_Message" xml:space="preserve">
     <value>在不需要时强制休眠显卡，可能会导致应用崩溃。
 请尽可能通过手动关闭占用进程来解除独立显卡占用。</value>
   </data>
   <data name="DiscreteGPUControl_MiscellaneousTabLabel" xml:space="preserve">
-    <value>Miscellaneous</value>
+    <value>其他</value>
   </data>
   <data name="DiscreteGPUControl_MonitorConnected" xml:space="preserve">
     <value>有显示器正在使用此显卡。</value>
@@ -875,19 +854,19 @@
     <value>未知</value>
   </data>
   <data name="DiscreteGPUControl_PollingIntervalDescription" xml:space="preserve">
-    <value>Adjust how often the app checks for GPU activity.</value>
+    <value>调整 LLT 查询程序使用独显操作的频率。</value>
   </data>
   <data name="DiscreteGPUControl_PollingIntervalTitle" xml:space="preserve">
-    <value>Polling Interval</value>
+    <value>检查更新间隔</value>
   </data>
   <data name="DiscreteGPUControl_PreferenceDefault" xml:space="preserve">
-    <value>Let Windows decide</value>
+    <value>自动（Windows 决定）</value>
   </data>
   <data name="DiscreteGPUControl_PreferenceDiscrete" xml:space="preserve">
-    <value>Discrete GPU</value>
+    <value>独立显卡</value>
   </data>
   <data name="DiscreteGPUControl_PreferenceIntegrated" xml:space="preserve">
-    <value>Integrated GPU</value>
+    <value>集成显卡</value>
   </data>
   <data name="DiscreteGPUControl_Processes" xml:space="preserve">
     <value>正在使用显卡的进程</value>
@@ -896,40 +875,57 @@
     <value>重启显卡</value>
   </data>
   <data name="DiscreteGPUControl_StartupDelayDescription" xml:space="preserve">
-    <value>Delay before initializing the dGPU monitoring service.</value>
+    <value>初始化 dGPU 监测服务之前的延迟。</value>
   </data>
   <data name="DiscreteGPUControl_StartupDelayTitle" xml:space="preserve">
-    <value>Startup Delay</value>
+    <value>启动延迟</value>
   </data>
   <data name="DiscreteGPUControl_Title" xml:space="preserve">
     <value>独立显卡</value>
   </data>
   <data name="DisplayBrightnessAutomationStepControl_Message" xml:space="preserve">
-    <value>更改内置屏幕亮度。
-在部分设备上，切换性能模式后屏幕亮度也会变化，因此请确保把这一步放到最后，否则可能无法正常执行。
-
-警告：当内置显示器关闭时此操作将不起作用。</value>
+    <value>更改内置显示的亮度。</value>
   </data>
   <data name="DisplayBrightnessAutomationStepControl_Title" xml:space="preserve">
     <value>显示器亮度</value>
   </data>
-  <data name="DonatePage_DonateWith" xml:space="preserve">
-    <value>使用PayPal捐赠</value>
+  <data name="Displays" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="DonatePage_Bartosz_Description" xml:space="preserve">
+    <value>Bartosz 创建了Lenovo Legion Toolkit 并编写了基础架构，为今天应用程序中的每个功能奠基。</value>
+  </data>
+  <data name="DonatePage_Bartosz_Role" xml:space="preserve">
+    <value>原作者</value>
+  </data>
+  <data name="DonatePage_BottomMessage" xml:space="preserve">
+    <value>即使您不能捐赠，只需使用 GitHub 上的项目，分享和启动项目也是很长的路程。每一点支持都是真正感激的。</value>
+  </data>
+  <data name="DonatePage_DrSkinner_Description" xml:space="preserve">
+    <value>负责核心功能开发、质量保证、UI/UX设计以及目前项目牵头的总体项目方向。</value>
+  </data>
+  <data name="DonatePage_DrSkinner_Role" xml:space="preserve">
+    <value>核心开发者 &amp; 项目负责人</value>
+  </data>
+  <data name="DonatePage_Kaguya_Description" xml:space="preserve">
+    <value>负责硬件研究和逆向工程，其贡献涉及核心功能开发和低级系统功能集成。</value>
+  </data>
+  <data name="DonatePage_Kaguya_Role" xml:space="preserve">
+    <value>核心开发者 &amp; 逆向</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>开发与维护联想拯救箱需要大量时间。如果你喜欢这个软件，你可以通过赞助来支持软件的开发。
+    <value>开发和维护 Lenovo Legion Toolkit 需要投入大量的时间与精力。如果您喜欢使用这款软件，可以通过赞助开发者来支持它的未来，是他们的付出让这一切成为可能。
 
-点击下方的 PayPal 图标或扫描二维码使用 PayPal 赞助。
-
-万分感谢！</value>
+感谢您的支持！</value>
+  </data>
+  <data name="DonatePage_Sponsor" xml:space="preserve">
+    <value>赞助</value>
   </data>
   <data name="DonatePage_Title" xml:space="preserve">
     <value>赞助</value>
   </data>
   <data name="DpiScaleAutomationStepControl_Message" xml:space="preserve">
-    <value>切换内置屏幕缩放。
-
-警告！当内置屏幕关闭时此选项无法生效。</value>
+    <value>更改内置显示的缩放。</value>
   </data>
   <data name="DpiScaleAutomationStepControl_Title" xml:space="preserve">
     <value>DPI</value>
@@ -967,6 +963,9 @@
   <data name="EditSensorWindow_Title" xml:space="preserve">
     <value>编辑传感器</value>
   </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>结束日期</value>
+  </data>
   <data name="Error" xml:space="preserve">
     <value>错误</value>
   </data>
@@ -993,6 +992,9 @@
   </data>
   <data name="Exit" xml:space="preserve">
     <value>退出</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>已过期</value>
   </data>
   <data name="Export" xml:space="preserve">
     <value>导出</value>
@@ -1089,12 +1091,14 @@
   <data name="GB" xml:space="preserve">
     <value>GB</value>
   </data>
+  <data name="Generation" xml:space="preserve">
+    <value>世代</value>
+  </data>
   <data name="GHz" xml:space="preserve">
     <value>GHz</value>
   </data>
   <data name="GodModePresetAutomationStepControl_Message" xml:space="preserve">
-    <value>切换至自定义模式的某个预设。
-该设置只有在启用自定义模式时才会生效。</value>
+    <value>应用特定的自定义模式预设。</value>
   </data>
   <data name="GodModePresetAutomationStepControl_Title" xml:space="preserve">
     <value>自定义模式预设</value>
@@ -1282,10 +1286,20 @@
   <data name="GodModeSettingsWindow_VantageWarning_Title" xml:space="preserve">
     <value>自定义设置在 Lenovo Vantage 及其服务运行时将不会生效。</value>
   </data>
+  <data name="GPU" xml:space="preserve">
+    <value>GPU</value>
+  </data>
+  <data name="HardwareFeatures" xml:space="preserve">
+    <value>硬件功能</value>
+  </data>
+  <data name="HardwareSensorsAutomationStepControl_Message" xml:space="preserve">
+    <value>启用或禁用硬件传感器后台轮询。</value>
+  </data>
+  <data name="HardwareSensorsAutomationStepControl_Title" xml:space="preserve">
+    <value>硬件传感器</value>
+  </data>
   <data name="HDRAutomationStepControl_Message" xml:space="preserve">
-    <value>为内置屏幕启用高动态范围显示（HDR）。
-
-警告：如内置屏幕关闭则本项无法正常运行。</value>
+    <value>启用内置显示的高动态范围 (HDR)。</value>
   </data>
   <data name="HDRAutomationStepControl_Title" xml:space="preserve">
     <value>HDR</value>
@@ -1304,6 +1318,15 @@
   </data>
   <data name="HideAll" xml:space="preserve">
     <value>隐藏全部</value>
+  </data>
+  <data name="Hz" xml:space="preserve">
+    <value>Hz</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>图标</value>
+  </data>
+  <data name="IconColor" xml:space="preserve">
+    <value>图标颜色</value>
   </data>
   <data name="IGPUModeChangeException_Message" xml:space="preserve">
     <value>如果独显未启用，请在几秒钟后再次尝试更改模式。
@@ -1328,10 +1351,7 @@
     <value>导入</value>
   </data>
   <data name="Inactive" xml:space="preserve">
-    <value>休眠中</value>
-  </data>
-  <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>此设备可能与拯救者工具箱不兼容。</value>
+    <value>不活跃</value>
   </data>
   <data name="Information" xml:space="preserve">
     <value>关于</value>
@@ -1354,12 +1374,6 @@
   <data name="ITSModeAutomationStepControl_Title" xml:space="preserve">
     <value>性能模式</value>
   </data>
-  <data name="ITSModeControl_Dialog_Message" xml:space="preserve">
-    <value>缺少 PowerBattery.dll ，请手动放置来使用 ITSMode 功能</value>
-  </data>
-  <data name="ITSModeControl_Dialog_Title" xml:space="preserve">
-    <value>缺少组件</value>
-  </data>
   <data name="ITSModeControl_Message" xml:space="preserve">
     <value>更改性能模式</value>
   </data>
@@ -1381,6 +1395,24 @@
   </data>
   <data name="Keyboard_VantageEnabledWarning_Title" xml:space="preserve">
     <value>Lenovo Vantage 与之相关服务仍在运行</value>
+  </data>
+  <data name="KeyDiscovery_AddCustomKey" xml:space="preserve">
+    <value>添加为自定义热键</value>
+  </data>
+  <data name="KeyDiscovery_Added" xml:space="preserve">
+    <value>已添加</value>
+  </data>
+  <data name="KeyDiscovery_CodeText" xml:space="preserve">
+    <value>键码: {0}</value>
+  </data>
+  <data name="KeyDiscovery_KnownKeyTooltip" xml:space="preserve">
+    <value>已知按键</value>
+  </data>
+  <data name="KeyDiscovery_Listening" xml:space="preserve">
+    <value>正在监听按键 ... 按 ESC 停止。</value>
+  </data>
+  <data name="KeyDiscovery_UnknownKeyTooltip" xml:space="preserve">
+    <value>未知按键 - 可以添加</value>
   </data>
   <data name="LampArrayRGBKeyboardPage_Aft_Ambient" xml:space="preserve">
     <value>尾部氛围灯</value>
@@ -1490,6 +1522,12 @@
   <data name="Load" xml:space="preserve">
     <value>重置</value>
   </data>
+  <data name="MacAddress" xml:space="preserve">
+    <value>MAC 地址</value>
+  </data>
+  <data name="MachineType" xml:space="preserve">
+    <value>设备代号</value>
+  </data>
   <data name="MacroAutomationStepControl_Message" xml:space="preserve">
     <value>启用或禁用宏。</value>
   </data>
@@ -1583,9 +1621,6 @@
   <data name="MainWindow_NavigationItem_Donate" xml:space="preserve">
     <value>赞助</value>
   </data>
-  <data name="MainWindow_NavigationItem_FanCurve" xml:space="preserve">
-    <value>风扇曲线</value>
-  </data>
   <data name="MainWindow_NavigationItem_Keyboard" xml:space="preserve">
     <value>键盘</value>
   </data>
@@ -1628,6 +1663,12 @@
   <data name="MicrophoneControl_Title" xml:space="preserve">
     <value>麦克风</value>
   </data>
+  <data name="Model" xml:space="preserve">
+    <value>设备型号</value>
+  </data>
+  <data name="Motherboard" xml:space="preserve">
+    <value>主板</value>
+  </data>
   <data name="MoveDown" xml:space="preserve">
     <value>下移</value>
   </data>
@@ -1641,23 +1682,35 @@
   <data name="MultipleTriggersAutomationPipelineTrigger_Logic_And" xml:space="preserve">
     <value>匹配全部</value>
   </data>
+  <data name="MultipleTriggersAutomationPipelineTrigger_Logic_None" xml:space="preserve">
+    <value>没有逻辑(分离)</value>
+  </data>
   <data name="MultipleTriggersAutomationPipelineTrigger_Logic_Or" xml:space="preserve">
     <value>匹配任意</value>
   </data>
   <data name="MultipleTriggersAutomationPipelineTrigger_Logic_Title" xml:space="preserve">
     <value>判断逻辑</value>
   </data>
+  <data name="NetworkAdapters" xml:space="preserve">
+    <value>网络适配器</value>
+  </data>
   <data name="No" xml:space="preserve">
     <value>否</value>
   </data>
   <data name="NotificationAutomationStepControl_NotificationText" xml:space="preserve">
-    <value>提示弹窗文本</value>
+    <value>通知文本（支持 $RUN_OUTPUT$）</value>
   </data>
   <data name="NotificationAutomationStepControl_Title" xml:space="preserve">
     <value>显示提示弹窗</value>
   </data>
+  <data name="NotificationAutomationStepControl_ToolTip" xml:space="preserve">
+    <value>您可以使用 $RUN_OUTPUT$ 来动态地插入上一步的输出。</value>
+  </data>
   <data name="NotificationsSettingsWindow_ACAdapter" xml:space="preserve">
     <value>电源适配器</value>
+  </data>
+  <data name="NotificationsSettingsWindow_AirplaneMode" xml:space="preserve">
+    <value>飞行模式</value>
   </data>
   <data name="NotificationsSettingsWindow_Automation" xml:space="preserve">
     <value>自动化</value>
@@ -1665,8 +1718,8 @@
   <data name="NotificationsSettingsWindow_Camera" xml:space="preserve">
     <value>摄像头</value>
   </data>
-  <data name="NotificationsSettingsWindow_CapsAndNumLock" xml:space="preserve">
-    <value>Caps Lock 和 Num Lock</value>
+  <data name="NotificationsSettingsWindow_CapsLock" xml:space="preserve">
+    <value>大写锁定</value>
   </data>
   <data name="NotificationsSettingsWindow_DontShowNotifications_Message" xml:space="preserve">
     <value>禁用麦克风静音等 Fn 键操作的弹窗。
@@ -1677,6 +1730,9 @@
   </data>
   <data name="NotificationsSettingsWindow_FnLock" xml:space="preserve">
     <value>锁定Fn键</value>
+  </data>
+  <data name="NotificationsSettingsWindow_ITSMode" xml:space="preserve">
+    <value>性能模式</value>
   </data>
   <data name="NotificationsSettingsWindow_KeyboardBacklight" xml:space="preserve">
     <value>键盘背光</value>
@@ -1702,6 +1758,12 @@
   </data>
   <data name="NotificationsSettingsWindow_NotificationPosition_Title" xml:space="preserve">
     <value>位置</value>
+  </data>
+  <data name="NotificationsSettingsWindow_NotificationType" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="NotificationsSettingsWindow_NumLock" xml:space="preserve">
+    <value>小键盘数字锁</value>
   </data>
   <data name="NotificationsSettingsWindow_PowerMode" xml:space="preserve">
     <value>性能模式</value>
@@ -1729,6 +1791,12 @@
   </data>
   <data name="Notification_ACAdapterDisconnected" xml:space="preserve">
     <value>电源适配器 已拔出</value>
+  </data>
+  <data name="Notification_AirplaneModeOff" xml:space="preserve">
+    <value>飞行模式关闭</value>
+  </data>
+  <data name="Notification_AirplaneModeOn" xml:space="preserve">
+    <value>飞行模式开启</value>
   </data>
   <data name="Notification_CameraOff" xml:space="preserve">
     <value>摄像头 关</value>
@@ -1772,6 +1840,27 @@
   <data name="Notification_PortLightingOn" xml:space="preserve">
     <value>接口指示灯 开</value>
   </data>
+  <data name="Notification_RGBKeyboardBacklightChanged" xml:space="preserve">
+    <value>键盘背光改变</value>
+  </data>
+  <data name="Notification_RGBKeyboardBacklightOff" xml:space="preserve">
+    <value>键盘背光关闭</value>
+  </data>
+  <data name="Notification_SmartKeyDoublePress" xml:space="preserve">
+    <value>双击</value>
+  </data>
+  <data name="Notification_SmartKeySinglePress" xml:space="preserve">
+    <value>单击</value>
+  </data>
+  <data name="Notification_SpectrumBacklightChanged" xml:space="preserve">
+    <value>键盘背光改变</value>
+  </data>
+  <data name="Notification_SpectrumBacklightOff" xml:space="preserve">
+    <value>键盘背光关闭</value>
+  </data>
+  <data name="Notification_SpectrumBacklightPresetChanged" xml:space="preserve">
+    <value>背光预设</value>
+  </data>
   <data name="Notification_SpectrumKeyboardBacklight_Backlight" xml:space="preserve">
     <value>背光 {0}</value>
   </data>
@@ -1792,6 +1881,15 @@
   </data>
   <data name="Notification_WhiteKeyboardBacklight" xml:space="preserve">
     <value>背光 {0}</value>
+  </data>
+  <data name="Notification_WhiteKeyboardBacklightChanged" xml:space="preserve">
+    <value>键盘背光改变</value>
+  </data>
+  <data name="Notification_WhiteKeyboardBacklightOff" xml:space="preserve">
+    <value>键盘背光关闭</value>
+  </data>
+  <data name="Notification_WhiteKeyboardBacklightSpecial" xml:space="preserve">
+    <value>背光状态改变</value>
   </data>
   <data name="Off" xml:space="preserve">
     <value>关闭</value>
@@ -1819,6 +1917,12 @@
   </data>
   <data name="OsdAutomationStepControl_Title" xml:space="preserve">
     <value>OSD</value>
+  </data>
+  <data name="OsdLockPositionAutomationStepControl_Message" xml:space="preserve">
+    <value>设置 OSD 的锁定位置状态。</value>
+  </data>
+  <data name="OsdLockPositionAutomationStepControl_Title" xml:space="preserve">
+    <value>OSD 锁定位置</value>
   </data>
   <data name="OsdSettings_Appearance_BackgroundColor" xml:space="preserve">
     <value>背景色</value>
@@ -1913,9 +2017,6 @@
   <data name="OsdWindow_Title" xml:space="preserve">
     <value>OSD 设置</value>
   </data>
-  <data name="Osd_Chipset" xml:space="preserve">
-    <value>芯片组</value>
-  </data>
   <data name="Osd_Cpu" xml:space="preserve">
     <value>CPU</value>
   </data>
@@ -1955,6 +2056,9 @@
   <data name="Osd_Memory_Utilization" xml:space="preserve">
     <value>利用率</value>
   </data>
+  <data name="Osd_Pch" xml:space="preserve">
+    <value>PCH</value>
+  </data>
   <data name="Osd_PCH_Fan" xml:space="preserve">
     <value>风扇转速</value>
   </data>
@@ -1968,9 +2072,7 @@
     <value>面板（传统）</value>
   </data>
   <data name="OverclockDiscreteGPUAutomationStepControl_Message" xml:space="preserve">
-    <value>超频独立显卡以提升性能。
-
-警告：当独立显卡弹出后此操作将不起作用。</value>
+    <value>通过超时的 GPU 增强性能。</value>
   </data>
   <data name="OverclockDiscreteGPUAutomationStepControl_Title" xml:space="preserve">
     <value>超频独立显卡</value>
@@ -1989,6 +2091,9 @@
   </data>
   <data name="OverclockDiscreteGPUSettingsWindow_Title" xml:space="preserve">
     <value>独立显卡超频设置</value>
+  </data>
+  <data name="Overclocking_UnlockSteps" xml:space="preserve">
+    <value>{0} 次点击后打开...</value>
   </data>
   <data name="OverDriveAutomationStepControl_Message" xml:space="preserve">
     <value>开启后通过加压超频提升内置屏幕响应速度，可能会导致屏幕过冲产生鬼影。</value>
@@ -2150,6 +2255,9 @@
   <data name="PeriodicActionPipelineTriggerTabItemContent_Seconds" xml:space="preserve">
     <value>秒钟</value>
   </data>
+  <data name="PlatformAndCapabilities" xml:space="preserve">
+    <value>平台 &amp; 功能</value>
+  </data>
   <data name="PlaySoundAutomationStepControl_Message" xml:space="preserve">
     <value>支持如 wav 和 mp3 等常规音频格式。</value>
   </data>
@@ -2190,6 +2298,9 @@
   <data name="PowerModeControl_Warning" xml:space="preserve">
     <value>在未插入电源适配器的情况下，性能模式可能无法正常生效。</value>
   </data>
+  <data name="PowerModes" xml:space="preserve">
+    <value>电源模式</value>
+  </data>
   <data name="PowerModeUnavailableWithoutACException_Message" xml:space="preserve">
     <value>在未接入全功率电源适配器时无法启用{0}</value>
     <comment>For example: "{Performance} power mode is not available without AC power."</comment>
@@ -2209,13 +2320,14 @@
   <data name="QuickActionAutomationStepControl_Title" xml:space="preserve">
     <value>快捷操作</value>
   </data>
+  <data name="RAM" xml:space="preserve">
+    <value>内存</value>
+  </data>
   <data name="Refresh" xml:space="preserve">
     <value>刷新</value>
   </data>
   <data name="RefreshRateAutomationStepControl_Message" xml:space="preserve">
-    <value>切换内置屏幕刷新率。
-
-警告！当内置屏幕关闭时此选项无法生效。</value>
+    <value>更改内置显示的刷新率。</value>
   </data>
   <data name="RefreshRateAutomationStepControl_Title" xml:space="preserve">
     <value>刷新率</value>
@@ -2233,9 +2345,7 @@
     <value>重置</value>
   </data>
   <data name="ResolutionAutomationStepControl_Message" xml:space="preserve">
-    <value>切换内置屏幕分辨率。
-
-警告！当内置屏幕关闭时此选项无法生效。</value>
+    <value>更改内置显示的分辨率。</value>
   </data>
   <data name="ResolutionAutomationStepControl_Title" xml:space="preserve">
     <value>分辨率</value>
@@ -2319,8 +2429,7 @@
     <value>执行路径</value>
   </data>
   <data name="RunAutomationStepControl_Message" xml:space="preserve">
-    <value>运行脚本或应用
-请确保你的脚本能正常运行。</value>
+    <value>运行脚本或程序。</value>
   </data>
   <data name="RunAutomationStepControl_ProcessCheckInstance" xml:space="preserve">
     <value>单例模式</value>
@@ -2353,16 +2462,16 @@
     <value>保存中...</value>
   </data>
   <data name="Seconds" xml:space="preserve">
-    <value>{0}s</value>
+    <value>{0}秒</value>
   </data>
-  <data name="SelectSmartKeyPipelinesWindow_List_Description" xml:space="preserve">
+  <data name="SelectSpecialKeyPipelinesWindow_Configure_Title" xml:space="preserve">
+    <value>配置 {0}</value>
+  </data>
+  <data name="SelectSpecialKeyPipelinesWindow_List_Description" xml:space="preserve">
     <value>选择单个或多个快捷操作来循环执行。</value>
   </data>
-  <data name="SelectSmartKeyPipelinesWindow_List_Empty" xml:space="preserve">
+  <data name="SelectSpecialKeyPipelinesWindow_List_Empty" xml:space="preserve">
     <value>暂无快捷操作。</value>
-  </data>
-  <data name="SelectSmartKeyPipelinesWindow_ShowThisApp" xml:space="preserve">
-    <value>显示本应用</value>
   </data>
   <data name="SensorItem_BatteryLevel" xml:space="preserve">
     <value>当前电量</value>
@@ -2523,6 +2632,12 @@
   <data name="SensorSettingsPage_Used_Memory_GB_Title" xml:space="preserve">
     <value>已使用/总内存 (GB)</value>
   </data>
+  <data name="SerialNumber" xml:space="preserve">
+    <value>序列号</value>
+  </data>
+  <data name="Series" xml:space="preserve">
+    <value>系列</value>
+  </data>
   <data name="Settings" xml:space="preserve">
     <value>设置</value>
   </data>
@@ -2559,6 +2674,12 @@
   <data name="SettingsPage_AccentColor_Title" xml:space="preserve">
     <value>主题色</value>
   </data>
+  <data name="SettingsPage_AlwaysOnTop_Message" xml:space="preserve">
+    <value>将应用窗口置于所有其他窗口之上。</value>
+  </data>
+  <data name="SettingsPage_AlwaysOnTop_Title" xml:space="preserve">
+    <value>置顶 LLT 窗口</value>
+  </data>
   <data name="SettingsPage_Autorun_Message" xml:space="preserve">
     <value>开启自启并最小化到托盘。
 如遇到无法控制等问题请选择【延迟启动】以等待联想服务完全加载。</value>
@@ -2567,7 +2688,7 @@
     <value>开机启动</value>
   </data>
   <data name="SettingsPage_BackupSettings_Message" xml:space="preserve">
-    <value>备份或恢复应用设置</value>
+    <value>备份或恢复应用设置。</value>
   </data>
   <data name="SettingsPage_BackupSettings_Title" xml:space="preserve">
     <value>备份设置</value>
@@ -2608,14 +2729,14 @@
   <data name="SettingsPage_CheckUpdatesButton_Content" xml:space="preserve">
     <value>检查</value>
   </data>
+  <data name="SettingsPage_CheckUpdates_Message" xml:space="preserve">
+    <value>立即检查最新版本。</value>
+  </data>
   <data name="SettingsPage_CheckUpdates_Started_Title" xml:space="preserve">
     <value>正在检查更新...</value>
   </data>
   <data name="SettingsPage_CheckUpdates_Title" xml:space="preserve">
     <value>检查更新</value>
-  </data>
-  <data name="SettingsPage_ClearBackgroundImage_Title" xml:space="preserve">
-    <value>背景图片已清除</value>
   </data>
   <data name="SettingsPage_Clear_BackgroundImage_Title" xml:space="preserve">
     <value>清空图片</value>
@@ -2635,11 +2756,32 @@
   <data name="SettingsPage_Common_RestartRecommended" xml:space="preserve">
     <value>修改此项后需要重启电脑。</value>
   </data>
+  <data name="SettingsPage_CompactMode_Message" xml:space="preserve">
+    <value>减少视觉干扰以在屏幕上显示更多内容。</value>
+  </data>
+  <data name="SettingsPage_CompactMode_Title" xml:space="preserve">
+    <value>紧凑模式</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Blur" xml:space="preserve">
+    <value>虚化</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Dim" xml:space="preserve">
+    <value>透明度</value>
+  </data>
   <data name="SettingsPage_Custom_BackgroundImage_Message" xml:space="preserve">
-    <value>自定义背景图片</value>
+    <value>设置应用程序窗口的自定义背景图。</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Stretch_Crop" xml:space="preserve">
+    <value>裁剪</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Stretch_Fill" xml:space="preserve">
+    <value>填充</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Stretch_Fit" xml:space="preserve">
+    <value>自适应</value>
   </data>
   <data name="SettingsPage_Custom_BackgroundImage_Title" xml:space="preserve">
-    <value>自定义背景图片</value>
+    <value>背景图片</value>
   </data>
   <data name="SettingsPage_DisableLegionSpace_Error_Message" xml:space="preserve">
     <value>Legion Space 可能未被正确禁用</value>
@@ -2713,7 +2855,7 @@
     <value>无法启用 Lenovo Hotkeys</value>
   </data>
   <data name="SettingsPage_EnableLogging_Message" xml:space="preserve">
-    <value>启用日志以方便错误追踪</value>
+    <value>启用日志以方便错误追踪。</value>
   </data>
   <data name="SettingsPage_EnableLogging_Title" xml:space="preserve">
     <value>启用日志</value>
@@ -2728,13 +2870,13 @@
     <value>排除应用</value>
   </data>
   <data name="SettingsPage_ExcludeRefreshRates_Message" xml:space="preserve">
-    <value>你可以排除某个刷新率，使 Fn+R 快捷键切换更快速。</value>
+    <value>在 Fn + R 循环中隐藏特定的刷新率。</value>
   </data>
   <data name="SettingsPage_ExcludeRefreshRates_Title" xml:space="preserve">
     <value>排除刷新率</value>
   </data>
   <data name="SettingsPage_HardwareAcceleration_Message" xml:space="preserve">
-    <value>为 UI 界面启用硬件加速，可以使 UI 更流畅。</value>
+    <value>使用硬件加速来绘制程序的 UI 。</value>
   </data>
   <data name="SettingsPage_HardwareAcceleration_Title" xml:space="preserve">
     <value>硬件加速</value>
@@ -2769,20 +2911,26 @@
   <data name="SettingsPage_HWiNFO_Title" xml:space="preserve">
     <value>HWiNFO64</value>
   </data>
+  <data name="SettingsPage_Key_Discovery_Message" xml:space="preserve">
+    <value>发现在 LLT 中未被定义的 Fn 热键。</value>
+  </data>
+  <data name="SettingsPage_Key_Discovery_Title" xml:space="preserve">
+    <value>发现按键</value>
+  </data>
   <data name="SettingsPage_Language_Message" xml:space="preserve">
-    <value>选择语言</value>
+    <value>更改应用程序的显示语言。</value>
   </data>
   <data name="SettingsPage_Language_Title" xml:space="preserve">
     <value>语言</value>
   </data>
   <data name="SettingsPage_LockWindowSize_Message" xml:space="preserve">
-    <value>锁定窗口大小，当锁定后，Windows 与您都将无法修改 LLT 窗口的大小。</value>
+    <value>防止窗口大小被调整。</value>
   </data>
   <data name="SettingsPage_LockWindowSize_Title" xml:space="preserve">
     <value>锁定窗口大小</value>
   </data>
   <data name="SettingsPage_MinimizeOnClose_Message" xml:space="preserve">
-    <value>总是最小化到托盘。开启后需右键点击托盘图标点击关闭以关闭软件。</value>
+    <value>最小化到系统托盘而不是关闭。</value>
   </data>
   <data name="SettingsPage_MinimizeOnClose_Title" xml:space="preserve">
     <value>关闭时最小化</value>
@@ -2811,11 +2959,23 @@
   <data name="SettingsPage_Osd_Title" xml:space="preserve">
     <value>启用 OSD</value>
   </data>
+  <data name="SettingsPage_PowerModeMapping_ITSWarning" xml:space="preserve">
+    <value>ITS 模式自带同步电源设置，此处覆盖它可能导致冲突。</value>
+  </data>
   <data name="SettingsPage_PowerModeMapping_Message" xml:space="preserve">
     <value>在切换性能模式时，同步自动切换 Windows 电源计划或 Windows 电源模式。</value>
   </data>
   <data name="SettingsPage_PowerModeMapping_Title" xml:space="preserve">
     <value>电源模式同步</value>
+  </data>
+  <data name="SettingsPage_ResetSettings_Confirm" xml:space="preserve">
+    <value>您确定要将所有设置重置为默认值吗？此操作不能撤消，并且应用程序将重新启动。</value>
+  </data>
+  <data name="SettingsPage_ResetSettings_Message" xml:space="preserve">
+    <value>重置所有应用程序设置为默认值。</value>
+  </data>
+  <data name="SettingsPage_ResetSettings_Title" xml:space="preserve">
+    <value>重置设置</value>
   </data>
   <data name="SettingsPage_RestartRequired_Message" xml:space="preserve">
     <value>重启以查看改动</value>
@@ -2833,25 +2993,19 @@
     <value>传感器设置</value>
   </data>
   <data name="SettingsPage_SmartFnLock_Message" xml:space="preserve">
-    <value>按下 Alt、Ctrl 或 Shift 键时，Fn 将会暂时解除锁定。</value>
+    <value>按住 Alt、Ctrl 或 Shift 时，暂时禁用 Fn Lock。</value>
   </data>
   <data name="SettingsPage_SmartFnLock_Title" xml:space="preserve">
     <value>智能锁定 Fn 键</value>
   </data>
-  <data name="SettingsPage_SmartKeyDoublePressAction_Message" xml:space="preserve">
-    <value>选择双击 Fn + F9 触发的快捷操作。</value>
+  <data name="SettingsPage_SmartKeys_Message" xml:space="preserve">
+    <value>自定义 Fn 热键。</value>
   </data>
-  <data name="SettingsPage_SmartKeyDoublePressAction_Title" xml:space="preserve">
-    <value>Smart Key 第二快捷动作</value>
-  </data>
-  <data name="SettingsPage_SmartKeySinglePressAction_Message" xml:space="preserve">
-    <value>选择单击 Fn + F9 触发的快捷操作。</value>
-  </data>
-  <data name="SettingsPage_SmartKeySinglePressAction_Title" xml:space="preserve">
-    <value>Smart Key 快捷动作</value>
+  <data name="SettingsPage_SmartKeys_Title" xml:space="preserve">
+    <value>Smart Keys</value>
   </data>
   <data name="SettingsPage_SynchronizeBrightnessToAllPowerPlans_Message" xml:space="preserve">
-    <value>启用后在不同电源计划间切换将保持亮度不变。</value>
+    <value>在所有的 Windows 电源计划中应用相同的屏幕亮度。</value>
   </data>
   <data name="SettingsPage_SynchronizeBrightnessToAllPowerPlans_Title" xml:space="preserve">
     <value>固定显示亮度</value>
@@ -2863,7 +3017,7 @@
     <value>温度</value>
   </data>
   <data name="SettingsPage_Theme_Description" xml:space="preserve">
-    <value>选择浅色或深色模式，亦或者跟随系统。</value>
+    <value>设置浅色模式、神色模式或跟随系统主题。</value>
   </data>
   <data name="SettingsPage_Theme_Title" xml:space="preserve">
     <value>主题</value>
@@ -2871,20 +3025,29 @@
   <data name="SettingsPage_Title" xml:space="preserve">
     <value>设置</value>
   </data>
+  <data name="SettingsPage_UpdateChannel_Message" xml:space="preserve">
+    <value>选择稳定的 Beta 版本和开发版本。</value>
+  </data>
   <data name="SettingsPage_UpdateChannel_Title" xml:space="preserve">
     <value>更新通道</value>
   </data>
+  <data name="SettingsPage_UpdateCheckFrequency_Message" xml:space="preserve">
+    <value>选择检查新版本的频率。</value>
+  </data>
   <data name="SettingsPage_UpdateCheckFrequency_Title" xml:space="preserve">
-    <value>自动检查更新</value>
+    <value>更新频率</value>
+  </data>
+  <data name="SettingsPage_UpdateMethod_Message" xml:space="preserve">
+    <value>选择如何下载和安装更新。</value>
   </data>
   <data name="SettingsPage_UpdateMethod_Title" xml:space="preserve">
     <value>更新途径</value>
   </data>
   <data name="SettingsPage_UseNewSensorDashboard_Message" xml:space="preserve">
-    <value>使用新的仪表盘</value>
+    <value>使用新的仪表盘。</value>
   </data>
   <data name="SettingsPage_UseNewSensorDashboard_Title" xml:space="preserve">
-    <value>使用新的状态面板</value>
+    <value>新的传感器仪表板</value>
   </data>
   <data name="SettingsPage_WindowBackdropType_Info" xml:space="preserve">
     <value>如果在 HDR 或自动颜色管理开启时在提示窗口上遇到视觉伪影，请将其设置为无。</value>
@@ -2916,6 +3079,21 @@
   <data name="Settings_GodModeFnQSwitchable_Title" xml:space="preserve">
     <value>使用 Fn+Q 切换至自定义模式</value>
   </data>
+  <data name="ShowAppAutomationStepControl_Message" xml:space="preserve">
+    <value>关闭 Lenovo Legion Toolkit</value>
+  </data>
+  <data name="ShowAppAutomationStepControl_Title" xml:space="preserve">
+    <value>显示应用程序</value>
+  </data>
+  <data name="ShowLess" xml:space="preserve">
+    <value>显示更少</value>
+  </data>
+  <data name="ShowMore" xml:space="preserve">
+    <value>显示更多</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>栏位</value>
+  </data>
   <data name="SpeakerAutomationStepControl_Message" xml:space="preserve">
     <value>静音此项将静音所有可用的音频输出设备。</value>
   </data>
@@ -2927,6 +3105,42 @@
   </data>
   <data name="SpeakerVolumeAutomationStepControl_Title" xml:space="preserve">
     <value>扬声器音量</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery" xml:space="preserve">
+    <value>发现未被定义的 Fn 热键。</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery_Message" xml:space="preserve">
+    <value>发现在 LLT 中未被定义的 Fn 热键。</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery_Start" xml:space="preserve">
+    <value>开始</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery_Stop" xml:space="preserve">
+    <value>停止</value>
+  </data>
+  <data name="SpecialKeyDetail_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="SpecialKeyDetail_Mode" xml:space="preserve">
+    <value>模式</value>
+  </data>
+  <data name="SpecialKeyDetail_Mode_Description" xml:space="preserve">
+    <value>选择按下此键时的响应方式。</value>
+  </data>
+  <data name="SpecialKeysWindow_Description" xml:space="preserve">
+    <value>为 Fn 按键设置自定义快捷动作。每个键都可以使用自定义覆盖其默认行为；右键单击任何键将其隐藏在此列表中。</value>
+  </data>
+  <data name="SpecialKeysWindow_HideHiddenKeys" xml:space="preserve">
+    <value>隐藏 {0} 个按键</value>
+  </data>
+  <data name="SpecialKeysWindow_ShowHiddenKeys" xml:space="preserve">
+    <value>显示 {0} 个隐藏键</value>
+  </data>
+  <data name="SpecialKey_DriverSuffix" xml:space="preserve">
+    <value>(驱动)</value>
+  </data>
+  <data name="SpecialKey_UnknownKey" xml:space="preserve">
+    <value>键 {0}</value>
   </data>
   <data name="SpectrumKeyboardBacklightBrightnessAutomationStepControl_Message" xml:space="preserve">
     <value>调节键盘背光亮度</value>
@@ -3048,6 +3262,9 @@
   <data name="SpectrumKeyboardEffectControl_Description_Zones" xml:space="preserve">
     <value>{0} 键区</value>
   </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>开始日期</value>
+  </data>
   <data name="StatusTrayPopup_Battery" xml:space="preserve">
     <value>电池</value>
   </data>
@@ -3087,8 +3304,17 @@
   <data name="StatusWindow_System_Fan" xml:space="preserve">
     <value>系统风扇</value>
   </data>
+  <data name="Storage" xml:space="preserve">
+    <value>存储</value>
+  </data>
   <data name="SymbolRegularPicker_Title" xml:space="preserve">
     <value>选择图标</value>
+  </data>
+  <data name="TextColor" xml:space="preserve">
+    <value>文本颜色</value>
+  </data>
+  <data name="Threads" xml:space="preserve">
+    <value>线程</value>
   </data>
   <data name="TimeAutomationPipelineTriggerTabItemContent_Sunrise" xml:space="preserve">
     <value>日出</value>
@@ -3100,8 +3326,7 @@
     <value>时间</value>
   </data>
   <data name="ToggleHybridModeAutomationStepControl_Message" xml:space="preserve">
-    <value>混合模式允许在核显与独显之间切换。
-关闭后即为独显直连模式，两者之间切换需要重启生效。</value>
+    <value>允许在集成和离散GPU之间切换。</value>
   </data>
   <data name="ToggleHybridModeAutomationStepControl_Title" xml:space="preserve">
     <value>混合模式</value>
@@ -3150,14 +3375,14 @@
   <data name="TurnOffMonitorsControl_TurnOff" xml:space="preserve">
     <value>关闭</value>
   </data>
-  <data name="TurnOffWiFiAutomationStepControl_Title" xml:space="preserve">
-    <value>关闭 Wi-Fi</value>
-  </data>
-  <data name="TurnOnWiFiAutomationStepControl_Title" xml:space="preserve">
-    <value>打开 Wi-Fi</value>
-  </data>
   <data name="UnexpectedException" xml:space="preserve">
     <value>发生意外异常：</value>
+  </data>
+  <data name="Unhide" xml:space="preserve">
+    <value>取消隐藏</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>未知</value>
   </data>
   <data name="Unnamed" xml:space="preserve">
     <value>未命名</value>
@@ -3188,14 +3413,29 @@
   <data name="Update" xml:space="preserve">
     <value>更新</value>
   </data>
+  <data name="UpdateWindow_DownloadError_Title" xml:space="preserve">
+    <value>更新下载失败</value>
+  </data>
+  <data name="UpdateWindow_SecurityError_Title" xml:space="preserve">
+    <value>检查更新失败</value>
+  </data>
   <data name="UpdateWindow_Title" xml:space="preserve">
     <value>有新的更新！</value>
   </data>
   <data name="UpdateWindow_WhatsNew" xml:space="preserve">
     <value>更新日志</value>
   </data>
+  <data name="Used" xml:space="preserve">
+    <value>已使用</value>
+  </data>
+  <data name="Valid" xml:space="preserve">
+    <value>有效</value>
+  </data>
   <data name="Warning" xml:space="preserve">
     <value>警告</value>
+  </data>
+  <data name="Warranty" xml:space="preserve">
+    <value>保修</value>
   </data>
   <data name="Watt" xml:space="preserve">
     <value>W</value>
@@ -3212,6 +3452,9 @@
   <data name="WhiteKeyboardBacklightControl_Title" xml:space="preserve">
     <value>键盘背光</value>
   </data>
+  <data name="WiFiAutomationStepControl_Title" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
   <data name="WiFiConnectedPipelineTriggerTabItemContent_CopyCurrentNetworkName" xml:space="preserve">
     <value>复制当前的网络名称</value>
   </data>
@@ -3224,7 +3467,19 @@
   <data name="WindowsPowerPlansWindow_DefaultPowerPlan" xml:space="preserve">
     <value>默认</value>
   </data>
+  <data name="WindowsPowerPlansWindow_PowerMode_AC" xml:space="preserve">
+    <value>接入电源</value>
+  </data>
+  <data name="WindowsPowerPlansWindow_PowerMode_DC" xml:space="preserve">
+    <value>使用电池</value>
+  </data>
+  <data name="WindowsPowerPlansWindow_PowerMode_Title" xml:space="preserve">
+    <value>电源模式</value>
+  </data>
   <data name="WindowsPowerPlansWindow_Title" xml:space="preserve">
+    <value>Windows 电源计划</value>
+  </data>
+  <data name="WindowsPowerPlan_Title" xml:space="preserve">
     <value>Windows 电源计划</value>
   </data>
   <data name="WinKeyAutomationStepControl_Message" xml:space="preserve">

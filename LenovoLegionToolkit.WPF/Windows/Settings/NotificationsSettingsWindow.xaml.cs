@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,26 +7,30 @@ using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Extensions;
 using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.WPF.Extensions;
+using LenovoLegionToolkit.WPF.Resources;
 using Wpf.Ui.Controls;
 
 namespace LenovoLegionToolkit.WPF.Windows.Settings;
 
 public partial class NotificationsSettingsWindow
 {
-    private readonly ApplicationSettings _settings = IoCContainer.Resolve<ApplicationSettings>();
+    private readonly NotificationSettings _settings = IoCContainer.Resolve<NotificationSettings>();
 
     private IEnumerable<CardControl> Cards =>
     [
         _notificationPositionCard,
         _notificationDurationCard,
         _updateAvailableCard,
-        _capsNumLockCard,
+        _capsLockCard,
+        _numLockCard,
         _fnLockCard,
         _touchpadLockCard,
         _keyboardBacklightCard,
         _cameraLockCard,
         _microphoneCard,
+        _airplaneModeCard,
         _powerModeCard,
+        _itsModeCard,
         _refreshRateCard,
         _acAdapterCard,
         _smartKeyCard,
@@ -45,13 +49,16 @@ public partial class NotificationsSettingsWindow
         _notificationDurationComboBox.SetItems(Enum.GetValues<NotificationDuration>(), _settings.Store.NotificationDuration, v => v.GetDisplayName());
 
         _updateAvailableToggle.IsChecked = _settings.Store.Notifications.UpdateAvailable;
-        _capsNumLockToggle.IsChecked = _settings.Store.Notifications.CapsNumLock;
+        _capsLockToggle.IsChecked = _settings.Store.Notifications.CapsLock;
+        _numLockToggle.IsChecked = _settings.Store.Notifications.NumLock;
         _fnLockToggle.IsChecked = _settings.Store.Notifications.FnLock;
         _touchpadLockToggle.IsChecked = _settings.Store.Notifications.TouchpadLock;
         _keyboardBacklightToggle.IsChecked = _settings.Store.Notifications.KeyboardBacklight;
         _cameraLockToggle.IsChecked = _settings.Store.Notifications.CameraLock;
         _microphoneToggle.IsChecked = _settings.Store.Notifications.Microphone;
+        _airplaneModeToggle.IsChecked = _settings.Store.Notifications.AirplaneMode;
         _powerModeToggle.IsChecked = _settings.Store.Notifications.PowerMode;
+        _itsModeToggle.IsChecked = _settings.Store.Notifications.ITSMode;
         _refreshRateToggle.IsChecked = _settings.Store.Notifications.RefreshRate;
         _acAdapterToggle.IsChecked = _settings.Store.Notifications.ACAdapter;
         _smartKeyToggle.IsChecked = _settings.Store.Notifications.SmartKey;
@@ -118,13 +125,24 @@ public partial class NotificationsSettingsWindow
         _settings.SynchronizeStore();
     }
 
-    private void CapsNumLockToggle_Click(object sender, RoutedEventArgs e)
+
+    private void CapsLockToggle_Click(object sender, RoutedEventArgs e)
     {
-        var state = _capsNumLockToggle.IsChecked;
+        var state = _capsLockToggle.IsChecked;
         if (state is null)
             return;
 
-        _settings.Store.Notifications.CapsNumLock = state.Value;
+        _settings.Store.Notifications.CapsLock = state.Value;
+        _settings.SynchronizeStore();
+    }
+
+    private void NumLockToggle_Click(object sender, RoutedEventArgs e)
+    {
+        var state = _numLockToggle.IsChecked;
+        if (state is null)
+            return;
+
+        _settings.Store.Notifications.NumLock = state.Value;
         _settings.SynchronizeStore();
     }
 
@@ -178,6 +196,16 @@ public partial class NotificationsSettingsWindow
         _settings.SynchronizeStore();
     }
 
+    private void AirplaneModeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        var state = _airplaneModeToggle.IsChecked;
+        if (state is null)
+            return;
+
+        _settings.Store.Notifications.AirplaneMode = state.Value;
+        _settings.SynchronizeStore();
+    }
+
     private void PowerModeToggle_Click(object sender, RoutedEventArgs e)
     {
         var state = _powerModeToggle.IsChecked;
@@ -185,6 +213,16 @@ public partial class NotificationsSettingsWindow
             return;
 
         _settings.Store.Notifications.PowerMode = state.Value;
+        _settings.SynchronizeStore();
+    }
+
+    private void ITSModeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        var state = _itsModeToggle.IsChecked;
+        if (state is null)
+            return;
+
+        _settings.Store.Notifications.ITSMode = state.Value;
         _settings.SynchronizeStore();
     }
 
@@ -236,5 +274,131 @@ public partial class NotificationsSettingsWindow
 
         _settings.Store.Notifications.AutomationNotification = state.Value;
         _settings.SynchronizeStore();
+    }
+
+    private void OpenCustomizeWindow(string title, (NotificationType, string)[] types) =>
+        new NotificationTypeCustomizationWindow(title, types, new NotificationsStoreWrapper(_settings)) { Owner = this }.ShowDialog();
+
+    private void PowerModeCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_PowerMode,
+        [
+                (NotificationType.PowerModeQuiet,       PowerModeState.Quiet.GetDisplayName()),
+                (NotificationType.PowerModeBalance,     PowerModeState.Balance.GetDisplayName()),
+                (NotificationType.PowerModePerformance, PowerModeState.Performance.GetDisplayName()),
+                (NotificationType.PowerModeExtreme,     PowerModeState.Extreme.GetDisplayName()),
+                (NotificationType.PowerModeGodMode,     PowerModeState.GodMode.GetDisplayName())
+        ]);
+
+    private void ITSModeCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_ITSMode,
+        [
+                (NotificationType.ITSModeAuto,        ITSMode.ItsAuto.GetDisplayName()),
+                (NotificationType.ITSModeCool,        ITSMode.MmcCool.GetDisplayName()),
+                (NotificationType.ITSModePerformance, ITSMode.MmcPerformance.GetDisplayName()),
+                (NotificationType.ITSModeGeek,        ITSMode.MmcGeek.GetDisplayName())
+        ]);
+
+    private void ACAdapterCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_ACAdapter,
+        [
+                (NotificationType.ACAdapterConnected, Resource.Notification_ACAdapterConnected),
+                (NotificationType.ACAdapterConnectedLowWattage, Resource.Notification_ACAdapterConnectedLowWattage),
+                (NotificationType.ACAdapterDisconnected, Resource.Notification_ACAdapterDisconnected)
+        ]);
+
+    private void KeyboardBacklightCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_KeyboardBacklight,
+        [
+                (NotificationType.RGBKeyboardBacklightChanged,    Resource.Notification_RGBKeyboardBacklightChanged),
+                (NotificationType.RGBKeyboardBacklightOff,        Resource.Notification_RGBKeyboardBacklightOff),
+                (NotificationType.SpectrumBacklightChanged,       Resource.Notification_SpectrumBacklightChanged),
+                (NotificationType.SpectrumBacklightOff,           Resource.Notification_SpectrumBacklightOff),
+                (NotificationType.SpectrumBacklightPresetChanged, Resource.Notification_SpectrumBacklightPresetChanged),
+                (NotificationType.WhiteKeyboardBacklightChanged,  Resource.Notification_WhiteKeyboardBacklightChanged),
+                (NotificationType.WhiteKeyboardBacklightChangedSpecial, Resource.Notification_WhiteKeyboardBacklightSpecial),
+                (NotificationType.WhiteKeyboardBacklightOff,      Resource.Notification_WhiteKeyboardBacklightOff),
+                (NotificationType.PanelLogoLightingOn,  Resource.Notification_PanelLogoLightingOn),
+                (NotificationType.PanelLogoLightingOff, Resource.Notification_PanelLogoLightingOff),
+                (NotificationType.PortLightingOn,  Resource.Notification_PortLightingOn),
+                (NotificationType.PortLightingOff, Resource.Notification_PortLightingOff)
+        ]);
+
+    private void CapsLockCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_CapsLock,
+        [
+                (NotificationType.CapsLockOn, Resource.Notification_CapsLockOn),
+                (NotificationType.CapsLockOff, Resource.Notification_CapsLockOff)
+        ]);
+
+    private void NumLockCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_NumLock,
+        [
+                (NotificationType.NumLockOn, Resource.Notification_NumLockOn),
+                (NotificationType.NumLockOff, Resource.Notification_NumLockOff)
+        ]);
+
+    private void FnLockCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_FnLock,
+        [
+                (NotificationType.FnLockOn, Resource.Notification_FnLockOn),
+                (NotificationType.FnLockOff, Resource.Notification_FnLockOff)
+        ]);
+
+    private void TouchpadLockCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_TouchpadLock,
+        [
+                (NotificationType.TouchpadOn, Resource.Notification_TouchpadOn),
+                (NotificationType.TouchpadOff, Resource.Notification_TouchpadOff)
+        ]);
+
+    private void CameraLockCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_Camera,
+        [
+                (NotificationType.CameraOn, Resource.Notification_CameraOn),
+                (NotificationType.CameraOff, Resource.Notification_CameraOff)
+        ]);
+
+    private void MicrophoneCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_Microphone,
+        [
+                (NotificationType.MicrophoneOn, Resource.Notification_MicrophoneOn),
+                (NotificationType.MicrophoneOff, Resource.Notification_MicrophoneOff)
+        ]);
+
+    private void AirplaneModeCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_AirplaneMode,
+        [
+                (NotificationType.AirplaneModeOn, Resource.Notification_AirplaneModeOn),
+                (NotificationType.AirplaneModeOff, Resource.Notification_AirplaneModeOff)
+        ]);
+
+    private void RefreshRateCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_RefreshRate,
+        [(NotificationType.RefreshRate, Resource.NotificationsSettingsWindow_RefreshRate)]);
+
+    private void SmartKeyCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_SmartKey,
+        [
+            (NotificationType.SmartKeySinglePress, Resource.Notification_SmartKeySinglePress),
+            (NotificationType.SmartKeyDoublePress, Resource.Notification_SmartKeyDoublePress)
+        ]);
+
+    private void UpdateAvailableCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_Updates_Title,
+        [(NotificationType.UpdateAvailable, Resource.NotificationsSettingsWindow_Updates_Title)]);
+
+    private void AutomationCustomizeButton_Click(object sender, RoutedEventArgs e) =>
+        OpenCustomizeWindow(Resource.NotificationsSettingsWindow_Automation,
+        [(NotificationType.AutomationNotification, Resource.NotificationsSettingsWindow_Automation)]);
+
+    private sealed class NotificationsStoreWrapper(NotificationSettings settings) : INotificationCustomizationStore
+    {
+        public Dictionary<NotificationType, int> IconOverrides => settings.Store.Notifications.IconOverrides;
+        public Dictionary<NotificationType, RGBColor> ColorOverrides => settings.Store.Notifications.ColorOverrides;
+        public Dictionary<NotificationType, RGBColor> TextColorOverrides => settings.Store.Notifications.TextColorOverrides;
+        public Dictionary<NotificationType, NotificationPosition> PositionOverrides => settings.Store.Notifications.PositionOverrides;
+        public Dictionary<NotificationType, NotificationDuration> DurationOverrides => settings.Store.Notifications.DurationOverrides;
+
+        public void SynchronizeStore() => settings.SynchronizeStore();
     }
 }

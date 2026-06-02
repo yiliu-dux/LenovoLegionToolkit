@@ -20,7 +20,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationManifest Condition="'$(Configuration)'=='Debug'">app.debug.manifest</ApplicationManifest>
+		<ApplicationManifest Condition="'$(Configuration)'!='Debug'">app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<SatelliteResourceLanguages>ar;bg;cs;de;en;el;es;fr;hu;it;ja;lv;nl;nl-nl;pl;pt;pt-br;ro;ru;sk;uk;tr;vi;zh;zh-hans;zh-hant</SatelliteResourceLanguages>
 	</PropertyGroup>
@@ -59,8 +60,9 @@
 	<ItemGroup>
 		<None Remove="Assets\icon.ico" />
 		<None Remove="Assets\default_exe.png" />
-		<None Remove="Assets\Donate\paypal_logo.png" />
-		<None Remove="Assets\Donate\paypal_qr.png" />
+		<None Remove="Assets\Donate\Bartosz_Cichecki.jpg" />
+		<None Remove="Assets\Donate\Kaguya.png" />
+		<None Remove="Assets\Donate\Dr_Skinner.jpeg" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -70,8 +72,9 @@
 	<ItemGroup>
 		<Resource Include="Assets\default_exe.png" />
 		<Resource Include="Assets\icon.ico" />
-		<Resource Include="Assets\Donate\paypal_logo.png" />
-		<Resource Include="Assets\Donate\paypal_qr.png" />
+		<Resource Include="Assets\Donate\Bartosz_Cichecki.jpg" />
+		<Resource Include="Assets\Donate\Kaguya.png" />
+		<Resource Include="Assets\Donate\Dr_Skinner.jpeg" />
 	</ItemGroup>
 
 	<ItemGroup>

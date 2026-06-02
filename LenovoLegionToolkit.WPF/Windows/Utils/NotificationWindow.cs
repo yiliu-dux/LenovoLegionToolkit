@@ -1,7 +1,4 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.IO;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +10,7 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
 using LenovoLegionToolkit.Lib;
+using LenovoLegionToolkit.WPF.Extensions;
 using LenovoLegionToolkit.WPF.Utils;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Common;
@@ -22,18 +20,9 @@ namespace LenovoLegionToolkit.WPF.Windows.Utils;
 
 public class NotificationWindow : UiWindow, INotificationWindow
 {
-    #region Win32 Constants
-    private const int GWL_EXSTYLE = -20;
-    private const int WS_EX_TRANSPARENT = 0x00000020;
-    private const int WS_EX_TOOLWINDOW = 0x00000080;
-    private const int WS_EX_NOACTIVATE = 0x08000000;
-
-    [DllImport("user32.dll")]
-    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-    [DllImport("user32.dll")]
-    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-    #endregion
+    private const double MeasureHeight = 80;
+    private const double DefaultMinWidth = 300;
+    private const int PositionMargin = 16;
 
     private readonly ScreenInfo _screenInfo;
 
@@ -66,12 +55,10 @@ public class NotificationWindow : UiWindow, INotificationWindow
         VerticalContentAlignment = VerticalAlignment.Center,
     };
 
-    private bool _gettingBitMap;
-
-    public NotificationWindow(SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Action? clickAction, ScreenInfo screenInfo, NotificationPosition position)
+    public NotificationWindow(SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Brush? textColor, Action? clickAction, ScreenInfo screenInfo, NotificationPosition position)
     {
         InitializeStyle();
-        InitializeContent(symbol, overlaySymbol, symbolTransform, text);
+        InitializeContent(symbol, overlaySymbol, symbolTransform, text, textColor);
 
         ShowInTaskbar = false;
         SourceInitialized += OnSourceInitialized;
@@ -86,7 +73,6 @@ public class NotificationWindow : UiWindow, INotificationWindow
             clickAction?.Invoke();
         };
     }
-
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
         if (PresentationSource.FromVisual(this) is not HwndSource source)
@@ -94,9 +80,9 @@ public class NotificationWindow : UiWindow, INotificationWindow
             return;
         }
 
-        var hwnd = source.Handle;
-        var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-        SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
+        var hwnd = (HWND)source.Handle;
+        var extendedStyle = (WINDOW_EX_STYLE)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+        PInvoke.SetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, (int)(extendedStyle | WINDOW_EX_STYLE.WS_EX_TOOLWINDOW | WINDOW_EX_STYLE.WS_EX_NOACTIVATE));
     }
 
     public void Show(int closeAfter)
@@ -108,57 +94,23 @@ public class NotificationWindow : UiWindow, INotificationWindow
         }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
+
     public void Close(bool immediate)
     {
         WindowStyle = WindowStyle.None;
         Close();
     }
 
-    public Bitmap GetBitmapView()
-    {
-        _gettingBitMap = true;
-        Show();
-        Close();
-        _gettingBitMap = false;
-
-        RenderTargetBitmap rtb = new((int)Width, (int)Height, 96, 96, PixelFormats.Pbgra32);
-        rtb.Render(this);
-        var ms = new MemoryStream();
-        var encoder = new BmpBitmapEncoder();
-        encoder.Frames.Add(BitmapFrame.Create(rtb));
-        encoder.Save(ms);
-        using var bitmap = new Bitmap(ms);
-
-        var multiplierX = _screenInfo.DpiX / 96d;
-        var multiplierY = _screenInfo.DpiY / 96d;
-        var newWidth = (int)(bitmap.Width * multiplierX);
-        var newHeight = (int)(bitmap.Height * multiplierY);
-        var resizedBitmap = new Bitmap(newWidth, newHeight);
-        using var graphics = Graphics.FromImage(resizedBitmap);
-        graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-        graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-        var borderPath = GetRoundedRectanglePath(new(0, 0, newWidth, newHeight), 10);
-        var penPath = GetRoundedRectanglePath(new(1, 1, newWidth - 3, newHeight - 3), 10);
-
-        graphics.SetClip(borderPath);
-        graphics.DrawImage(bitmap, 0, 0, newWidth, newHeight);
-        graphics.ResetClip();
-
-        using var pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(64, 64, 64), 3);
-        graphics.DrawPath(pen, penPath);
-
-        return resizedBitmap;
-    }
-
     private void InitializeStyle()
     {
         WindowStartupLocation = WindowStartupLocation.Manual;
         ResizeMode = ResizeMode.NoResize;
+        WindowStyle = WindowStyle.None;
+        AllowsTransparency = true;
+        Topmost = true;
 
         Focusable = false;
-        Topmost = true;
-        ExtendsContentIntoTitleBar = true;
+        ExtendsContentIntoTitleBar = false;
         ShowInTaskbar = false;
         ShowActivated = false;
 
@@ -168,71 +120,64 @@ public class NotificationWindow : UiWindow, INotificationWindow
 
     private void InitializePosition(Rect workArea, uint dpiX, uint dpiY, NotificationPosition position)
     {
-        _mainGrid.Measure(new System.Windows.Size(double.PositiveInfinity, 80));
+        _mainGrid.Measure(new Size(double.PositiveInfinity, MeasureHeight));
 
         var multiplierX = dpiX / 96d;
         var multiplierY = dpiY / 96d;
         Rect nativeWorkArea = new(workArea.Left, workArea.Top, workArea.Width * multiplierX, workArea.Height * multiplierY);
 
-        Width = MaxWidth = MinWidth = Math.Max(_mainGrid.DesiredSize.Width, 300);
+        Width = MaxWidth = MinWidth = Math.Max(_mainGrid.DesiredSize.Width, DefaultMinWidth);
         Height = MaxHeight = MinHeight = _mainGrid.DesiredSize.Height;
 
-        double nativeLeft = 0;
-        double nativeTop = 0;
+        var nativeWidth = Width * multiplierX;
+        var nativeHeight = Height * multiplierY;
 
-        if (_gettingBitMap)
+        var nativeMarginX = PositionMargin * multiplierX;
+        var nativeMarginY = PositionMargin * multiplierY;
+
+        double nativeLeft;
+        double nativeTop;
+
+        switch (position)
         {
-            nativeLeft = -1048576;
-            nativeTop = -1048576;
-        }
-        else
-        {
-            var nativeWidth = Width * multiplierX;
-            var nativeHeight = Height * multiplierY;
-
-            const int margin = 16;
-            var nativeMarginX = margin * multiplierX;
-            var nativeMarginY = margin * multiplierY;
-
-            switch (position)
-            {
-                case NotificationPosition.BottomRight:
-                    nativeLeft = nativeWorkArea.Right - nativeWidth - nativeMarginX;
-                    nativeTop = nativeWorkArea.Bottom - nativeHeight - nativeMarginY;
-                    break;
-                case NotificationPosition.BottomCenter:
-                    nativeLeft = nativeWorkArea.Left + (nativeWorkArea.Width - nativeWidth) / 2;
-                    nativeTop = nativeWorkArea.Bottom - nativeHeight - nativeMarginY;
-                    break;
-                case NotificationPosition.BottomLeft:
-                    nativeLeft = nativeWorkArea.Left + nativeMarginX;
-                    nativeTop = nativeWorkArea.Bottom - nativeHeight - nativeMarginY;
-                    break;
-                case NotificationPosition.CenterLeft:
-                    nativeLeft = nativeWorkArea.Left + nativeMarginX;
-                    nativeTop = nativeWorkArea.Top + (nativeWorkArea.Height - nativeHeight) / 2;
-                    break;
-                case NotificationPosition.TopLeft:
-                    nativeLeft = nativeWorkArea.Left + nativeMarginX;
-                    nativeTop = nativeWorkArea.Top + nativeMarginY;
-                    break;
-                case NotificationPosition.TopCenter:
-                    nativeLeft = nativeWorkArea.Left + (nativeWorkArea.Width - nativeWidth) / 2;
-                    nativeTop = nativeWorkArea.Top + nativeMarginY;
-                    break;
-                case NotificationPosition.TopRight:
-                    nativeLeft = nativeWorkArea.Right - nativeWidth - nativeMarginX;
-                    nativeTop = nativeWorkArea.Top + nativeMarginY;
-                    break;
-                case NotificationPosition.CenterRight:
-                    nativeLeft = nativeWorkArea.Right - nativeWidth - nativeMarginX;
-                    nativeTop = nativeWorkArea.Top + (nativeWorkArea.Height - nativeHeight) / 2;
-                    break;
-                case NotificationPosition.Center:
-                    nativeLeft = nativeWorkArea.Left + (nativeWorkArea.Width - nativeWidth) / 2;
-                    nativeTop = nativeWorkArea.Top + (nativeWorkArea.Height - nativeHeight) / 2;
-                    break;
-            }
+            case NotificationPosition.BottomRight:
+                nativeLeft = nativeWorkArea.Right - nativeWidth - nativeMarginX;
+                nativeTop = nativeWorkArea.Bottom - nativeHeight - nativeMarginY;
+                break;
+            case NotificationPosition.BottomCenter:
+                nativeLeft = nativeWorkArea.Left + (nativeWorkArea.Width - nativeWidth) / 2;
+                nativeTop = nativeWorkArea.Bottom - nativeHeight - nativeMarginY;
+                break;
+            case NotificationPosition.BottomLeft:
+                nativeLeft = nativeWorkArea.Left + nativeMarginX;
+                nativeTop = nativeWorkArea.Bottom - nativeHeight - nativeMarginY;
+                break;
+            case NotificationPosition.CenterLeft:
+                nativeLeft = nativeWorkArea.Left + nativeMarginX;
+                nativeTop = nativeWorkArea.Top + (nativeWorkArea.Height - nativeHeight) / 2;
+                break;
+            case NotificationPosition.TopLeft:
+                nativeLeft = nativeWorkArea.Left + nativeMarginX;
+                nativeTop = nativeWorkArea.Top + nativeMarginY;
+                break;
+            case NotificationPosition.TopCenter:
+                nativeLeft = nativeWorkArea.Left + (nativeWorkArea.Width - nativeWidth) / 2;
+                nativeTop = nativeWorkArea.Top + nativeMarginY;
+                break;
+            case NotificationPosition.TopRight:
+                nativeLeft = nativeWorkArea.Right - nativeWidth - nativeMarginX;
+                nativeTop = nativeWorkArea.Top + nativeMarginY;
+                break;
+            case NotificationPosition.CenterRight:
+                nativeLeft = nativeWorkArea.Right - nativeWidth - nativeMarginX;
+                nativeTop = nativeWorkArea.Top + (nativeWorkArea.Height - nativeHeight) / 2;
+                break;
+            case NotificationPosition.Center:
+                nativeLeft = nativeWorkArea.Left + (nativeWorkArea.Width - nativeWidth) / 2;
+                nativeTop = nativeWorkArea.Top + (nativeWorkArea.Height - nativeHeight) / 2;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(position), position, "Unexpected notification position.");
         }
 
         var windowInteropHandler = new WindowInteropHelper(this);
@@ -240,10 +185,13 @@ public class NotificationWindow : UiWindow, INotificationWindow
         PInvoke.SetWindowPos((HWND)windowInteropHandler.Handle, HWND.Null, (int)nativeLeft, (int)nativeTop, 0, 0, SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE);
     }
 
-    private void InitializeContent(SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text)
+    private void InitializeContent(SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Brush? textColor)
     {
         _symbolIcon.Symbol = symbol;
         _textBlock.Content = text;
+
+        if (textColor is not null)
+            _textBlock.Foreground = textColor;
 
         Grid.SetColumn(_symbolIcon, 0);
         Grid.SetColumn(_textBlock, 1);
@@ -261,17 +209,5 @@ public class NotificationWindow : UiWindow, INotificationWindow
         symbolTransform?.Invoke(_symbolIcon);
 
         Content = _mainGrid;
-    }
-
-    private GraphicsPath GetRoundedRectanglePath(Rectangle rect, int radius)
-    {
-        var path = new GraphicsPath();
-        int diameter = radius * 2;
-        path.AddArc(rect.X, rect.Y, diameter, diameter, 180, 90);
-        path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
-        path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
-        path.AddArc(rect.X, rect.Bottom - diameter, diameter, diameter, 90, 90);
-        path.CloseFigure();
-        return path;
     }
 }

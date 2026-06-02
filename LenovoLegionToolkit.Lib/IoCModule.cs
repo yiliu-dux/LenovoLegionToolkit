@@ -36,6 +36,7 @@ public class IoCModule : Module
         builder.Register<VantageDisabler>();
 
         builder.Register<ApplicationSettings>();
+        builder.Register<NotificationSettings>();
         builder.Register<BalanceModeSettings>();
         builder.Register<OsdSettings>();
         builder.Register<GodModeSettings>();
@@ -47,7 +48,8 @@ public class IoCModule : Module
         builder.Register<SunriseSunsetSettings>();
         builder.Register<UpdateSettings>();
         builder.Register<LampArraySettings>();
-        builder.Register<FanCurveSettings>().SingleInstance();
+        builder.Register<SpecialKeySettings>();
+        builder.Register<ITSModeSettings>();
 
         builder.Register<AlwaysOnUSBFeature>();
         builder.Register<BatteryFeature>();
@@ -68,6 +70,7 @@ public class IoCModule : Module
         builder.Register<InstantBootFeature>();
         builder.Register<InstantBootFeatureFlagsFeature>(true);
         builder.Register<InstantBootCapabilityFeature>(true);
+        builder.Register<HardwareSensorsFeature>();
         builder.Register<MicrophoneFeature>();
         builder.Register<OneLevelWhiteKeyboardBacklightFeature>();
         builder.Register<OverDriveFeature>();
@@ -94,18 +97,21 @@ public class IoCModule : Module
 
         builder.Register<DisplayBrightnessListener>().AutoActivateListener();
         builder.Register<DisplayConfigurationListener>().AutoActivateListener();
-        builder.Register<DriverKeyListener>().AutoActivateListener();
+        builder.Register<DriverKeyListener>().SingleInstance().AutoActivateListener();
         builder.Register<LightingChangeListener>().AutoActivateListener();
         builder.Register<NativeWindowsMessageListener>().AutoActivateListener();
         builder.Register<PowerModeListener>().AutoActivateListener();
         builder.Register<PowerStateListener>().AutoActivateListener();
         builder.Register<RGBKeyboardBacklightListener>().AutoActivateListener();
         builder.Register<SessionLockUnlockListener>().AutoActivateListener();
-        builder.Register<SpecialKeyListener>().AutoActivateListener();
+        builder.Register<SpecialKeyListener>().SingleInstance().AutoActivateListener();
         builder.Register<SystemThemeListener>().AutoActivateListener();
         builder.Register<ThermalModeListener>().AutoActivateListener();
         builder.Register<WinKeyListener>().AutoActivateListener();
+        builder.Register<ITSModeListener>().AutoActivateListener();
+        builder.Register<VolumeListener>().AutoActivateListener();
 
+        builder.Register<BatteryAutoListener>();
         builder.Register<GameAutoListener>();
         builder.Register<InstanceStartedEventAutoAutoListener>();
         builder.Register<InstanceStoppedEventAutoAutoListener>();
@@ -152,10 +158,5 @@ public class IoCModule : Module
         builder.Register<BatteryDischargeRateMonitorService>();
 
         builder.Register<AmdOverclockingController>();
-
-        builder.Register<FanCurveManager>(c => new FanCurveManager(
-            c.Resolve<SensorsGroupController>(),
-            c.Resolve<PowerModeListener>(),
-            c.Resolve<PowerModeFeature>())).SingleInstance();
     }
 }

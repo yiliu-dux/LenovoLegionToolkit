@@ -1,11 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Controllers.GodMode;
 using LenovoLegionToolkit.Lib.Extensions;
@@ -14,9 +6,18 @@ using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.SoftwareDisabler;
 using LenovoLegionToolkit.Lib.System.Management;
 using LenovoLegionToolkit.Lib.Utils;
+using LenovoLegionToolkit.WPF.Controls;
 using LenovoLegionToolkit.WPF.Extensions;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Management;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace LenovoLegionToolkit.WPF.Windows.Dashboard;
 
@@ -27,12 +28,12 @@ public partial class GodModeSettingsWindow
     private readonly VantageDisabler _vantageDisabler = IoCContainer.Resolve<VantageDisabler>();
     private readonly LegionSpaceDisabler _legionSpaceDisabler = IoCContainer.Resolve<LegionSpaceDisabler>();
     private readonly LegionZoneDisabler _legionZoneDisabler = IoCContainer.Resolve<LegionZoneDisabler>();
-    private readonly FanCurveManager _fanCurveManager = IoCContainer.Resolve<FanCurveManager>();
+
+    private Control FanControl;
 
     private GodModeState? _state;
     private Dictionary<PowerModeState, GodModeDefaults>? _defaults;
     private bool _isRefreshing;
-    private readonly List<Controls.FanCurveControlV3> _fanCurveControls = new();
 
     private const int BIOS_OC_MODE_ENABLED = 3;
 
@@ -41,21 +42,18 @@ public partial class GodModeSettingsWindow
         InitializeComponent();
         IsVisibleChanged += GodModeSettingsWindow_IsVisibleChanged;
         var mi = Compatibility.GetMachineInformationAsync().GetAwaiter().GetResult();
-        InitializeFanControlContainer(mi);
+        FanControl = InitializeFanControlContainer(mi);
     }
 
-    private void InitializeFanControlContainer(MachineInformation mi)
+    private Control InitializeFanControlContainer(MachineInformation mi)
     {
-        if (_fanCurveManager.IsEnabled)
-        {
-            return;
-        }
-
         int contentIndex = _fanCurveControlStackPanel.Children.IndexOf(_fanCurveButton);
         Control ctrl = mi.Properties.SupportsGodModeV2
             ? new Controls.FanCurveControlV2()
             : new Controls.FanCurveControl();
         _fanCurveControlStackPanel.Children.Insert(contentIndex, ctrl);
+
+        return ctrl;
     }
 
     private async void GodModeSettingsWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -130,57 +128,16 @@ public partial class GodModeSettingsWindow
             var activePresetId = _state.Value.ActivePresetId;
             var preset = _state.Value.Presets[activePresetId];
 
-            FanTableInfo? fanInfo;
-            if (_fanCurveManager.IsEnabled)
+            FanTableInfo? fanInfo = FanControl switch
             {
-                fanInfo = preset.FanTableInfo is not null ? (_fanCurveControls.Count > 0 ? _fanCurveControls[0].GetFanTableInfo() : null) : null;
-                
-                var fanSettings = IoCContainer.Resolve<FanCurveSettings>();
-                fanSettings.Store.Entries.Clear();
-                foreach (var ctrl in _fanCurveControls)
-                {
-                    if (ctrl.GetCurveEntry() is { } entry)
-                    {
-                        fanSettings.Store.Entries.Add(entry);
-                    }
-                }
-                fanSettings.Save();
-            }
-            else
-            {
-                var fanSettings = IoCContainer.Resolve<FanCurveSettings>();
-                Log.Instance.Trace($"About to save fan curves. Controls count: {_fanCurveControls.Count}");
-                fanSettings.Store.Entries.Clear();
-                foreach (var ctrl in _fanCurveControls)
-                {
-                    var entry = ctrl.GetCurveEntry();
-                    if (entry != null)
-                    {
-                        Log.Instance.Trace($"Adding entry: {entry.Type}");
-                        fanSettings.Store.Entries.Add(entry);
-                    }
-                    else
-                    {
-                        Log.Instance.Trace($"Entry for {ctrl.Tag} is null!");
-                    }
-                }
-                fanSettings.Save();
-                Log.Instance.Trace($"Fan settings saved. Path: {System.IO.Path.Combine(Folders.AppData, "fan_curves.json")}");
-
-                var fanControl = _fanCurveControlStackPanel.Children.OfType<Control>().FirstOrDefault(c => c is Controls.FanCurveControl or Controls.FanCurveControlV2);
-                fanInfo = fanControl switch
-                {
-                    Controls.FanCurveControl v1 => v1.GetFanTableInfo(),
-                    Controls.FanCurveControlV2 v2 => v2.GetFanTableInfo(),
-                    _ => preset.FanTableInfo
-                };
-            }
+                Controls.FanCurveControl v1 => v1.GetFanTableInfo(),
+                Controls.FanCurveControlV2 v2 => v2.GetFanTableInfo(),
+                _ => preset.FanTableInfo
+            };
 
             var newPreset = new GodModePreset
             {
                 Name = preset.Name,
-                PowerPlanGuid = preset.PowerPlanGuid,
-                PowerMode = preset.PowerMode,
                 CPULongTermPowerLimit = preset.CPULongTermPowerLimit?.WithValue(_cpuLongTermPowerLimitControl.Value),
                 CPUShortTermPowerLimit = preset.CPUShortTermPowerLimit?.WithValue(_cpuShortTermPowerLimitControl.Value),
                 CPUPeakPowerLimit = preset.CPUPeakPowerLimit?.WithValue(_cpuPeakPowerLimitControl.Value),
@@ -201,8 +158,8 @@ public partial class GodModeSettingsWindow
                 AllCoreCurveOptimizer = preset.AllCoreCurveOptimizer?.WithValue(_cpuAllCoreCurveOptimizer.Value),
                 EnableAllCoreCurveOptimizer = _toggleCoreCurveCard.Visibility == Visibility.Visible ? _coreCurveToggle.IsChecked : preset.EnableAllCoreCurveOptimizer,
                 EnableOverclocking = _toggleOcCard.Visibility == Visibility.Visible ? _overclockingToggle.IsChecked : preset.EnableOverclocking,
-
                 FanTableInfo = fanInfo,
+                Overrides = preset.Overrides,
             };
 
             var newPresets = new Dictionary<Guid, GodModePreset>(_state.Value.Presets)
@@ -266,50 +223,13 @@ public partial class GodModeSettingsWindow
             {
                 FanTable minimum = await _godModeController.GetMinimumFanTableAsync();
 
-                if (_fanCurveManager.IsEnabled)
+                if (FanControl is Controls.FanCurveControl v1)
                 {
-                    foreach (var ctrl in _fanCurveControls)
-                    {
-                        _fanCurveControlStackPanel.Children.Remove(ctrl);
-                    }
-                    _fanCurveControls.Clear();
-                    _fanSelector.Items.Clear();
-                    
-                    int insertIndex = _fanCurveControlStackPanel.Children.IndexOf(_fanSelector) + 1;
-                    foreach (var data in preset.FanTableInfo.Value.Data)
-                    {
-                        if (data.Type == FanTableType.PCH)
-                        {
-                            // Always show PCH/System fan
-                        }
-
-                        var ctrl = CreateFanControl(data, preset.FanTableInfo.Value);
-                        _fanCurveControls.Add(ctrl);
-                        _fanCurveControlStackPanel.Children.Insert(insertIndex++, ctrl);
-                        _fanSelector.Items.Add(ctrl.Tag);
-                    }
-
-                    if (_fanSelector.Items.Count > 1)
-                    {
-                        _fanSelector.Visibility = Visibility.Visible;
-                        _fanSelector.SelectedIndex = 0;
-                    }
-                    else
-                    {
-                        _fanSelector.Visibility = Visibility.Collapsed;
-                    }
+                    v1.SetFanTableInfo(preset.FanTableInfo.Value, minimum);
                 }
-                else
+                else if (FanControl is Controls.FanCurveControlV2 v2)
                 {
-                    var fanControl = _fanCurveControlStackPanel.Children.OfType<Control>().FirstOrDefault(c => c is Controls.FanCurveControl or Controls.FanCurveControlV2);
-                    if (fanControl is Controls.FanCurveControl v1)
-                    {
-                        v1.SetFanTableInfo(preset.FanTableInfo.Value, minimum);
-                    }
-                    else if (fanControl is Controls.FanCurveControlV2 v2)
-                    {
-                        v2.SetFanTableInfo(preset.FanTableInfo.Value, minimum);
-                    }
+                    v2.SetFanTableInfo(preset.FanTableInfo.Value, minimum);
                 }
 
                 _fanCurveCardControl.Visibility = Visibility.Visible;
@@ -373,50 +293,12 @@ public partial class GodModeSettingsWindow
         }
     }
 
-    private Controls.FanCurveControlV3 CreateFanControl(FanTableData data, FanTableInfo info)
-    {
-        var fanType = data.Type switch
-        {
-            FanTableType.CPU => FanType.Cpu,
-            FanTableType.GPU => FanType.Gpu,
-            _ => FanType.System
-        };
-
-        var entry = _fanCurveManager.GetEntry(fanType);
-        if (entry == null)
-        {
-            entry = FanCurveEntry.FromFanTableInfo(info, (ushort)fanType);
-            _fanCurveManager.AddEntry(entry);
-        }
-
-        var ctrl = new Controls.FanCurveControlV3
-        {
-            Margin = new Thickness(0, 32, 0, 0),
-            Tag = fanType.GetDisplayName()
-        };
-
-        ctrl.Initialize(entry, info.Data, fanType, data.FanId);
-        ctrl.Visibility = _fanCurveControls.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        
-        ctrl.SettingsChanged += (s, e) =>
-        {
-             _fanCurveManager.UpdateConfig(fanType, entry);
-             _fanCurveManager.UpdateGlobalSettings(entry);
-        };
-
-        _fanCurveManager.RegisterViewModel(fanType, ctrl);
-
-        ctrl.Unloaded += (s, e) => _fanCurveManager.UnregisterViewModel(fanType, ctrl);
-
-        return ctrl;
-    }
-
     private async Task UpdateOverclockingVisibilityAsync()
     {
         var mi = await Compatibility.GetMachineInformationAsync();
         var isBiosOcEnabled = await IsBiosOcEnabledAsync();
-        _toggleOcCard.Visibility = (isBiosOcEnabled && mi.Properties.IsAmdDevice) ? Visibility.Visible : Visibility.Collapsed;
-        var ocVisible = (isBiosOcEnabled && mi.Properties.IsAmdDevice && _overclockingToggle.IsChecked == true) ? Visibility.Visible : Visibility.Collapsed;
+        _toggleOcCard.Visibility = (isBiosOcEnabled && (mi.Properties.IsAmdDevice || AppFlags.Instance.Debug)) ? Visibility.Visible : Visibility.Collapsed;
+        var ocVisible = (isBiosOcEnabled && (mi.Properties.IsAmdDevice || AppFlags.Instance.Debug) && _overclockingToggle.IsChecked == true) ? Visibility.Visible : Visibility.Collapsed;
         _cpuPrecisionBoostOverdriveScaler.Visibility = ocVisible;
         _cpuPrecisionBoostOverdriveBoostFrequency.Visibility = ocVisible;
         _toggleCoreCurveCard.Visibility = ocVisible;
@@ -463,38 +345,13 @@ public partial class GodModeSettingsWindow
                 FanTableInfo defaultTableInfo = new FanTableInfo(data, fanTable);
                 FanTable minimum = await _godModeController.GetMinimumFanTableAsync();
 
-                if (_fanCurveManager.IsEnabled)
+                if (FanControl is Controls.FanCurveControl v1)
                 {
-                    foreach (var ctrl in _fanCurveControls)
-                    {
-                        var fanData = data.FirstOrDefault(d => d.FanId == ctrl.FanId);
-                        if (fanData.Equals(default(FanTableData)))
-                        {
-                            continue;
-                        }
-
-                        var fanTypeStr = ctrl.Tag?.ToString() ?? string.Empty;
-                        FanType fanType = FanType.System;
-                        foreach (FanType ft in Enum.GetValues(typeof(FanType)))
-                        {
-                            if (ft.GetDisplayName() == fanTypeStr) { fanType = ft; break; }
-                        }
-
-                        var defaultEntry = FanCurveEntry.FromFanTableInfo(defaultTableInfo, (ushort)fanType);
-                        ctrl.Reset(defaultEntry);
-                    }
+                    v1.SetFanTableInfo(defaultTableInfo, minimum);
                 }
-                else
+                else if (FanControl is Controls.FanCurveControlV2 v2)
                 {
-                    var fanControl = _fanCurveControlStackPanel.Children.OfType<Control>().FirstOrDefault(c => c is Controls.FanCurveControl or Controls.FanCurveControlV2);
-                    if (fanControl is Controls.FanCurveControl v1)
-                    {
-                        v1.SetFanTableInfo(defaultTableInfo, minimum);
-                    }
-                    else if (fanControl is Controls.FanCurveControlV2 v2)
-                    {
-                        v2.SetFanTableInfo(defaultTableInfo, minimum);
-                    }
+                    v2.SetFanTableInfo(defaultTableInfo, minimum);
                 }
             }
         }
@@ -597,25 +454,13 @@ public partial class GodModeSettingsWindow
         var defaultInfo = new FanTableInfo(data, await _godModeController.GetDefaultFanTableAsync());
         var minimum = await _godModeController.GetMinimumFanTableAsync();
 
-        if (_fanCurveManager.IsEnabled)
+        if (FanControl is Controls.FanCurveControl v1)
         {
-            foreach (var ctrl in _fanCurveControls)
-            {
-                var entry = FanCurveEntry.FromFanTableInfo(defaultInfo, (ushort)ctrl.FanType);
-                ctrl.Reset(entry);
-            }
+            v1.SetFanTableInfo(defaultInfo, minimum);
         }
-        else
+        else if (FanControl is Controls.FanCurveControlV2 v2)
         {
-            var fanControl = _fanCurveControlStackPanel.Children.OfType<Control>().FirstOrDefault(c => c is Controls.FanCurveControl or Controls.FanCurveControlV2);
-            if (fanControl is Controls.FanCurveControl v1)
-            {
-                v1.SetFanTableInfo(defaultInfo, minimum);
-            }
-            else if (fanControl is Controls.FanCurveControlV2 v2)
-            {
-                v2.SetFanTableInfo(defaultInfo, minimum);
-            }
+            v2.SetFanTableInfo(defaultInfo, minimum);
         }
     }
 
@@ -671,9 +516,10 @@ public partial class GodModeSettingsWindow
         }
     }
 
-    private void FanFullSpeedToggle_Click(object sender, RoutedEventArgs e)
+    private async void FanFullSpeedToggle_Click(object sender, RoutedEventArgs e)
     {
-        _fanCurveCardControl.IsEnabled = !(_fanFullSpeedToggle.IsChecked ?? false);
+        bool enabled = _fanFullSpeedToggle.IsChecked ?? false;
+        _fanCurveCardControl.IsEnabled = !enabled;
     }
 
     private async void OverclockingToggle_Click(object sender, RoutedEventArgs e)
@@ -683,18 +529,6 @@ public partial class GodModeSettingsWindow
             return;
         }
         await UpdateOverclockingVisibilityAsync();
-    }
-
-    private void FanSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_fanSelector.SelectedIndex < 0 || _fanSelector.SelectedIndex >= _fanCurveControls.Count)
-        {
-            return;
-        }
-        for (int i = 0; i < _fanCurveControls.Count; i++)
-        {
-            _fanCurveControls[i].Visibility = (i == _fanSelector.SelectedIndex) ? Visibility.Visible : Visibility.Collapsed;
-        }
     }
 
     private void SetVal<T>(Control control, T? value, Action<T> setter) where T : struct

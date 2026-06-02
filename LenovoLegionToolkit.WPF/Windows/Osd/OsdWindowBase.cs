@@ -20,27 +20,13 @@ using LenovoLegionToolkit.Lib.Settings;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Settings;
+using LenovoLegionToolkit.WPF.Extensions;
 using WpfScreenHelper;
 
 namespace LenovoLegionToolkit.WPF.Windows.Osd;
 
 public abstract class OsdWindowBase : Window
 {
-    #region Win32
-
-    private const int GWL_EXSTYLE = -20;
-    private const int WS_EX_TRANSPARENT = 0x00000020;
-    private const int WS_EX_TOOLWINDOW = 0x00000080;
-    private const int WS_EX_NOACTIVATE = 0x08000000;
-
-    [DllImport("user32.dll")]
-    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-    [DllImport("user32.dll")]
-    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-    #endregion
-
     #region Threshold Constants
 
     protected int _uiUpdateThrottleMs = 0;
@@ -61,7 +47,8 @@ public abstract class OsdWindowBase : Window
     protected readonly SensorsController _controller = IoCContainer.Resolve<SensorsController>();
     protected readonly SensorsGroupController _sensorsGroupControllers = IoCContainer.Resolve<SensorsGroupController>();
     protected readonly FpsSensorController _fpsController = IoCContainer.Resolve<FpsSensorController>();
-    protected readonly SensorsControlSettings _sensorsControlSettings = IoCContainer.Resolve<SensorsControlSettings>();
+    protected readonly HardwareSensorSettings _hardwareSensorSettings = IoCContainer.Resolve<HardwareSensorSettings>();
+    protected readonly ApplicationSettings _applicationSettings = IoCContainer.Resolve<ApplicationSettings>();
 
     #endregion
 
@@ -77,6 +64,7 @@ public abstract class OsdWindowBase : Window
     private CancellationTokenSource? _cts;
     protected bool _positionSet;
     private bool _fpsMonitoringStarted;
+    private bool _hasLenovoController;
 
     protected HashSet<OsdItem> _activeItems = [];
     protected Dictionary<OsdItem, FrameworkElement> _itemsMap = [];
@@ -89,14 +77,15 @@ public abstract class OsdWindowBase : Window
     protected void InitOsd()
     {
         _activeItems = new HashSet<OsdItem>(_OsdSettings.Store.Items);
+        ShowInTaskbar = false;
 
         IsVisibleChanged += OnVisibilityChanged;
         SourceInitialized += OnSourceInitialized;
         Closed += OnWindowClosed;
         Loaded += OnLoaded;
-        ContentRendered += OnContentRendered;
         LocationChanged += OnLocationChanged;
         MouseLeftButtonDown += OnMouseLeftButtonDown;
+        SizeChanged += OnSizeChanged;
 
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
 
@@ -110,11 +99,21 @@ public abstract class OsdWindowBase : Window
 
     private async void InitializeComponentSpecifics()
     {
-        var mi = await Compatibility.GetMachineInformationAsync();
-        if (mi.Properties.IsAmdDevice)
+        try
         {
-            OnAmdDeviceDetected();
+            _hasLenovoController = await _controller.IsSupportedAsync();
         }
+        catch
+        {
+            _hasLenovoController = false;
+        }
+
+        var mi = await Compatibility.GetMachineInformationAsync();
+        if (!IsLoaded)
+            return;
+
+        if (mi.Properties.IsAmdDevice)
+            OnAmdDeviceDetected();
     }
 
     protected abstract void OnAmdDeviceDetected();
@@ -147,24 +146,13 @@ public abstract class OsdWindowBase : Window
 
     private void OnSourceInitialized(object? sender, EventArgs e)
     {
-        UpdateClickThrough();
-    }
+        this.SetClickThrough(_OsdSettings.Store.IsLocked);
 
-    private void UpdateClickThrough()
-    {
-        if (PresentationSource.FromVisual(this) is not HwndSource source) return;
-
-        var hwnd = source.Handle;
-        var extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-
-        extendedStyle |= WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
-
-        if (_OsdSettings.Store.IsLocked)
-            extendedStyle |= WS_EX_TRANSPARENT;
-        else
-            extendedStyle &= ~WS_EX_TRANSPARENT;
-
-        SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle);
+        if (PresentationSource.FromVisual(this) is HwndSource source)
+        {
+            source.RemoveHook(WindowExtensions.WndProcHook);
+            source.AddHook(WindowExtensions.WndProcHook);
+        }
     }
 
     private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -177,7 +165,7 @@ public abstract class OsdWindowBase : Window
             if (screen != null)
             {
                 var workArea = screen.WpfWorkingArea;
-                
+
                 double snapThreshold = _OsdSettings.Store.SnapThreshold;
 
                 double left = this.Left;
@@ -202,28 +190,40 @@ public abstract class OsdWindowBase : Window
                 {
                     top = workArea.Bottom - height;
                 }
-                
+
                 if (left < workArea.Left) left = workArea.Left;
                 if (left + width > workArea.Right) left = workArea.Right - width;
-                
+
                 if (top < workArea.Top) top = workArea.Top;
                 if (top + height > workArea.Bottom) top = workArea.Bottom - height;
 
                 this.Left = left;
                 this.Top = top;
-                
+
                 _OsdSettings.SynchronizeStore();
             }
         }
     }
 
-    private void OnLoaded(object? sender, RoutedEventArgs e)
-        => Dispatcher.BeginInvoke(new Action(SetWindowPosition), DispatcherPriority.Loaded);
-
-    private void OnContentRendered(object? sender, EventArgs e)
+    private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
+        await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
+
+        UpdateLayout();
+        SetWindowPosition();
+    }
+
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (SavedPositionX.HasValue)
+            return;
+
         if (!_positionSet)
-            Dispatcher.BeginInvoke(new Action(SetWindowPosition), DispatcherPriority.Render);
+            return;
+
+        var workArea = SystemParameters.WorkArea;
+
+        Left = workArea.Left + (workArea.Width - ActualWidth) / 2;
     }
 
     protected virtual void SetWindowPosition()
@@ -258,7 +258,7 @@ public abstract class OsdWindowBase : Window
         SavedPositionX = null;
         SavedPositionY = null;
         _OsdSettings.SynchronizeStore();
-        
+
         SetDefaultWindowPosition();
     }
 
@@ -294,7 +294,9 @@ public abstract class OsdWindowBase : Window
         Dispatcher.BeginInvoke(() =>
         {
             if (!IsPositionOnScreen(Left, Top))
+            {
                 SetDefaultWindowPosition();
+            }
         });
     }
 
@@ -302,7 +304,7 @@ public abstract class OsdWindowBase : Window
     {
         if (IsVisible)
         {
-            _sensorsGroupControllers.ShowAverageCpuFrequency = _sensorsControlSettings.Store.ShowCpuAverageFrequency;
+            _sensorsGroupControllers.ShowAverageCpuFrequency = _hardwareSensorSettings.Store.ShowCpuAverageFrequency;
 
             _cts?.Cancel();
             _cts?.Dispose();
@@ -311,11 +313,14 @@ public abstract class OsdWindowBase : Window
             CheckAndUpdateFpsMonitoring();
             UpdateMeasurementControlsVisibility();
 
+            _sensorsGroupControllers.Start(this, TimeSpan.FromSeconds(_OsdSettings.Store.OsdRefreshInterval));
+
             await TheRing(_cts.Token);
         }
         else
         {
             _cts?.Cancel();
+            _sensorsGroupControllers.Stop(this);
             CheckAndUpdateFpsMonitoring();
         }
     }
@@ -335,9 +340,11 @@ public abstract class OsdWindowBase : Window
         _fpsController.FpsDataUpdated -= OnFpsDataUpdated;
         _fpsController.Dispose();
 
+        MessagingCenter.Unsubscribe(this);
+
         App.Current.OsdWindow = null;
     }
-    
+
     protected virtual void ApplyAppearanceSettings()
     {
         var converter = new BrushConverter();
@@ -348,7 +355,7 @@ public abstract class OsdWindowBase : Window
         _warningBrush = (Brush)converter.ConvertFromString(_OsdSettings.Store.WarningColor)!;
         _criticalBrush = (Brush)converter.ConvertFromString(_OsdSettings.Store.CriticalColor)!;
 
-        UpdateClickThrough();
+        this.SetClickThrough(_OsdSettings.Store.IsLocked);
 
         if (!SavedPositionX.HasValue || !SavedPositionY.HasValue)
         {
@@ -421,6 +428,7 @@ public abstract class OsdWindowBase : Window
         }
 
         CheckAndUpdateFpsMonitoring();
+        this.EscalateZBand();
     }
 
     protected virtual void OnItemVisibilityChanged(FrameworkElement element, bool visible) { }
@@ -472,7 +480,7 @@ public abstract class OsdWindowBase : Window
 
     protected string GetMemoryDisplayText(double usage, double used, double total)
     {
-        if (_sensorsControlSettings.Store.DisplayMemoryInGigabytes)
+        if (_hardwareSensorSettings.Store.DisplayMemoryInGigabytes)
         {
             if (used >= 0 && total > 0) return $"{used:F1}/{total:F1} {Resource.GB}";
             if (used >= 0) return $"{used:F1} {Resource.GB}";
@@ -485,6 +493,34 @@ public abstract class OsdWindowBase : Window
     protected string GetMemoryDisplayText(SensorSnapshot data) => GetMemoryDisplayText(data.MemUsage, data.MemUsed, data.MemTotal);
 
     protected string GetGpuVramDisplayText(SensorSnapshot data) => GetMemoryDisplayText(data.GpuVramUsage, data.GpuVramUsed, data.GpuVramTotal);
+
+    protected string GetTemperatureFormat(double rawCelsius)
+    {
+        if (double.IsNaN(rawCelsius) || rawCelsius < 0) return "-";
+
+        if (_applicationSettings.Store.TemperatureUnit == TemperatureUnit.F)
+        {
+            var fahrenheit = rawCelsius * 9.0 / 5.0 + 32.0;
+            return $"{fahrenheit:F0}{Resource.Fahrenheit}";
+        }
+
+        return $"{rawCelsius:F0}{Resource.Celsius}";
+    }
+
+    protected void UpdateTemperatureTextBlock(TextBlock tb, double rawCelsius,
+        double warningThreshold = double.MaxValue, double criticalThreshold = double.MaxValue)
+    {
+        if (tb.Visibility != Visibility.Visible) return;
+
+        var text = GetTemperatureFormat(rawCelsius);
+        var foreground = _valueBrush;
+
+        if (warningThreshold != double.MaxValue && !double.IsNaN(rawCelsius) && rawCelsius >= 0)
+            foreground = SeverityBrush(rawCelsius, warningThreshold, criticalThreshold);
+
+        SetTextIfChanged(tb, text);
+        SetForegroundIfChanged(tb, foreground);
+    }
 
     protected static void SetTextIfChanged(TextBlock tb, string text)
     {
@@ -509,12 +545,12 @@ public abstract class OsdWindowBase : Window
         switch (shouldMonitor)
         {
             case true when !_fpsMonitoringStarted:
-                await StartFpsMonitoringAsync();
                 _fpsMonitoringStarted = true;
+                await StartFpsMonitoringAsync();
                 break;
             case false when _fpsMonitoringStarted:
-                StopFpsMonitoring();
                 _fpsMonitoringStarted = false;
+                StopFpsMonitoring();
                 break;
         }
     }
@@ -555,7 +591,8 @@ public abstract class OsdWindowBase : Window
         if (isSampleValid)
         {
             long elapsedTicks = currentTick - _lastFpsUiUpdateTick;
-            if (_uiUpdateThrottleMs > 0 && elapsedTicks < TimeSpan.FromMilliseconds(_uiUpdateThrottleMs).Ticks) return;
+            var intervalTicks = TimeSpan.FromSeconds(_OsdSettings.Store.OsdRefreshInterval).Ticks;
+            if (elapsedTicks < intervalTicks) return;
 
             _lastFpsUiUpdateTick = currentTick;
             _lastValidFpsTick = currentTick;
@@ -563,20 +600,20 @@ public abstract class OsdWindowBase : Window
             const string dash = "-";
 
             fpsText = fpsVal.ToString();
-            fpsBrush = (fpsVal < _OsdSettings.Store.FpsThresholdCritical) ? _criticalBrush : Brushes.White;
+            fpsBrush = (fpsVal < _OsdSettings.Store.FpsThresholdCritical) ? _criticalBrush : _valueBrush;
 
             lowText = (lowVal > 0) ? lowVal.ToString() : dash;
-            lowBrush = (lowVal > 0 && (fpsVal - lowVal) >= _OsdSettings.Store.LowFpsDeltaThreshold) ? _criticalBrush : Brushes.White;
+            lowBrush = (lowVal > 0 && (fpsVal - lowVal) >= _OsdSettings.Store.LowFpsDeltaThreshold) ? _criticalBrush : _valueBrush;
 
             if (ftVal > 0.1)
             {
                 ftText = $"{ftVal,5:F1}ms";
-                ftBrush = (ftVal > MAX_FRAME_TIME_MS) ? _criticalBrush : Brushes.White;
+                ftBrush = (ftVal > MAX_FRAME_TIME_MS) ? _criticalBrush : _valueBrush;
             }
             else
             {
                 ftText = dash;
-                ftBrush = Brushes.White;
+                ftBrush = _valueBrush;
             }
         }
         else
@@ -584,9 +621,9 @@ public abstract class OsdWindowBase : Window
             if (currentTick - _lastValidFpsTick > FRAMETIME_TIMEOUT_TICKS)
             {
                 const string dash = "-";
-                fpsText = dash; fpsBrush = Brushes.White;
-                lowText = dash; lowBrush = Brushes.White;
-                ftText = dash; ftBrush = Brushes.White;
+                fpsText = dash; fpsBrush = _valueBrush;
+                lowText = dash; lowBrush = _valueBrush;
+                ftText = dash; ftBrush = _valueBrush;
                 _lastFpsUiUpdateTick = currentTick;
             }
             else
@@ -616,7 +653,14 @@ public abstract class OsdWindowBase : Window
 
     private async Task TheRing(CancellationToken token)
     {
-        if (!await _refreshLock.WaitAsync(0, token)) return;
+        try
+        {
+            await _refreshLock.WaitAsync(-1, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
         try
         {
@@ -650,69 +694,94 @@ public abstract class OsdWindowBase : Window
 
     private async Task RefreshSensorsDataAsync(CancellationToken token)
     {
-        await _sensorsGroupControllers.UpdateAsync();
+        var gs = _sensorsGroupControllers.Snapshot;
 
-        var dataTask = _controller.GetDataAsync();
-        var cpuPowerTask = _sensorsGroupControllers.GetCpuPowerAsync();
-        var gpuPowerTask = _sensorsGroupControllers.GetGpuPowerAsync();
-        var gpuVramUsageTask = _sensorsGroupControllers.GetGpuVramUtilizationAsync();
-        var gpuVramUsedTask = _sensorsGroupControllers.GetGpuVramUsedAsync();
-        var gpuVramTotalTask = _sensorsGroupControllers.GetGpuVramTotalAsync();
-        var gpuVramTempTask = _sensorsGroupControllers.GetGpuVramTemperatureAsync();
-        var memUsageTask = _sensorsGroupControllers.GetMemoryUsageAsync();
-        var memUsedTask = _sensorsGroupControllers.GetMemoryUsedAsync();
-        var memTotalTask = _sensorsGroupControllers.GetMemoryTotalAsync();
-        var memTempTask = _sensorsGroupControllers.GetHighestMemoryTemperatureAsync();
-        var diskTempsTask = _sensorsGroupControllers.GetSsdTemperaturesAsync();
-
-        var cpuClockTask = !_sensorsGroupControllers.IsHybrid ? _sensorsGroupControllers.GetCpuCoreClockAsync() : Task.FromResult(float.NaN);
-        var cpuPClockTask = _sensorsGroupControllers.IsHybrid ? _sensorsGroupControllers.GetCpuPCoreClockAsync() : Task.FromResult(float.NaN);
-        var cpuEClockTask = _sensorsGroupControllers.IsHybrid ? _sensorsGroupControllers.GetCpuECoreClockAsync() : Task.FromResult(float.NaN);
-
-        await Task.WhenAll(dataTask, cpuPowerTask, gpuPowerTask, gpuVramUsageTask, gpuVramUsedTask, gpuVramTotalTask, gpuVramTempTask, memUsageTask, memUsedTask, memTotalTask, memTempTask, diskTempsTask, cpuPClockTask, cpuEClockTask);
-
-        if (token.IsCancellationRequested) return;
-
-        if (_uiUpdateThrottleMs > 0 && (DateTime.Now - _lastUpdate).TotalMilliseconds < _uiUpdateThrottleMs) return;
-
-        _lastUpdate = DateTime.Now;
-
-        var mainData = await dataTask;
-        var diskData = await diskTempsTask;
-
-        var snapshot = new SensorSnapshot
+        if (_hasLenovoController)
         {
-            CpuUsage = mainData.CPU.Utilization,
-            CpuFrequency = await cpuClockTask,
-            CpuPClock = await cpuPClockTask,
-            CpuEClock = await cpuEClockTask,
-            CpuTemp = mainData.CPU.Temperature,
-            CpuPower = await cpuPowerTask,
-            CpuFanSpeed = mainData.CPU.FanSpeed,
+            var mainData = await _controller.GetDataAsync();
 
-            GpuUsage = mainData.GPU.Utilization,
-            GpuFrequency = mainData.GPU.CoreClock,
-            GpuTemp = mainData.GPU.Temperature,
-            GpuVramUsage = await gpuVramUsageTask,
-            GpuVramUsed = await gpuVramUsedTask,
-            GpuVramTotal = await gpuVramTotalTask,
-            GpuVramTemp = await gpuVramTempTask,
-            GpuPower = await gpuPowerTask,
-            GpuFanSpeed = mainData.GPU.FanSpeed,
+            if (token.IsCancellationRequested) return;
 
-            MemUsage = await memUsageTask,
-            MemUsed = await memUsedTask,
-            MemTotal = await memTotalTask,
-            MemTemp = await memTempTask,
+            if (_uiUpdateThrottleMs > 0 && (DateTime.Now - _lastUpdate).TotalMilliseconds < _uiUpdateThrottleMs) return;
 
-            PchTemp = mainData.PCH.Temperature,
-            PchFanSpeed = mainData.PCH.FanSpeed,
+            _lastUpdate = DateTime.Now;
 
-            Disk1Temp = diskData.Item1,
-            Disk2Temp = diskData.Item2
-        };
+            var snapshot = new SensorSnapshot
+            {
+                CpuUsage = mainData.CPU.Utilization,
+                CpuFrequency = _sensorsGroupControllers.ShowAverageCpuFrequency ? gs.CpuAvgClock : gs.CpuMaxClock,
+                CpuPClock = _sensorsGroupControllers.ShowAverageCpuFrequency ? gs.CpuPAvgClock : gs.CpuPClock,
+                CpuEClock = _sensorsGroupControllers.ShowAverageCpuFrequency ? gs.CpuEAvgClock : gs.CpuEClock,
+                CpuTemp = mainData.CPU.Temperature,
+                CpuPower = gs.CpuPower,
+                CpuFanSpeed = mainData.CPU.FanSpeed,
 
-        await Dispatcher.BeginInvoke(() => UpdateSensorData(snapshot), DispatcherPriority.Normal);
+                GpuUsage = mainData.GPU.Utilization,
+                GpuFrequency = mainData.GPU.CoreClock,
+                GpuTemp = mainData.GPU.Temperature,
+                GpuVramUsage = gs.GpuVramUtilization,
+                GpuVramUsed = gs.GpuVramUsed,
+                GpuVramTotal = gs.GpuVramTotal,
+                GpuVramTemp = gs.GpuVramTemp,
+                GpuPower = gs.GpuPower,
+                GpuFanSpeed = mainData.GPU.FanSpeed,
+
+                MemUsage = gs.MemUsage,
+                MemUsed = gs.MemUsed,
+                MemTotal = gs.MemTotal,
+                MemTemp = (float)gs.MemMaxTemp,
+
+                PchTemp = mainData.PCH.Temperature,
+                PchFanSpeed = mainData.PCH.FanSpeed,
+
+                Disk1Temp = gs.SsdTemps.Item1,
+                Disk2Temp = gs.SsdTemps.Item2
+            };
+
+            await Dispatcher.BeginInvoke(() => UpdateSensorData(snapshot), DispatcherPriority.Normal);
+        }
+        else
+        {
+            if (token.IsCancellationRequested) return;
+
+            if (_uiUpdateThrottleMs > 0 && (DateTime.Now - _lastUpdate).TotalMilliseconds < _uiUpdateThrottleMs) return;
+
+            _lastUpdate = DateTime.Now;
+
+            var snapshot = new SensorSnapshot
+            {
+                CpuUsage = gs.CpuUsage,
+                CpuFrequency = _sensorsGroupControllers.ShowAverageCpuFrequency ? gs.CpuAvgClock : gs.CpuMaxClock,
+                CpuPClock = _sensorsGroupControllers.ShowAverageCpuFrequency ? gs.CpuPAvgClock : gs.CpuPClock,
+                CpuEClock = _sensorsGroupControllers.ShowAverageCpuFrequency ? gs.CpuEAvgClock : gs.CpuEClock,
+                CpuTemp = gs.CpuTemp,
+                CpuPower = gs.CpuPower,
+                CpuFanSpeed = -1,
+
+                GpuUsage = gs.GpuUsage,
+                GpuFrequency = gs.GpuClock,
+                GpuTemp = gs.GpuTemp,
+                GpuVramUsage = gs.GpuVramUtilization,
+                GpuVramUsed = gs.GpuVramUsed,
+                GpuVramTotal = gs.GpuVramTotal,
+                GpuVramTemp = gs.GpuVramTemp,
+                GpuPower = gs.GpuPower,
+                GpuFanSpeed = -1,
+
+                MemUsage = gs.MemUsage,
+                MemUsed = gs.MemUsed,
+                MemTotal = gs.MemTotal,
+                MemTemp = (float)gs.MemMaxTemp,
+
+                PchTemp = -1,
+                PchFanSpeed = -1,
+
+                Disk1Temp = gs.SsdTemps.Item1,
+                Disk2Temp = gs.SsdTemps.Item2
+            };
+
+            await Dispatcher.BeginInvoke(() => UpdateSensorData(snapshot), DispatcherPriority.Normal);
+        }
     }
 
     protected abstract void UpdateSensorData(SensorSnapshot data);

@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,28 +10,51 @@ using LenovoLegionToolkit.Lib.SoftwareDisabler;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Controls.Settings;
 using Wpf.Ui.Common;
+using CustomControls = LenovoLegionToolkit.WPF.Controls.Custom;
 
 namespace LenovoLegionToolkit.WPF.Pages;
 
 public partial class SettingsPage
 {
+    public static SettingsPage? Instance { get; private set; }
+    public static string? PendingTabKey { get; set; }
+
     private SettingsAppearanceControl? _appearanceControl;
     private SettingsAppBehaviorControl? _appBehaviorControl;
     private SettingsSoftwareControlControl? _softwareControlControl;
-    private SettingsSmartKeysControl? _smartKeysControl;
+    private SettingsSpecialKeyControl? _specialKeyControl;
     private SettingsDisplayControl? _displayControl;
     private SettingsUpdateControl? _updateControl;
     private SettingsPowerControl? _powerControl;
     private SettingsIntegrationsControl? _integrationsControl;
 
+    private const double CompactNavThreshold = 560;
+    private const double CompactNavWidth = 48;
+    private const double NormalNavWidth = 220;
+
     private bool _isInitialized;
     private bool _isInitializing;
+    private DataTemplate? _defaultNavTemplate;
 
     public SettingsPage()
     {
         InitializeComponent();
-
+        Instance = this;
         IsVisibleChanged += SettingsPage_IsVisibleChanged;
+        SizeChanged += (_, e) => { if (e.WidthChanged && _isInitialized) UpdateNavLayout(); };
+    }
+
+    public void ApplyPendingTab()
+    {
+        if (!_isInitialized || string.IsNullOrEmpty(PendingTabKey)) return;
+
+        var items = _navigationListBox.ItemsSource as IEnumerable<NavigationItem>;
+        var target = items?.FirstOrDefault(i => i.Key == PendingTabKey);
+
+        if (target != null)
+            _navigationListBox.SelectedItem = target;
+
+        PendingTabKey = null;
     }
 
     private async void SettingsPage_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -55,7 +79,7 @@ public partial class SettingsPage
             _appearanceControl = new SettingsAppearanceControl();
             _appBehaviorControl = new SettingsAppBehaviorControl();
             _softwareControlControl = new SettingsSoftwareControlControl();
-            _smartKeysControl = new SettingsSmartKeysControl();
+            _specialKeyControl = new SettingsSpecialKeyControl();
             _displayControl = new SettingsDisplayControl();
             _updateControl = new SettingsUpdateControl();
             _powerControl = new SettingsPowerControl();
@@ -86,7 +110,31 @@ public partial class SettingsPage
         };
 
         _navigationListBox.ItemsSource = navigationItems;
-        _navigationListBox.SelectedIndex = 0;
+
+        _defaultNavTemplate ??= _navigationListBox.ItemTemplate;
+
+        UpdateNavLayout();
+
+        if (!string.IsNullOrEmpty(PendingTabKey))
+        {
+            var target = navigationItems.FirstOrDefault(i => i.Key == PendingTabKey);
+            _navigationListBox.SelectedItem = target ?? navigationItems[0];
+            PendingTabKey = null;
+        }
+        else
+        {
+            _navigationListBox.SelectedIndex = 0;
+        }
+    }
+
+    private void UpdateNavLayout()
+    {
+
+        var isNarrow = ActualWidth < CompactNavThreshold;
+        _navColumn.Width = new GridLength(isNarrow ? CompactNavWidth : NormalNavWidth);
+        _navigationListBox.ItemTemplate = isNarrow
+            ? (DataTemplate)Resources["CompactNavTemplate"]
+            : _defaultNavTemplate;
     }
 
     private async void NavigationListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -99,7 +147,7 @@ public partial class SettingsPage
             "Appearance" => _appearanceControl,
             "AppBehavior" => _appBehaviorControl,
             "SoftwareControl" => _softwareControlControl,
-            "SmartKeys" => _smartKeysControl,
+            "SmartKeys" => _specialKeyControl,
             "Display" => _displayControl,
             "Updates" => _updateControl,
             "Power" => _powerControl,
@@ -141,7 +189,7 @@ public partial class SettingsPage
                     if (_softwareControlControl is not null) await _softwareControlControl.RefreshAsync();
                     break;
                 case "SmartKeys":
-                    if (_smartKeysControl is not null) await _smartKeysControl.RefreshAsync();
+                    if (_specialKeyControl is not null) await _specialKeyControl.RefreshAsync();
                     break;
                 case "Display":
                     if (_displayControl is not null) await _displayControl.RefreshAsync();
@@ -165,7 +213,14 @@ public partial class SettingsPage
 
     private void SoftwareControl_FnKeysStatusChanged(object? sender, SoftwareStatus fnKeysStatus)
     {
-        _smartKeysControl?.UpdateVisibilityBasedOnFnKeys(fnKeysStatus);
+        try
+        {
+            _specialKeyControl?.UpdateFnKeysVisibility(fnKeysStatus);
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to update FnKeys visibility.", ex);
+        }
     }
 
     private void PlayTransitionAnimation()

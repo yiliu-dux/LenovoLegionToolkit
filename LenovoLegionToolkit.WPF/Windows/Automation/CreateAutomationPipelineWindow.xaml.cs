@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +27,7 @@ public partial class CreateAutomationPipelineWindow
         new ACAdapterConnectedAutomationPipelineTrigger(),
         new LowWattageACAdapterConnectedAutomationPipelineTrigger(),
         new ACAdapterDisconnectedAutomationPipelineTrigger(),
+        new BatteryPercentageAutomationPipelineTrigger(),
         new PowerModeAutomationPipelineTrigger(PowerModeState.Balance),
         new GodModePresetChangedAutomationPipelineTrigger(Guid.Empty),
         new GamesAreRunningAutomationPipelineTrigger(),
@@ -77,6 +78,7 @@ public partial class CreateAutomationPipelineWindow
         }
 
         IsVisibleChanged += CreateAutomationPipelineWindow_IsVisibleChanged;
+        _logicComboBox.SelectionChanged += (_, _) => _ = RefreshAsync();
     }
 
     private async void CreateAutomationPipelineWindow_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -92,28 +94,36 @@ public partial class CreateAutomationPipelineWindow
         if (triggers.IsEmpty())
             return;
 
-        IAutomationPipelineTrigger trigger;
-
         if (triggers.Length == 1)
         {
-            trigger = triggers[0];
+            _createPipeline(triggers[0]);
+        }
+        else if (_logicComboBox.SelectedIndex == 0)
+        {
+            foreach (var t in triggers)
+                _createPipeline(t);
         }
         else
         {
-            if (_logicComboBox.SelectedIndex == 1)
-                trigger = new OrAutomationPipelineTrigger(triggers);
-            else
-                trigger = new AndAutomationPipelineTrigger(triggers);
+            IAutomationPipelineTrigger composite = _logicComboBox.SelectedIndex == 2
+                ? new OrAutomationPipelineTrigger(triggers)
+                : new AndAutomationPipelineTrigger(triggers);
+            _createPipeline(composite);
         }
-
-        _createPipeline(trigger);
 
         Close();
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e) => Close();
 
-    private void _searchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    private async void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        _multiSelect = false;
+        _selectedTriggers.Clear();
+        await RefreshAsync();
+    }
+
+    private void _searchBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         _ = RefreshAsync();
     }
@@ -136,9 +146,10 @@ public partial class CreateAutomationPipelineWindow
             }
         }
 
-        _createButton.IsEnabled = false;
+        _backButton.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
         _createButton.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
-        _logicSelection.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
+        _logicComboBox.Visibility = _multiSelect ? Visibility.Visible : Visibility.Collapsed;
+        RefreshCreateButton();
 
         return Task.CompletedTask;
     }
@@ -205,7 +216,7 @@ public partial class CreateAutomationPipelineWindow
             Margin = new(0, 8, 0, 0),
         };
 
-        if (!_multiSelect && trigger is IDisallowDuplicatesAutomationPipelineTrigger)
+        if (trigger is IDisallowDuplicatesAutomationPipelineTrigger && (!_multiSelect || _logicComboBox.SelectedIndex == 0))
             control.IsEnabled = !_existingTriggerTypes.Contains(trigger.GetType());
 
         control.Click += (_, _) =>

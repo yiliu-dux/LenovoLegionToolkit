@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -30,45 +30,55 @@ public partial class WindowsPowerModeController(ApplicationSettings settings, IM
         if (settings.Store.PowerModeMappingMode is not PowerModeMappingMode.WindowsPowerMode)
         {
             Log.Instance.Trace($"Ignoring... [powerModeMappingMode={settings.Store.PowerModeMappingMode}]");
-
             return;
         }
 
         Log.Instance.Trace($"Activating... [powerModeState={powerModeState}]");
 
-        WindowsPowerMode? powerMode = null;
+        var defaultMode = settings.Store.PowerModes.GetValueOrDefault(powerModeState, WindowsPowerMode.Balanced);
+        var powerModeOnAc = preset?.Overrides.TryGetEnum<WindowsPowerMode>(PowerOverrideKey.PowerModeOnAc) ?? settings.Store.Overrides.GetPowerModeOnAc(powerModeState) ?? defaultMode;
+        var powerModeOnDc = preset?.Overrides.TryGetEnum<WindowsPowerMode>(PowerOverrideKey.PowerModeOnDc) ?? settings.Store.Overrides.GetPowerModeOnDc(powerModeState) ?? defaultMode;
 
-        powerMode = (preset == null) ? settings.Store.PowerModes.GetValueOrDefault(powerModeState, WindowsPowerMode.Balanced) : preset.PowerMode;
-
-        if (powerMode == null)
-        {
-            Log.Instance.Trace($"I don't think this is possible.");
-            return;
-        }
-
-        var powerModeGuid = GuidForWindowsPowerMode(powerMode.Value);
+        var acGuid = GuidForWindowsPowerMode(powerModeOnAc);
+        var dcGuid = GuidForWindowsPowerMode(powerModeOnDc);
 
         if (Power.IsBatterySaverEnabled())
         {
             Log.Instance.Trace($"Battery saver is on - will not set overlay scheme.");
-
             return;
         }
 
+        var adapterStatus = await Power.IsPowerAdapterConnectedAsync().ConfigureAwait(false);
+        var activeGuid = adapterStatus != PowerAdapterStatus.Disconnected ? acGuid : dcGuid;
+
         await _dispatcher.DispatchAsync(() =>
         {
-            ActivateDefaultPowerPlanIfNeeded();
+            try
+            {
+                ActivateDefaultPowerPlanIfNeeded();
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"Failed to activate default power plan.", ex);
+            }
 
             mainThreadDispatcher.Dispatch(() =>
             {
-                var result = PowerSetActiveOverlayScheme(powerModeGuid);
-
-                Log.Instance.Trace($"Overlay scheme set. [result={result}]");
+                try
+                {
+                    var result = PowerSetActiveOverlayScheme(activeGuid);
+                    Log.Instance.Trace($"Overlay scheme set. [result={result}, activeGuid={activeGuid}]");
+                }
+                catch (Exception ex)
+                {
+                    Log.Instance.Trace($"Failed to set active overlay scheme.", ex);
+                }
             });
 
             try
             {
-                UpdateRegistry(powerModeGuid);
+                SetActiveOverlayRegistryForAc(acGuid);
+                SetActiveOverlayRegistryForDc(dcGuid);
             }
             catch (Exception ex)
             {
@@ -78,29 +88,131 @@ public partial class WindowsPowerModeController(ApplicationSettings settings, IM
             return Task.CompletedTask;
         }).ConfigureAwait(false);
 
-        Log.Instance.Trace($"Power mode {powerMode} activated... [powerModeState={powerModeState}, powerModeGuid={powerModeGuid}]");
+        Log.Instance.Trace($"Power mode activated... [powerModeState={powerModeState}, acGuid={acGuid}, dcGuid={dcGuid}]");
     }
 
-    private static void UpdateRegistry(Guid guid)
+    public async Task SetPowerModeAsync(ITSMode itsMode)
     {
-        Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY, guid, true);
-        Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY, guid, true);
+        if (settings.Store.PowerModeMappingMode is not PowerModeMappingMode.WindowsPowerMode)
+        {
+            Log.Instance.Trace($"Ignoring... [powerModeMappingMode={settings.Store.PowerModeMappingMode}]");
+            return;
+        }
+
+        Log.Instance.Trace($"Activating... [itsMode={itsMode}]");
+
+        var defaultMode = settings.Store.ITSPowerModes.GetValueOrDefault(itsMode, WindowsPowerMode.Balanced);
+        var powerModeOnAc = settings.Store.ITSOverrides.GetPowerModeOnAc(itsMode);
+        var powerModeOnDc = settings.Store.ITSOverrides.GetPowerModeOnDc(itsMode);
+
+        if (powerModeOnAc is null && powerModeOnDc is null)
+        {
+            Log.Instance.Trace($"Power mode is null. [itsMode={itsMode}]");
+            return;
+        }
+
+        var acGuid = GuidForWindowsPowerMode(powerModeOnAc ?? defaultMode);
+        var dcGuid = GuidForWindowsPowerMode(powerModeOnDc ?? defaultMode);
+
+        if (Power.IsBatterySaverEnabled())
+        {
+            Log.Instance.Trace($"Battery saver is on - will not set overlay scheme.");
+            return;
+        }
+
+        var adapterStatus = await Power.IsPowerAdapterConnectedAsync().ConfigureAwait(false);
+        var activeGuid = adapterStatus != PowerAdapterStatus.Disconnected ? acGuid : dcGuid;
+
+        await _dispatcher.DispatchAsync(() =>
+        {
+            try
+            {
+                ActivateDefaultPowerPlanIfNeeded();
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"Failed to activate default power plan.", ex);
+            }
+
+            mainThreadDispatcher.Dispatch(() =>
+            {
+                try
+                {
+                    var result = PowerSetActiveOverlayScheme(activeGuid);
+                    Log.Instance.Trace($"Overlay scheme set. [result={result}, activeGuid={activeGuid}]");
+                }
+                catch (Exception ex)
+                {
+                    Log.Instance.Trace($"Failed to set active overlay scheme.", ex);
+                }
+            });
+
+            try
+            {
+                SetActiveOverlayRegistryForAc(acGuid);
+                SetActiveOverlayRegistryForDc(dcGuid);
+            }
+            catch (Exception ex)
+            {
+                Log.Instance.Trace($"Failed to update registry.", ex);
+            }
+
+            return Task.CompletedTask;
+        }).ConfigureAwait(false);
+
+        Log.Instance.Trace($"Power mode activated... [itsMode={itsMode}, acGuid={acGuid}, dcGuid={dcGuid}]");
     }
 
-    private static Guid GuidForWindowsPowerMode(WindowsPowerMode windowsPowerMode) => windowsPowerMode switch
+    public static void SetActiveOverlayRegistryForAc(Guid guid)
+    {
+        try
+        {
+            Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY, guid, true);
+            Log.Instance.Trace($"Set {ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY} to {guid}");
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to set {ACTIVE_OVERLAY_AC_POWER_SCHEME_KEY} registry value.", ex);
+        }
+    }
+
+    public static void SetActiveOverlayRegistryForDc(Guid guid)
+    {
+        try
+        {
+            Registry.SetValue(POWER_SCHEMES_HIVE, POWER_SCHEMES_SUBKEY, ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY, guid, true);
+            Log.Instance.Trace($"Set {ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY} to {guid}");
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to set {ACTIVE_OVERLAY_DC_POWER_SCHEME_KEY} registry value.", ex);
+        }
+    }
+
+    public static Guid GuidForWindowsPowerMode(WindowsPowerMode windowsPowerMode) => windowsPowerMode switch
     {
         WindowsPowerMode.BestPowerEfficiency => BestPowerEfficiency,
+        WindowsPowerMode.Balanced => Guid.Empty,
         WindowsPowerMode.BestPerformance => BestPerformance,
-        _ => Guid.Empty
+        _ => throw new ArgumentOutOfRangeException(nameof(windowsPowerMode), windowsPowerMode, null)
     };
+
+    public static void ApplyActiveOverlayScheme(Guid guid)
+    {
+        var result = PowerSetActiveOverlayScheme(guid);
+        Log.Instance.Trace($"Overlay scheme set. [result={result}, guid={guid}]");
+    }
 
     private static unsafe void ActivateDefaultPowerPlanIfNeeded()
     {
         if (PInvoke.PowerGetActiveScheme(null, out var guid) != WIN32_ERROR.ERROR_SUCCESS)
             PInvokeExtensions.ThrowIfWin32Error("PowerGetActiveScheme");
 
-        if (DefaultPowerPlan == *guid)
+        if (PowerPlanExtensions.IsPlanBasedOnBalanced(*guid))
+        {
+            Log.Instance.Trace($"Default power plan is already active.");
             return;
+        }
 
         if (PInvoke.PowerSetActiveScheme(null, DefaultPowerPlan) != WIN32_ERROR.ERROR_SUCCESS)
             PInvokeExtensions.ThrowIfWin32Error("PowerSetActiveScheme");

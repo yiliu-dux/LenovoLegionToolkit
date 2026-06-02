@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -153,6 +153,9 @@
   <data name="AutorunState_EnabledDelayed" xml:space="preserve">
     <value>Irkilis penen iske túsirilgen</value>
   </data>
+  <data name="Balanced" xml:space="preserve">
+    <value>Balanced</value>
+  </data>
   <data name="BatteryNightChargeState_Off" xml:space="preserve">
     <value>Óshik</value>
   </data>
@@ -168,6 +171,12 @@
   <data name="BatteryState_RapidCharge" xml:space="preserve">
     <value>Tez zaryadlaw</value>
   </data>
+  <data name="BestPerformance" xml:space="preserve">
+    <value>Best Performance</value>
+  </data>
+  <data name="BestPowerEfficiency" xml:space="preserve">
+    <value>Best Power Efficiency</value>
+  </data>
   <data name="CustomFanCurveControl_Fan_CPU" xml:space="preserve">
     <value>CPU Fan</value>
   </data>
@@ -177,14 +186,11 @@
   <data name="CustomFanCurveControl_Fan_System" xml:space="preserve">
     <value>System Fan</value>
   </data>
-  <data name="FanMaxSpeedState_Off" xml:space="preserve">
-    <value>Off</value>
+  <data name="CustomSpecialKey_Custom" xml:space="preserve">
+    <value>Custom</value>
   </data>
-  <data name="FanMaxSpeedState_On" xml:space="preserve">
-    <value>On</value>
-  </data>
-  <data name="FanMaxSpeedState_Toggle" xml:space="preserve">
-    <value>Toggle</value>
+  <data name="CustomSpecialKey_Default" xml:space="preserve">
+    <value>Default</value>
   </data>
   <data name="FlipToStartState_Off" xml:space="preserve">
     <value>Óshirilgen</value>
@@ -202,11 +208,20 @@
     <value>Janıq</value>
     <comment>Informs the user that Fn Lock is or will be turned on.</comment>
   </data>
+  <data name="GB" xml:space="preserve">
+    <value>GB</value>
+  </data>
   <data name="GPUController_PoweredOff" xml:space="preserve">
     <value>Óshirilgen</value>
   </data>
   <data name="GPUController_PoweredOn" xml:space="preserve">
     <value>Qosılǵan</value>
+  </data>
+  <data name="HardwareSensorsState_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="HardwareSensorsState_On" xml:space="preserve">
+    <value>On</value>
   </data>
   <data name="HDRState_Off" xml:space="preserve">
     <value>Óshirilgen</value>
@@ -364,15 +379,6 @@
   <data name="OsdItem_VramUtilization" xml:space="preserve">
     <value>VRAM Utilization</value>
   </data>
-  <data name="OsdState_Hidden" xml:space="preserve">
-    <value>Hidden</value>
-  </data>
-  <data name="OsdState_Show" xml:space="preserve">
-    <value>Show</value>
-  </data>
-  <data name="OsdState_Toggle" xml:space="preserve">
-    <value>Toggle</value>
-  </data>
   <data name="OverdriveState_Off" xml:space="preserve">
     <value>Óshirilgen</value>
     <comment>Informs the user that Overdrive is or will be turned off.</comment>
@@ -464,6 +470,9 @@
   </data>
   <data name="RGBKeyboardBacklightSpeed_Slowest" xml:space="preserve">
     <value>Júdá ásten</value>
+  </data>
+  <data name="SharedMemory" xml:space="preserve">
+    <value>Shared / Dynamic</value>
   </data>
   <data name="SpeakerState_Mute" xml:space="preserve">
     <value>Mute</value>
@@ -558,6 +567,15 @@
   <data name="Theme_System" xml:space="preserve">
     <value>Sistema teması</value>
   </data>
+  <data name="ToggleState_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="ToggleState_On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="ToggleState_Toggle" xml:space="preserve">
+    <value>Toggle</value>
+  </data>
   <data name="TouchpadLockState_Off" xml:space="preserve">
     <value>Óshirilgen</value>
     <comment>Informs the user that Touchpad Lock is or will be turned off.</comment>
@@ -574,6 +592,9 @@
   </data>
   <data name="UpdateChannel_Stable" xml:space="preserve">
     <value>Stable</value>
+  </data>
+  <data name="UpdateChannel_Test" xml:space="preserve">
+    <value>Test</value>
   </data>
   <data name="UpdateChecker_Security_Invalid" xml:space="preserve">
     <value>The downloaded update is not signed by the trusted server certificate {0}</value>

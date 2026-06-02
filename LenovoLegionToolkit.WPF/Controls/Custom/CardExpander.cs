@@ -1,11 +1,25 @@
 ﻿using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
+using UiCardExpander = Wpf.Ui.Controls.CardExpander;
 
 namespace LenovoLegionToolkit.WPF.Controls.Custom;
 
-public class CardExpander : Wpf.Ui.Controls.CardExpander
+public class CardExpander : UiCardExpander
 {
+    static CardExpander()
+    {
+        MarginProperty.OverrideMetadata(
+            typeof(CardExpander),
+            new FrameworkPropertyMetadata(
+                new Thickness(0),
+                FrameworkPropertyMetadataOptions.AffectsMeasure,
+                null,
+                (_, v) => v is Thickness m && CardControl.IsCompact
+                    ? new Thickness(m.Left, m.Top, m.Right, m.Bottom / 2)
+                    : v));
+    }
+
     protected override AutomationPeer OnCreateAutomationPeer() => new CardExpanderAutomationPeer(this);
 
     private class CardExpanderAutomationPeer(CardExpander owner) : FrameworkElementAutomationPeer(owner)

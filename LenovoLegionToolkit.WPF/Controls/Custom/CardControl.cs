@@ -1,11 +1,27 @@
 ﻿using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Automation.Peers;
+using UiCardControl = Wpf.Ui.Controls.CardControl;
 
 namespace LenovoLegionToolkit.WPF.Controls.Custom;
 
-public class CardControl : Wpf.Ui.Controls.CardControl
+public class CardControl : UiCardControl
 {
+    public static bool IsCompact { get; set; }
+
+    static CardControl()
+    {
+        MarginProperty.OverrideMetadata(
+            typeof(CardControl),
+            new FrameworkPropertyMetadata(
+                new Thickness(0),
+                FrameworkPropertyMetadataOptions.AffectsMeasure,
+                null,
+                (_, v) => v is Thickness m && IsCompact
+                    ? new Thickness(m.Left, m.Top, m.Right, m.Bottom / 2)
+                    : v));
+    }
+
     protected override AutomationPeer OnCreateAutomationPeer() => new CardControlAutomationPeer(this);
 
     private class CardControlAutomationPeer(CardControl owner) : FrameworkElementAutomationPeer(owner)

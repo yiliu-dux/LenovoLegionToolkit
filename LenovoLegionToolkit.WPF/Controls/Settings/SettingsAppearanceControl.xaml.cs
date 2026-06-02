@@ -15,6 +15,7 @@ using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Utils;
 using LenovoLegionToolkit.WPF.Windows.Utils;
 using Microsoft.Win32;
+using SymbolRegular = Wpf.Ui.Common.SymbolRegular;
 
 namespace LenovoLegionToolkit.WPF.Controls.Settings;
 
@@ -53,26 +54,28 @@ public partial class SettingsAppearanceControl
             _langCardControl.Visibility = Visibility.Collapsed;
         }
 
-        _temperatureComboBox.SetItems(Enum.GetValues<TemperatureUnit>(), _settings.Store.TemperatureUnit, t => t switch
-        {
-            TemperatureUnit.C => Resource.Celsius,
-            TemperatureUnit.F => Resource.Fahrenheit,
-            _ => new ArgumentOutOfRangeException(nameof(t))
-        });
         _themeComboBox.SetItems(Enum.GetValues<Theme>(), _settings.Store.Theme, t => t.GetDisplayName());
 
         UpdateAccentColorPicker();
         _accentColorSourceComboBox.SetItems(Enum.GetValues<AccentColorSource>(), _settings.Store.AccentColorSource, t => t.GetDisplayName());
 
         _backgroundImageOpacitySlider.Value = _settings.Store.Opacity;
+        _backgroundImageDimValueText.Text = FormatDimValue(_settings.Store.Opacity);
+        _backgroundImageBlurSlider.Value = _settings.Store.BackgroundImageBlur;
+        _backgroundImageBlurValueText.Text = FormatBlurValue(_settings.Store.BackgroundImageBlur);
 
-        _temperatureComboBox.Visibility = Visibility.Visible;
         _themeComboBox.Visibility = Visibility.Visible;
         _selectBackgroundImageButton.Visibility = Visibility.Visible;
         _clearBackgroundImageButton.Visibility = Visibility.Visible;
-        _backgroundImageOpacitySlider.Visibility = Visibility.Visible;
-        _backdropTypeComboBox.SetItems(Enum.GetValues<WindowBackdropType>(), _settings.Store.BackdropType, t => t.GetDisplayName());
+        UpdateImageControlsVisibility();
+        UpdateStretchButton(_settings.Store.BackgroundImageStretch);
         _hardwareAccelerationToggle.IsChecked = _settings.Store.EnableHardwareAcceleration;
+
+        var array = Enum.GetValues<WindowBackdropType>()
+            .Where(t => Environment.OSVersion.Version.Build >= 22621 || t != WindowBackdropType.Acrylic)
+            .ToArray();
+
+        _backdropTypeComboBox.SetItems(array, _settings.Store.BackdropType, t => t.GetDisplayName());
 
         if (!Displays.HasMultipleGpus())
         {
@@ -105,18 +108,6 @@ public partial class SettingsAppearanceControl
         LocalizationHelper.SetLanguageAsync(cultureInfo).ContinueWith(_ =>
             Dispatcher.Invoke(() => App.Current.RestartMainWindow()),
             TaskScheduler.Default);
-    }
-
-    private void TemperatureComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isRefreshing)
-            return;
-
-        if (!_temperatureComboBox.TryGetSelectedItem(out TemperatureUnit temperatureUnit))
-            return;
-
-        _settings.Store.TemperatureUnit = temperatureUnit;
-        _settings.SynchronizeStore();
     }
 
     private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -186,9 +177,14 @@ public partial class SettingsAppearanceControl
             {
                 var filePath = openFileDialog.FileName;
                 App.MainWindowInstance!.SetMainWindowBackgroundImage(filePath);
+                App.MainWindowInstance!.SetWindowOpacity(_settings.Store.Opacity);
+                App.MainWindowInstance!.SetBackgroundBlur(_settings.Store.BackgroundImageBlur);
+                App.MainWindowInstance!.SetBackgroundStretch(_settings.Store.BackgroundImageStretch);
 
                 _settings.Store.BackGroundImageFilePath = filePath;
                 _settings.SynchronizeStore();
+
+                UpdateImageControlsVisibility();
             }
         }
         catch (Exception ex)
@@ -198,14 +194,67 @@ public partial class SettingsAppearanceControl
         }
     }
 
+    private void UpdateImageControlsVisibility()
+    {
+        var hasImage = _settings.Store.BackGroundImageFilePath != string.Empty;
+        var visibility = hasImage ? Visibility.Visible : Visibility.Collapsed;
+        _backgroundImageSliderControls.Visibility = visibility;
+        _stretchToggleButton.Visibility = visibility;
+    }
+
     private void OpacitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_isRefreshing)
             return;
 
+        if (_settings.Store.BackGroundImageFilePath == string.Empty)
+            return;
+
         App.MainWindowInstance!.SetWindowOpacity(e.NewValue);
         _settings.Store.Opacity = e.NewValue;
         _settings.SynchronizeStore();
+        _backgroundImageDimValueText.Text = FormatDimValue(e.NewValue);
+    }
+
+    private void BlurSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isRefreshing)
+            return;
+
+        if (_settings.Store.BackGroundImageFilePath == string.Empty)
+            return;
+
+        var radius = (int)e.NewValue;
+        App.MainWindowInstance!.SetBackgroundBlur(radius);
+        _settings.Store.BackgroundImageBlur = radius;
+        _settings.SynchronizeStore();
+        _backgroundImageBlurValueText.Text = FormatBlurValue(radius);
+    }
+
+    private void StretchToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        var values = Enum.GetValues<BackgroundImageStretchMode>();
+        var next = values[((int)_settings.Store.BackgroundImageStretch + 1) % values.Length];
+        App.MainWindowInstance!.SetBackgroundStretch(next);
+        _settings.Store.BackgroundImageStretch = next;
+        _settings.SynchronizeStore();
+        UpdateStretchButton(next);
+    }
+
+    private void UpdateStretchButton(BackgroundImageStretchMode stretch)
+    {
+        _stretchToggleButton.Icon = stretch switch
+        {
+            BackgroundImageStretchMode.Fill => SymbolRegular.ArrowMaximize24,
+            BackgroundImageStretchMode.Fit => SymbolRegular.Resize24,
+            _ => SymbolRegular.Crop24
+        };
+        _stretchToggleButton.ToolTip = stretch switch
+        {
+            BackgroundImageStretchMode.Fill => Resource.SettingsPage_Custom_BackgroundImage_Stretch_Fill,
+            BackgroundImageStretchMode.Fit => Resource.SettingsPage_Custom_BackgroundImage_Stretch_Fit,
+            _ => Resource.SettingsPage_Custom_BackgroundImage_Stretch_Crop
+        };
     }
 
     private void ClearBackgroundImageButton_Click(object sender, RoutedEventArgs e)
@@ -213,10 +262,11 @@ public partial class SettingsAppearanceControl
         if (_isRefreshing)
             return;
 
-        SnackbarHelper.Show(Resource.SettingsPage_ClearBackgroundImage_Title, Resource.SettingsPage_RestartRequired_Message, SnackbarType.Success);
-
         _settings.Store.BackGroundImageFilePath = string.Empty;
         _settings.SynchronizeStore();
+
+        App.MainWindowInstance?.SetVisual();
+        UpdateImageControlsVisibility();
     }
 
     private void HardwareAccelerationToggle_Checked(object sender, RoutedEventArgs e)
@@ -275,5 +325,9 @@ public partial class SettingsAppearanceControl
 
         SnackbarHelper.Show(Resource.SettingsPage_HardwareAcceleration_Title, Resource.SettingsPage_RestartRequired_Message, SnackbarType.Success);
     }
+
+    private static string FormatDimValue(double opacity) => $"{opacity * 100:0}{Resource.Percent}";
+
+    private static string FormatBlurValue(int radius) => radius.ToString();
 }
 

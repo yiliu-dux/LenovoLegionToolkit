@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -433,8 +433,6 @@ public readonly struct GodModeState
 public readonly struct GodModePreset
 {
     public string Name { get; init; }
-    public Guid? PowerPlanGuid { get; init; }
-    public WindowsPowerMode? PowerMode { get; init; }
     public StepperValue? CPULongTermPowerLimit { get; init; }
     public StepperValue? CPUShortTermPowerLimit { get; init; }
     public StepperValue? CPUPeakPowerLimit { get; init; }
@@ -457,6 +455,8 @@ public readonly struct GodModePreset
     public int? MinValueOffset { get; init; }
     public int? MaxValueOffset { get; init; }
 
+    public Dictionary<PowerOverrideKey, string> Overrides { get; init; }
+
     public override string ToString()
     {
         return $"{nameof(Name)}: {Name}," +
@@ -475,7 +475,8 @@ public readonly struct GodModePreset
                $" {nameof(FanTableInfo)}: {FanTableInfo}," +
                $" {nameof(FanFullSpeed)}: {FanFullSpeed}," +
                $" {nameof(MinValueOffset)}: {MinValueOffset}," +
-               $" {nameof(MaxValueOffset)}: {MaxValueOffset}";
+               $" {nameof(MaxValueOffset)}: {MaxValueOffset}," +
+               $" {nameof(Overrides)}: [{string.Join(", ", Overrides?.Select(kv => $"{kv.Key}={kv.Value}") ?? [])}]";
     }
 }
 
@@ -1210,7 +1211,7 @@ public readonly struct Time(int hour, int minute, int second)
     {
         return !(left == right);
     }
-    
+
     public override string ToString()
     {
         return $"{Hour}:{Minute}:{Second}";
@@ -1287,6 +1288,12 @@ public readonly struct WindowSize(double width, double height)
     public double Height { get; } = height;
 }
 
+public readonly struct WindowPosition(double left, double top)
+{
+    public double Left { get; } = left;
+    public double Top { get; } = top;
+}
+
 public struct ProjectEntry()
 {
     public bool MaintenanceMode { get; set; } = false;
@@ -1294,6 +1301,7 @@ public struct ProjectEntry()
     public string ProjectCurrentVersion { get; set; } = string.Empty;
     public string ProjectVersion { get; set; } = string.Empty;
     public bool ProjectForceUpdate { get; set; } = false;
+    public string DownloadUrl { get; set; } = string.Empty;
 
     public bool IsValid()
     {
@@ -1325,4 +1333,33 @@ public struct UpdateFromServer(ProjectInfo projectInfo, string patchNote)
     public string Description { get; set; } = patchNote;
     public DateTimeOffset Date { get; set; } = DateTimeOffset.Now;
     public string? Url = projectInfo.ProjectNewExePath;
+}
+
+public sealed record HardwareSensorSnapshot
+{
+    public float CpuTemp { get; init; } = -1;
+    public float CpuUsage { get; init; } = -1;
+    public float CpuPower { get; init; } = -1;
+    public float CpuMaxClock { get; init; } = -1;
+    public float CpuAvgClock { get; init; } = -1;
+    public float CpuPClock { get; init; } = -1;
+    public float CpuPAvgClock { get; init; } = -1;
+    public float CpuEClock { get; init; } = -1;
+    public float CpuEAvgClock { get; init; } = -1;
+
+    public float GpuUsage { get; init; } = -1;
+    public float GpuTemp { get; init; } = -1;
+    public float GpuClock { get; init; } = -1;
+    public float GpuPower { get; init; } = -1;
+    public float GpuVramTemp { get; init; } = -1;
+    public float GpuVramUtilization { get; init; } = -1;
+    public float GpuVramUsed { get; init; } = -1;
+    public float GpuVramTotal { get; init; } = -1;
+
+    public float MemUsage { get; init; } = -1;
+    public float MemUsed { get; init; } = -1;
+    public float MemTotal { get; init; } = -1;
+    public double MemMaxTemp { get; init; } = -1;
+
+    public (float, float) SsdTemps { get; init; } = (-1, -1);
 }

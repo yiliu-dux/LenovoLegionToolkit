@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,6 +17,7 @@ using LenovoLegionToolkit.Lib.System;
 using LenovoLegionToolkit.Lib.Utils;
 using LenovoLegionToolkit.WPF.Resources;
 using LenovoLegionToolkit.WPF.Settings;
+using LenovoLegionToolkit.WPF.Windows.Dashboard;
 using Wpf.Ui.Common;
 using MenuItem = Wpf.Ui.Controls.MenuItem;
 
@@ -27,21 +28,25 @@ public partial class SensorsControlV2
     private readonly SensorsController _controller = IoCContainer.Resolve<SensorsController>();
     private readonly SensorsGroupController _sensorsGroupControllers = IoCContainer.Resolve<SensorsGroupController>();
     private readonly SensorsControlSettings _sensorsControlSettings = IoCContainer.Resolve<SensorsControlSettings>();
+    private readonly HardwareSensorSettings _hardwareSensorSettings = IoCContainer.Resolve<HardwareSensorSettings>();
     private readonly ApplicationSettings _applicationSettings = IoCContainer.Resolve<ApplicationSettings>();
-    private readonly DashboardSettings _dashboardSettings = IoCContainer.Resolve<DashboardSettings>();
     private readonly Lock _updateLock = new();
     private readonly Task<string> _cpuNameTask;
     private Task<string>? _gpuNameTask;
     private readonly HashSet<SensorItem> _activeSensorItems = [];
+    private static readonly double[] AvailableRefreshIntervals = [0.5, 1, 2, 3, 4, 5];
     private readonly Dictionary<SensorItem, FrameworkElement> _sensorItemToControlMap;
+    private int _lastVisibleCardCount = -1;
+    private double _lastAdjustedWidth = -1;
 
     public SensorsControlV2()
     {
         InitializeComponent();
         InitializeContextMenu();
         IsVisibleChanged += SensorsControl_IsVisibleChanged;
+        SizeChanged += (_, e) => { if (e.WidthChanged) AdjustCardWidths(); };
 
-        _sensorsGroupControllers.SelectedGpuIsIgpu = _sensorsControlSettings.Store.SelectedGpuIsIgpu;
+        _sensorsGroupControllers.SelectedGpuIsIgpu = _hardwareSensorSettings.Store.SelectedGpuIsIgpu;
 
         _cpuNameTask = GetProcessedCpuName();
         _sensorItemToControlMap = new Dictionary<SensorItem, FrameworkElement>
@@ -92,6 +97,24 @@ public partial class SensorsControlV2
                 }
             });
         });
+
+        MessagingCenter.Subscribe<FeatureStateMessage<HardwareSensorsState>>(this, message =>
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (message.State == HardwareSensorsState.Off)
+                {
+                    _sensorsGroupControllers.Stop(this);
+                    _sensorsGroupControllers.SensorsUpdated -= OnSensorsUpdated;
+                    ClearAllSensorValues();
+                }
+                else if (IsVisible)
+                {
+                    _sensorsGroupControllers.SensorsUpdated += OnSensorsUpdated;
+                    _sensorsGroupControllers.Start(this, TimeSpan.FromSeconds(_sensorsControlSettings.Store.SensorsRefreshIntervalSeconds));
+                }
+            });
+        });
     }
 
     private void UpdateControlsVisibility()
@@ -115,25 +138,26 @@ public partial class SensorsControlV2
         UpdateCardVisibility(_gpuCard, [SensorItem.GpuUtilization, SensorItem.GpuVramUtilization, SensorItem.GpuFrequency, SensorItem.GpuFanSpeed, SensorItem.GpuCoreTemperature, SensorItem.GpuVramTemperature, SensorItem.GpuPower]);
         UpdateMotherboardCardVisibility();
         UpdateMemoryDiskCardVisibility();
+        AdjustCardWidths();
     }
 
     private void InitializeContextMenu()
     {
         ContextMenu = new ContextMenu();
         ContextMenu.Items.Add(new MenuItem { Header = Resource.SensorsControl_RefreshInterval, IsEnabled = false });
-        foreach (var interval in new[] { 1, 2, 3, 5 })
+        foreach (var interval in AvailableRefreshIntervals)
         {
             var item = new MenuItem
             {
-                SymbolIcon = _dashboardSettings.Store.SensorsRefreshIntervalSeconds == interval
+                SymbolIcon = _sensorsControlSettings.Store.SensorsRefreshIntervalSeconds == interval
                     ? SymbolRegular.Checkmark24
                     : SymbolRegular.Empty,
                 Header = TimeSpan.FromSeconds(interval).Humanize(culture: Resource.Culture)
             };
             item.Click += (_, _) =>
             {
-                _dashboardSettings.Store.SensorsRefreshIntervalSeconds = interval;
-                _dashboardSettings.SynchronizeStore();
+                _sensorsControlSettings.Store.SensorsRefreshIntervalSeconds = interval;
+                _sensorsControlSettings.SynchronizeStore();
                 InitializeContextMenu();
                 if (IsVisible)
                 {
@@ -142,14 +166,22 @@ public partial class SensorsControlV2
             };
             ContextMenu.Items.Add(item);
         }
+        ContextMenu.Items.Add(new Separator());
+        var customizeItem = new MenuItem
+        {
+            Header = Resource.DashboardPage_Customize,
+            SymbolIcon = SymbolRegular.Settings24
+        };
+        customizeItem.Click += (_, _) => EditSensorGroupWindow.ShowInstance();
+        ContextMenu.Items.Add(customizeItem);
     }
 
     private void SensorsControl_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (IsVisible)
         {
-            _sensorsGroupControllers.SelectedGpuIsIgpu = _sensorsControlSettings.Store.SelectedGpuIsIgpu;
-            _sensorsGroupControllers.ShowAverageCpuFrequency = _sensorsControlSettings.Store.ShowCpuAverageFrequency;
+            _sensorsGroupControllers.SelectedGpuIsIgpu = _hardwareSensorSettings.Store.SelectedGpuIsIgpu;
+            _sensorsGroupControllers.ShowAverageCpuFrequency = _hardwareSensorSettings.Store.ShowCpuAverageFrequency;
 
             _activeSensorItems.Clear();
             if (_sensorsControlSettings.Store.VisibleItems != null)
@@ -161,8 +193,12 @@ public partial class SensorsControlV2
             }
 
             UpdateControlsVisibility();
+
+            if (!_applicationSettings.Store.EnableHardwareSensors)
+                return;
+
             _sensorsGroupControllers.SensorsUpdated += OnSensorsUpdated;
-            _sensorsGroupControllers.Start(this, TimeSpan.FromSeconds(_dashboardSettings.Store.SensorsRefreshIntervalSeconds));
+            _sensorsGroupControllers.Start(this, TimeSpan.FromSeconds(_sensorsControlSettings.Store.SensorsRefreshIntervalSeconds));
         }
         else
         {
@@ -171,7 +207,7 @@ public partial class SensorsControlV2
         }
     }
 
-    private async void OnSensorsUpdated(object? sender, EventArgs e)
+    private async void OnSensorsUpdated(HardwareSensorSnapshot snapshot)
     {
         try
         {
@@ -181,46 +217,16 @@ public partial class SensorsControlV2
                 catch { return default(SensorsData); }
             });
 
-            var gpuNameTask = GetProcessedGpuName();
-            var cpuUsageTask = _sensorsGroupControllers.GetCpuUsageAsync();
-            var cpuTempTask = _sensorsGroupControllers.GetCpuTemperatureAsync();
-            var cpuClockTask = _sensorsGroupControllers.IsHybrid
-                ? _sensorsGroupControllers.GetCpuPCoreClockAsync()
-                : _sensorsGroupControllers.GetCpuCoreClockAsync();
-            var cpuPowerTask = _sensorsGroupControllers.GetCpuPowerAsync();
-
-            var gpuUsageTask = _sensorsGroupControllers.GetGpuUsageAsync();
-            var gpuVramUsageTask = _sensorsGroupControllers.GetGpuVramUtilizationAsync();
-            var gpuVramUsedTask = _sensorsGroupControllers.GetGpuVramUsedAsync();
-            var gpuVramTotalTask = _sensorsGroupControllers.GetGpuVramTotalAsync();
-            var gpuTempTask = _sensorsGroupControllers.GetGpuTemperatureAsync();
-            var gpuClockTask = _sensorsGroupControllers.GetGpuCoreClockAsync();
-            var gpuPowerTask = _sensorsGroupControllers.GetGpuPowerAsync();
-            var gpuVramTask = _sensorsGroupControllers.GetGpuVramTemperatureAsync();
-
-            var diskTemperaturesTask = _sensorsGroupControllers.GetSsdTemperaturesAsync();
-            var memoryUsageTask = _sensorsGroupControllers.GetMemoryUsageAsync();
-            var memoryUsedTask = _sensorsGroupControllers.GetMemoryUsedAsync();
-            var memoryTotalTask = _sensorsGroupControllers.GetMemoryTotalAsync();
-            var memoryTemperaturesTask = _sensorsGroupControllers.GetHighestMemoryTemperatureAsync();
-
             var batteryInfoTask = Task.Run(Battery.GetBatteryInformation);
+            var gpuNameTask = GetProcessedGpuName();
 
-            await Task.WhenAll(
-                dataTask,
-                cpuUsageTask, gpuNameTask, cpuTempTask, cpuClockTask, cpuPowerTask,
-                gpuUsageTask, gpuVramUsageTask, gpuVramUsedTask, gpuVramTotalTask, gpuTempTask, gpuClockTask, gpuPowerTask, gpuVramTask,
-                diskTemperaturesTask, memoryUsageTask, memoryUsedTask, memoryTotalTask, memoryTemperaturesTask,
-                batteryInfoTask
-            ).ConfigureAwait(false);
+            await Task.WhenAll(dataTask, batteryInfoTask, gpuNameTask).ConfigureAwait(false);
 
             _gpuNameTask = gpuNameTask;
 
             await Dispatcher.BeginInvoke(() => UpdateAllSensorValuesV2(
                 dataTask.Result,
-                cpuUsageTask.Result, cpuTempTask.Result, cpuClockTask.Result, cpuPowerTask.Result,
-                gpuUsageTask.Result, gpuVramUsageTask.Result, gpuVramUsedTask.Result, gpuVramTotalTask.Result, gpuTempTask.Result, gpuClockTask.Result, gpuPowerTask.Result, gpuVramTask.Result,
-                diskTemperaturesTask.Result, memoryUsageTask.Result, memoryUsedTask.Result, memoryTotalTask.Result, memoryTemperaturesTask.Result,
+                snapshot,
                 batteryInfoTask.Result
             ), DispatcherPriority.Background);
         }
@@ -265,11 +271,33 @@ public partial class SensorsControlV2
 
     private void UpdateAllSensorValuesV2(
         SensorsData data,
-        float cpuUsage, float cpuTemp, float cpuClock, float cpuPower,
-        float gpuUsage, float gpuVramUsage, float gpuVramUsed, float gpuVramTotal, float gpuTemp, float gpuClock, float gpuPower, float gpuVramTemp,
-        (float, float) diskTemps, float memoryUsage, float memoryUsed, float memoryTotal, double memoryTemp,
+        HardwareSensorSnapshot snapshot,
         BatteryInformation? batteryInfo)
     {
+        var cpuUsage = snapshot.CpuUsage;
+        var cpuTemp = snapshot.CpuTemp;
+        var cpuClock = _sensorsGroupControllers.ShowAverageCpuFrequency ? snapshot.CpuAvgClock : snapshot.CpuMaxClock;
+        if (_sensorsGroupControllers.IsHybrid)
+        {
+            cpuClock = _sensorsGroupControllers.ShowAverageCpuFrequency ? snapshot.CpuPAvgClock : snapshot.CpuPClock;
+        }
+        var cpuPower = snapshot.CpuPower;
+
+        var gpuUsage = snapshot.GpuUsage;
+        var gpuVramUsage = snapshot.GpuVramUtilization;
+        var gpuVramUsed = snapshot.GpuVramUsed;
+        var gpuVramTotal = snapshot.GpuVramTotal;
+        var gpuTemp = snapshot.GpuTemp;
+        var gpuClock = snapshot.GpuClock;
+        var gpuPower = snapshot.GpuPower;
+        var gpuVramTemp = snapshot.GpuVramTemp;
+
+        var diskTemps = snapshot.SsdTemps;
+        var memoryUsage = snapshot.MemUsage;
+        var memoryUsed = snapshot.MemUsed;
+        var memoryTotal = snapshot.MemTotal;
+        var memoryTemp = snapshot.MemMaxTemp;
+
         lock (_updateLock)
         {
             foreach (var kv in _sensorItemToControlMap)
@@ -282,17 +310,17 @@ public partial class SensorsControlV2
             _gpuCardName.Text = _gpuNameTask?.Result ?? "UNKNOWN";
 
             // --- CPU ---
-            if (_activeSensorItems.Contains(SensorItem.CpuUtilization)) UpdateValue(_cpuUtilizationBar, _cpuUtilizationLabel, 100, cpuUsage, $"{cpuUsage:0}%");
+            if (_activeSensorItems.Contains(SensorItem.CpuUtilization)) UpdateValue(_cpuUtilizationBar, _cpuUtilizationLabel, 100, cpuUsage, $"{cpuUsage:0}{Resource.Percent}");
             if (_activeSensorItems.Contains(SensorItem.CpuFrequency)) UpdateValue(_cpuCoreClockBar, _cpuCoreClockLabel, 6000, cpuClock, $"{cpuClock / 1000.0:0.0} {Resource.GHz}");
             if (_activeSensorItems.Contains(SensorItem.CpuTemperature)) UpdateValue(_cpuTemperatureBar, _cpuTemperatureLabel, 100, cpuTemp, GetTemperatureText(cpuTemp));
-            if (_activeSensorItems.Contains(SensorItem.CpuPower)) UpdateValue(_cpuPowerLabel, $"{cpuPower:0}W");
+            if (_activeSensorItems.Contains(SensorItem.CpuPower)) UpdateValue(_cpuPowerLabel, $"{cpuPower:0} {Resource.Watt}");
             if (_activeSensorItems.Contains(SensorItem.CpuFanSpeed)) UpdateValue(_cpuFanSpeedBar, _cpuFanSpeedLabel, data.CPU.MaxFanSpeed, data.CPU.FanSpeed, $"{data.CPU.FanSpeed} {Resource.RPM}", $"{data.CPU.MaxFanSpeed} {Resource.RPM}");
 
             // --- GPU ---
-            if (_activeSensorItems.Contains(SensorItem.GpuUtilization)) UpdateValue(_gpuUtilizationBar, _gpuUtilizationLabel, 100, gpuUsage, $"{gpuUsage:0}%");
+            if (_activeSensorItems.Contains(SensorItem.GpuUtilization)) UpdateValue(_gpuUtilizationBar, _gpuUtilizationLabel, 100, gpuUsage, $"{gpuUsage:0}{Resource.Percent}");
             if (_activeSensorItems.Contains(SensorItem.GpuVramUtilization)) UpdateValue(_gpuVramUtilizationBar, _gpuVramUtilizationLabel, 100, gpuVramUsage, GetMemoryUsageText(gpuVramUsage, gpuVramUsed, gpuVramTotal));
             if (_activeSensorItems.Contains(SensorItem.GpuFrequency)) UpdateValue(_gpuCoreClockBar, _gpuCoreClockLabel, 3000, gpuClock, $"{gpuClock:0} {Resource.MHz}");
-            if (_activeSensorItems.Contains(SensorItem.GpuPower)) UpdateValue(_gpuPowerLabel, $"{gpuPower:0}W");
+            if (_activeSensorItems.Contains(SensorItem.GpuPower)) UpdateValue(_gpuPowerLabel, $"{gpuPower:0} {Resource.Watt}");
 
             if (_activeSensorItems.Contains(SensorItem.GpuTemperatures))
             {
@@ -338,7 +366,7 @@ public partial class SensorsControlV2
 
             // --- Battery ---
             if (_activeSensorItems.Contains(SensorItem.BatteryState)) UpdateBatteryStatus(_batteryStateLabel, batteryInfo);
-            if (_activeSensorItems.Contains(SensorItem.BatteryLevel)) UpdateValue(_batteryLevelBar, _batteryLevelLabel, 100, batteryInfo?.BatteryPercentage ?? 0, batteryInfo != null ? $"{batteryInfo.Value.BatteryPercentage}%" : "-");
+            if (_activeSensorItems.Contains(SensorItem.BatteryLevel)) UpdateValue(_batteryLevelBar, _batteryLevelLabel, 100, batteryInfo?.BatteryPercentage ?? 0, batteryInfo != null ? $"{batteryInfo.Value.BatteryPercentage}{Resource.Percent}" : "-");
 
             UpdateCardVisibility(_cpuCard, [SensorItem.CpuUtilization, SensorItem.CpuFrequency, SensorItem.CpuFanSpeed, SensorItem.CpuTemperature, SensorItem.CpuPower]);
             UpdateCardVisibility(_gpuCard, [SensorItem.GpuUtilization, SensorItem.GpuVramUtilization, SensorItem.GpuFrequency, SensorItem.GpuFanSpeed, SensorItem.GpuCoreTemperature, SensorItem.GpuVramTemperature, SensorItem.GpuPower]);
@@ -382,31 +410,53 @@ public partial class SensorsControlV2
         _memoryDiskCard.Visibility = (memoryVisible || diskVisible) ? Visibility.Visible : Visibility.Collapsed;
     }
 
+    private void AdjustCardWidths()
+    {
+        var width = ActualWidth;
+        if (width <= 0) return;
+
+        var allCards = new FrameworkElement[] { _cpuCard, _gpuCard, _motherboardCard, _memoryDiskCard };
+        var visibleCards = allCards.Where(c => c.Visibility == Visibility.Visible).ToList();
+        var count = visibleCards.Count;
+        if (count == 0) return;
+        if (count == _lastVisibleCardCount && Math.Abs(width - _lastAdjustedWidth) < 1) return;
+
+        _lastVisibleCardCount = count;
+        _lastAdjustedWidth = width;
+
+        const double cardMargin = 8;
+        var cardsPerRow = Math.Max(1, Math.Min(count, (int)(width / (200 + cardMargin))));
+        var cardWidth = Math.Max(200, (width - cardsPerRow * cardMargin) / cardsPerRow);
+
+        foreach (var card in visibleCards)
+            card.Width = cardWidth;
+    }
+
     private Task<string> GetProcessedCpuName() => _sensorsGroupControllers.GetCpuNameAsync();
 
     private Task<string> GetProcessedGpuName() => _sensorsGroupControllers.GetGpuNameAsync();
 
     private string GetTemperatureText(double temperature)
     {
-        if (temperature <= 0) return "-";
+        if (double.IsNaN(temperature) || temperature < 0) return "-";
         if (_applicationSettings.Store.TemperatureUnit == TemperatureUnit.F)
         {
-            temperature = (temperature * 9 / 5) + 32;
-            return $"{temperature:0}{Resource.Fahrenheit}";
+            var fahrenheit = temperature * 9.0 / 5.0 + 32.0;
+            return $"{fahrenheit:0}{Resource.Fahrenheit}";
         }
         return $"{temperature:0}{Resource.Celsius}";
     }
 
     private string GetMemoryUsageText(double memoryUsage, double memoryUsed, double memoryTotal)
     {
-        if (_sensorsControlSettings.Store.DisplayMemoryInGigabytes)
+        if (_hardwareSensorSettings.Store.DisplayMemoryInGigabytes)
         {
             if (memoryUsed >= 0 && memoryTotal > 0) return $"{memoryUsed:F1}/{memoryTotal:F1} {Resource.GB}";
             if (memoryUsed >= 0) return $"{memoryUsed:F1} {Resource.GB}";
             return "-";
         }
 
-        return memoryUsage >= 0 ? $"{memoryUsage:0}%" : "-";
+        return memoryUsage >= 0 ? $"{memoryUsage:0}{Resource.Percent}" : "-";
     }
 
     private static void UpdateValue(RangeBase bar, TextBlock label, double max, double value, string text, string? toolTipText = null)

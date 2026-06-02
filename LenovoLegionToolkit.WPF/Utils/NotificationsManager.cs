@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using LenovoLegionToolkit.Lib;
 using LenovoLegionToolkit.Lib.Messaging;
@@ -21,11 +22,11 @@ public class NotificationsManager
 {
     private static Dispatcher Dispatcher => Application.Current.Dispatcher;
 
-    private readonly ApplicationSettings _settings;
+    private readonly NotificationSettings _settings;
 
     private List<INotificationWindow?> _windows = [];
 
-    public NotificationsManager(ApplicationSettings settings)
+    public NotificationsManager(NotificationSettings settings)
     {
         _settings = settings;
 
@@ -57,17 +58,19 @@ public class NotificationsManager
                 NotificationType.ACAdapterConnected => _settings.Store.Notifications.ACAdapter,
                 NotificationType.ACAdapterConnectedLowWattage => _settings.Store.Notifications.ACAdapter,
                 NotificationType.ACAdapterDisconnected => _settings.Store.Notifications.ACAdapter,
+                NotificationType.AirplaneModeOn => _settings.Store.Notifications.AirplaneMode,
+                NotificationType.AirplaneModeOff => _settings.Store.Notifications.AirplaneMode,
                 NotificationType.AutomationNotification => _settings.Store.Notifications.AutomationNotification,
-                NotificationType.CapsLockOn => _settings.Store.Notifications.CapsNumLock,
-                NotificationType.CapsLockOff => _settings.Store.Notifications.CapsNumLock,
+                NotificationType.CapsLockOn => _settings.Store.Notifications.CapsLock,
+                NotificationType.CapsLockOff => _settings.Store.Notifications.CapsLock,
                 NotificationType.CameraOn => _settings.Store.Notifications.CameraLock,
                 NotificationType.CameraOff => _settings.Store.Notifications.CameraLock,
                 NotificationType.FnLockOn => _settings.Store.Notifications.FnLock,
                 NotificationType.FnLockOff => _settings.Store.Notifications.FnLock,
                 NotificationType.MicrophoneOn => _settings.Store.Notifications.Microphone,
                 NotificationType.MicrophoneOff => _settings.Store.Notifications.Microphone,
-                NotificationType.NumLockOn => _settings.Store.Notifications.CapsNumLock,
-                NotificationType.NumLockOff => _settings.Store.Notifications.CapsNumLock,
+                NotificationType.NumLockOn => _settings.Store.Notifications.NumLock,
+                NotificationType.NumLockOff => _settings.Store.Notifications.NumLock,
                 NotificationType.PanelLogoLightingOn => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.PanelLogoLightingOff => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.PortLightingOn => _settings.Store.Notifications.KeyboardBacklight,
@@ -89,6 +92,7 @@ public class NotificationsManager
                 NotificationType.UpdateAvailable => _settings.Store.Notifications.UpdateAvailable,
                 NotificationType.WhiteKeyboardBacklightOff => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.WhiteKeyboardBacklightChanged => _settings.Store.Notifications.KeyboardBacklight,
+                NotificationType.WhiteKeyboardBacklightChangedSpecial => _settings.Store.Notifications.KeyboardBacklight,
                 NotificationType.ITSModeAuto => _settings.Store.Notifications.ITSMode,
                 NotificationType.ITSModeCool => _settings.Store.Notifications.ITSMode,
                 NotificationType.ITSModePerformance => _settings.Store.Notifications.ITSMode,
@@ -103,72 +107,17 @@ public class NotificationsManager
                 return;
             }
 
-            var symbol = notification.Type switch
-            {
-                NotificationType.ACAdapterConnected => SymbolRegular.BatteryCharge24,
-                NotificationType.ACAdapterConnectedLowWattage => SymbolRegular.BatteryCharge24,
-                NotificationType.ACAdapterDisconnected => SymbolRegular.BatteryCharge24,
-                NotificationType.AutomationNotification => SymbolRegular.Rocket24,
-                NotificationType.CapsLockOn => SymbolRegular.KeyboardShiftUppercase24,
-                NotificationType.CapsLockOff => SymbolRegular.KeyboardShiftUppercase24,
-                NotificationType.CameraOn => SymbolRegular.Camera24,
-                NotificationType.CameraOff => SymbolRegular.Camera24,
-                NotificationType.FnLockOn => SymbolRegular.Keyboard24,
-                NotificationType.FnLockOff => SymbolRegular.Keyboard24,
-                NotificationType.MicrophoneOn => SymbolRegular.Mic24,
-                NotificationType.MicrophoneOff => SymbolRegular.Mic24,
-                NotificationType.NumLockOn => SymbolRegular.Keyboard12324,
-                NotificationType.NumLockOff => SymbolRegular.Keyboard12324,
-                NotificationType.PanelLogoLightingOn => SymbolRegular.LightbulbCircle24,
-                NotificationType.PanelLogoLightingOff => SymbolRegular.LightbulbCircle24,
-                NotificationType.PortLightingOn => SymbolRegular.UsbPlug24,
-                NotificationType.PortLightingOff => SymbolRegular.UsbPlug24,
-                NotificationType.PowerModeQuiet => SymbolRegular.Gauge24,
-                NotificationType.PowerModeBalance => SymbolRegular.Gauge24,
-                NotificationType.PowerModePerformance => SymbolRegular.Gauge24,
-                NotificationType.PowerModeGodMode => SymbolRegular.Gauge24,
-                NotificationType.RefreshRate => SymbolRegular.DesktopPulse24,
-                NotificationType.RGBKeyboardBacklightOff => SymbolRegular.Lightbulb24,
-                NotificationType.RGBKeyboardBacklightChanged => SymbolRegular.Lightbulb24,
-                NotificationType.SmartKeyDoublePress => SymbolRegular.StarEmphasis24,
-                NotificationType.SmartKeySinglePress => SymbolRegular.Star24,
-                NotificationType.SpectrumBacklightChanged => SymbolRegular.Lightbulb24,
-                NotificationType.SpectrumBacklightOff => SymbolRegular.Lightbulb24,
-                NotificationType.SpectrumBacklightPresetChanged => SymbolRegular.Lightbulb24,
-                NotificationType.TouchpadOn => SymbolRegular.Tablet24,
-                NotificationType.TouchpadOff => SymbolRegular.Tablet24,
-                NotificationType.UpdateAvailable => SymbolRegular.ArrowSync24,
-                NotificationType.WhiteKeyboardBacklightOff => SymbolRegular.Lightbulb24,
-                NotificationType.WhiteKeyboardBacklightChanged => SymbolRegular.Lightbulb24,
-                NotificationType.ITSModeAuto => SymbolRegular.Gauge24,
-                NotificationType.ITSModeCool => SymbolRegular.Gauge24,
-                NotificationType.ITSModePerformance => SymbolRegular.Gauge24,
-                NotificationType.ITSModeGeek => SymbolRegular.Gauge24,
-                _ => throw new ArgumentException(nameof(notification.Type))
-            };
+            var symbol = GetDefaultSymbol(notification.Type);
 
-            SymbolRegular? overlaySymbol = notification.Type switch
-            {
-                NotificationType.ACAdapterDisconnected => SymbolRegular.Line24,
-                NotificationType.CapsLockOff => SymbolRegular.Line24,
-                NotificationType.CameraOff => SymbolRegular.Line24,
-                NotificationType.FnLockOff => SymbolRegular.Line24,
-                NotificationType.MicrophoneOff => SymbolRegular.Line24,
-                NotificationType.NumLockOff => SymbolRegular.Line24,
-                NotificationType.PanelLogoLightingOff => SymbolRegular.Line24,
-                NotificationType.PortLightingOff => SymbolRegular.Line24,
-                NotificationType.RGBKeyboardBacklightOff => SymbolRegular.Line24,
-                NotificationType.SpectrumBacklightOff => SymbolRegular.Line24,
-                NotificationType.TouchpadOff => SymbolRegular.Line24,
-                NotificationType.WhiteKeyboardBacklightOff => SymbolRegular.Line24,
-                _ => null,
-            };
+            SymbolRegular? overlaySymbol = GetDefaultOverlaySymbol(notification.Type);
 
             var text = notification.Type switch
             {
                 NotificationType.ACAdapterConnected => Resource.Notification_ACAdapterConnected,
                 NotificationType.ACAdapterConnectedLowWattage => Resource.Notification_ACAdapterConnectedLowWattage,
                 NotificationType.ACAdapterDisconnected => Resource.Notification_ACAdapterDisconnected,
+                NotificationType.AirplaneModeOn => Resource.Notification_AirplaneModeOn,
+                NotificationType.AirplaneModeOff => Resource.Notification_AirplaneModeOff,
                 NotificationType.AutomationNotification => string.Format("{0}", notification.Args),
                 NotificationType.CapsLockOn => Resource.Notification_CapsLockOn,
                 NotificationType.CapsLockOff => Resource.Notification_CapsLockOff,
@@ -201,6 +150,7 @@ public class NotificationsManager
                 NotificationType.UpdateAvailable => string.Format(Resource.Notification_UpdateAvailable, notification.Args),
                 NotificationType.WhiteKeyboardBacklightOff => string.Format(Resource.Notification_WhiteKeyboardBacklight, notification.Args),
                 NotificationType.WhiteKeyboardBacklightChanged => string.Format(Resource.Notification_WhiteKeyboardBacklight, notification.Args),
+                NotificationType.WhiteKeyboardBacklightChangedSpecial => Resource.Notification_WhiteKeyboardBacklightSpecial,
                 NotificationType.ITSModeAuto => string.Format("{0}", notification.Args),
                 NotificationType.ITSModeCool => string.Format("{0}", notification.Args),
                 NotificationType.ITSModePerformance => string.Format("{0}", notification.Args),
@@ -214,10 +164,10 @@ public class NotificationsManager
                 NotificationType.PowerModePerformance => si => si.Foreground = PowerModeState.Performance.GetSolidColorBrush(),
                 NotificationType.PowerModeExtreme => si => si.Foreground = PowerModeState.Extreme.GetSolidColorBrush(),
                 NotificationType.PowerModeGodMode => si => si.Foreground = PowerModeState.GodMode.GetSolidColorBrush(),
-                NotificationType.ITSModeAuto => si => si.Foreground = PowerModeState.Quiet.GetSolidColorBrush(),
-                NotificationType.ITSModeCool => si => si.Foreground = PowerModeState.Performance.GetSolidColorBrush(),
-                NotificationType.ITSModePerformance => si => si.Foreground = PowerModeState.Extreme.GetSolidColorBrush(),
-                NotificationType.ITSModeGeek => si => si.Foreground = PowerModeState.GodMode.GetSolidColorBrush(),
+                NotificationType.ITSModeAuto => si => si.Foreground = ITSMode.ItsAuto.GetSolidColorBrush(),
+                NotificationType.ITSModeCool => si => si.Foreground = ITSMode.MmcCool.GetSolidColorBrush(),
+                NotificationType.ITSModePerformance => si => si.Foreground = ITSMode.MmcPerformance.GetSolidColorBrush(),
+                NotificationType.ITSModeGeek => si => si.Foreground = ITSMode.MmcGeek.GetSolidColorBrush(),
                 _ => null
             };
 
@@ -227,16 +177,51 @@ public class NotificationsManager
                 _ => null
             };
 
+            if (notification.Overrides?.IconOverride != null && Enum.IsDefined(typeof(SymbolRegular), notification.Overrides.IconOverride.Value))
+                symbol = (SymbolRegular)notification.Overrides.IconOverride.Value;
+            else if (_settings.Store.Notifications.IconOverrides.TryGetValue(notification.Type, out var iconOverride)
+                && Enum.IsDefined(typeof(SymbolRegular), iconOverride))
+                symbol = (SymbolRegular)iconOverride;
+
+            if (notification.Overrides?.ColorOverride != null)
+                symbolTransform = si => si.Foreground = new SolidColorBrush(notification.Overrides.ColorOverride.Value.ToColor());
+            else if (_settings.Store.Notifications.ColorOverrides.TryGetValue(notification.Type, out var colorOverride))
+                symbolTransform = si => si.Foreground = new SolidColorBrush(colorOverride.ToColor());
+
             if (symbolTransform is null && overlaySymbol is not null)
                 symbolTransform = si => si.SetResourceReference(Control.ForegroundProperty, "TextFillColorSecondaryBrush");
 
-            ShowNotification(symbol, overlaySymbol, symbolTransform, text, clickAction);
+            Brush? textColor = null;
+            if (notification.Overrides?.TextColorOverride != null)
+                textColor = new SolidColorBrush(notification.Overrides.TextColorOverride.Value.ToColor());
+            else if (_settings.Store.Notifications.TextColorOverrides.TryGetValue(notification.Type, out var textColorOverride))
+                textColor = new SolidColorBrush(textColorOverride.ToColor());
+
+            var effectiveDuration = notification.Overrides?.DurationOverride 
+                ?? (_settings.Store.Notifications.DurationOverrides.TryGetValue(notification.Type, out var durOverride)
+                    ? durOverride
+                    : _settings.Store.NotificationDuration);
+
+            var duration = effectiveDuration switch
+            {
+                NotificationDuration.Short  => notification.Type == NotificationType.RefreshRate ? 2000 : 500,
+                NotificationDuration.Normal => notification.Type == NotificationType.RefreshRate ? 3500 : 1000,
+                NotificationDuration.Long   => notification.Type == NotificationType.RefreshRate ? 5000 : 2500,
+                _ => throw new ArgumentException(nameof(effectiveDuration))
+            };
+
+            var effectivePosition = notification.Overrides?.PositionOverride
+                ?? (_settings.Store.Notifications.PositionOverrides.TryGetValue(notification.Type, out var posOverride)
+                    ? posOverride
+                    : _settings.Store.NotificationPosition);
+
+            ShowNotification(duration, symbol, overlaySymbol, symbolTransform, text, textColor, clickAction, effectivePosition);
 
             Log.Instance.Trace($"Notification {notification} shown.");
         });
     }
 
-    private void ShowNotification(SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Action? clickAction)
+    private void ShowNotification(int duration, SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Brush? textColor, Action? clickAction, NotificationPosition position)
     {
         if (App.Current.MainWindow is not MainWindow mainWindow)
             return;
@@ -250,70 +235,101 @@ public class NotificationsManager
         }
 
         ScreenHelper.UpdateScreenInfos();
+
         if (_settings.Store.NotificationOnAllScreens)
         {
             foreach (var screen in ScreenHelper.Screens)
             {
-                var nw = new NotificationWindow(symbol, overlaySymbol, symbolTransform, text, clickAction, screen, _settings.Store.NotificationPosition) { Owner = mainWindow };
-                if (_settings.Store.NotificationAlwaysOnTop)
-                {
-                    var bitmap = nw.GetBitmapView();
-                    var nwaot = new NotificationAoTWindow(bitmap, screen, _settings.Store.NotificationPosition);
-                    nwaot.Show(_settings.Store.NotificationDuration switch
-                    {
-                        NotificationDuration.Short => 500,
-                        NotificationDuration.Long => 2500,
-                        NotificationDuration.Normal => 1000,
-                        _ => throw new ArgumentException(nameof(_settings.Store.NotificationDuration))
-                    });
-                    _windows.Add(nwaot);
-                }
-                else
-                {
-                    nw.Show(_settings.Store.NotificationDuration switch
-                    {
-                        NotificationDuration.Short => 500,
-                        NotificationDuration.Long => 2500,
-                        NotificationDuration.Normal => 1000,
-                        _ => throw new ArgumentException(nameof(_settings.Store.NotificationDuration))
-                    });
-                    _windows.Add(nw);
-                }
+                ShowOnScreen(screen, duration, symbol, overlaySymbol, symbolTransform, text, textColor, clickAction, position);
             }
         }
         else
         {
             var primaryScreen = ScreenHelper.PrimaryScreen;
-            if (!primaryScreen.HasValue)
-                return;
-
-            var nw = new NotificationWindow(symbol, overlaySymbol, symbolTransform, text, clickAction, primaryScreen.Value, _settings.Store.NotificationPosition) { Owner = mainWindow };
-            if (_settings.Store.NotificationAlwaysOnTop)
+            if (primaryScreen.HasValue)
             {
-                var bitmap = nw.GetBitmapView();
-                var nwaot = new NotificationAoTWindow(bitmap, primaryScreen.Value, _settings.Store.NotificationPosition);
-                nwaot.Show(_settings.Store.NotificationDuration switch
-                {
-                    NotificationDuration.Short => 500,
-                    NotificationDuration.Long => 2500,
-                    NotificationDuration.Normal => 1000,
-                    _ => throw new ArgumentException(nameof(_settings.Store.NotificationDuration))
-                });
-                _windows.Add(nwaot);
-            }
-            else
-            {
-                nw.Show(_settings.Store.NotificationDuration switch
-                {
-                    NotificationDuration.Short => 500,
-                    NotificationDuration.Long => 2500,
-                    NotificationDuration.Normal => 1000,
-                    _ => throw new ArgumentException(nameof(_settings.Store.NotificationDuration))
-                });
-                _windows.Add(nw);
+                ShowOnScreen(primaryScreen.Value, duration, symbol, overlaySymbol, symbolTransform, text, textColor, clickAction, position);
             }
         }
     }
+
+    private void ShowOnScreen(ScreenInfo screen, int duration, SymbolRegular symbol, SymbolRegular? overlaySymbol, Action<SymbolIcon>? symbolTransform, string text, Brush? textColor, Action? clickAction, NotificationPosition position)
+    {
+        var nw = new NotificationWindow(symbol, overlaySymbol, symbolTransform, text, textColor, clickAction, screen, position);
+        if (_settings.Store.NotificationAlwaysOnTop)
+        {
+            nw.SourceInitialized += (_, _) => nw.EscalateZBand();
+        }
+
+        nw.Show(duration);
+        _windows.Add(nw);
+    }
+
+    internal static SymbolRegular GetDefaultSymbol(NotificationType type) => type switch
+    {
+        NotificationType.ACAdapterConnected => SymbolRegular.BatteryCharge24,
+        NotificationType.ACAdapterConnectedLowWattage => SymbolRegular.BatteryCharge24,
+        NotificationType.ACAdapterDisconnected => SymbolRegular.BatteryCharge24,
+        NotificationType.AirplaneModeOn => SymbolRegular.Airplane24,
+        NotificationType.AirplaneModeOff => SymbolRegular.Airplane24,
+        NotificationType.AutomationNotification => SymbolRegular.Rocket24,
+        NotificationType.CapsLockOn => SymbolRegular.KeyboardShiftUppercase24,
+        NotificationType.CapsLockOff => SymbolRegular.KeyboardShiftUppercase24,
+        NotificationType.CameraOn => SymbolRegular.Camera24,
+        NotificationType.CameraOff => SymbolRegular.Camera24,
+        NotificationType.FnLockOn => SymbolRegular.Keyboard24,
+        NotificationType.FnLockOff => SymbolRegular.Keyboard24,
+        NotificationType.MicrophoneOn => SymbolRegular.Mic24,
+        NotificationType.MicrophoneOff => SymbolRegular.Mic24,
+        NotificationType.NumLockOn => SymbolRegular.Keyboard12324,
+        NotificationType.NumLockOff => SymbolRegular.Keyboard12324,
+        NotificationType.PanelLogoLightingOn => SymbolRegular.LightbulbCircle24,
+        NotificationType.PanelLogoLightingOff => SymbolRegular.LightbulbCircle24,
+        NotificationType.PortLightingOn => SymbolRegular.UsbPlug24,
+        NotificationType.PortLightingOff => SymbolRegular.UsbPlug24,
+        NotificationType.PowerModeQuiet => SymbolRegular.Gauge24,
+        NotificationType.PowerModeBalance => SymbolRegular.Gauge24,
+        NotificationType.PowerModePerformance => SymbolRegular.Gauge24,
+        NotificationType.PowerModeExtreme => SymbolRegular.Gauge24,
+        NotificationType.PowerModeGodMode => SymbolRegular.Gauge24,
+        NotificationType.RefreshRate => SymbolRegular.DesktopPulse24,
+        NotificationType.RGBKeyboardBacklightOff => SymbolRegular.Lightbulb24,
+        NotificationType.RGBKeyboardBacklightChanged => SymbolRegular.Lightbulb24,
+        NotificationType.SmartKeyDoublePress => SymbolRegular.StarEmphasis24,
+        NotificationType.SmartKeySinglePress => SymbolRegular.Star24,
+        NotificationType.SpectrumBacklightChanged => SymbolRegular.Lightbulb24,
+        NotificationType.SpectrumBacklightOff => SymbolRegular.Lightbulb24,
+        NotificationType.SpectrumBacklightPresetChanged => SymbolRegular.Lightbulb24,
+        NotificationType.TouchpadOn => SymbolRegular.Tablet24,
+        NotificationType.TouchpadOff => SymbolRegular.Tablet24,
+        NotificationType.UpdateAvailable => SymbolRegular.ArrowSync24,
+        NotificationType.WhiteKeyboardBacklightOff => SymbolRegular.Lightbulb24,
+        NotificationType.WhiteKeyboardBacklightChanged => SymbolRegular.Lightbulb24,
+        NotificationType.WhiteKeyboardBacklightChangedSpecial => SymbolRegular.Lightbulb24,
+        NotificationType.ITSModeAuto => SymbolRegular.Gauge24,
+        NotificationType.ITSModeCool => SymbolRegular.Gauge24,
+        NotificationType.ITSModePerformance => SymbolRegular.Gauge24,
+        NotificationType.ITSModeGeek => SymbolRegular.Gauge24,
+        _ => SymbolRegular.Question24,
+    };
+
+    internal static SymbolRegular? GetDefaultOverlaySymbol(NotificationType type) => type switch
+    {
+        NotificationType.ACAdapterDisconnected => SymbolRegular.Line24,
+        NotificationType.AirplaneModeOff => SymbolRegular.Line24,
+        NotificationType.CapsLockOff => SymbolRegular.Line24,
+        NotificationType.CameraOff => SymbolRegular.Line24,
+        NotificationType.FnLockOff => SymbolRegular.Line24,
+        NotificationType.MicrophoneOff => SymbolRegular.Line24,
+        NotificationType.NumLockOff => SymbolRegular.Line24,
+        NotificationType.PanelLogoLightingOff => SymbolRegular.Line24,
+        NotificationType.PortLightingOff => SymbolRegular.Line24,
+        NotificationType.RGBKeyboardBacklightOff => SymbolRegular.Line24,
+        NotificationType.SpectrumBacklightOff => SymbolRegular.Line24,
+        NotificationType.TouchpadOff => SymbolRegular.Line24,
+        NotificationType.WhiteKeyboardBacklightOff => SymbolRegular.Line24,
+        _ => null,
+    };
 
     private static void UpdateAvailableAction()
     {

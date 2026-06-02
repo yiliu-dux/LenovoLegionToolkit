@@ -24,6 +24,13 @@ public enum AutorunState
     Disabled
 }
 
+public enum BackgroundImageStretchMode
+{
+    Fill = 0,
+    Fit = 1,
+    Crop = 2
+}
+
 public enum BatteryNightChargeState
 {
     [Display(ResourceType = typeof(Resource), Name = "BatteryNightChargeState_On")]
@@ -95,9 +102,18 @@ public enum CpuProfileMode
     X3DGaming
 }
 
+public enum CustomSpecialKey
+{
+    [Display(ResourceType = typeof(Resource), Name = "CustomSpecialKey_Default")]
+    Default,
+    [Display(ResourceType = typeof(Resource), Name = "CustomSpecialKey_Custom")]
+    Custom
+}
+
 [Flags]
 public enum DriverKey
 {
+    FnQ = 1,
     FnF10 = 32,
     FnF4 = 256,
     FnF8 = 8192,
@@ -200,23 +216,14 @@ public enum OsdItem
     PchFan,
 }
 
-public enum FanMaxSpeedState
-{
-    [Display(ResourceType = typeof(Resource), Name = "FanMaxSpeedState_Off")]
-    Off,
-    [Display(ResourceType = typeof(Resource), Name = "FanMaxSpeedState_On")]
-    On,
-    [Display(ResourceType = typeof(Resource), Name = "FanMaxSpeedState_Toggle")]
-    Toggle,
-}
 
-public enum OsdState
+public enum ToggleState
 {
-    [Display(ResourceType = typeof(Resource), Name = "OsdState_Hidden")]
-    Hidden,
-    [Display(ResourceType = typeof(Resource), Name = "OsdState_Show")]
-    Show,
-    [Display(ResourceType = typeof(Resource), Name = "OsdState_Toggle")]
+    [Display(ResourceType = typeof(Resource), Name = "ToggleState_Off")]
+    Off,
+    [Display(ResourceType = typeof(Resource), Name = "ToggleState_On")]
+    On,
+    [Display(ResourceType = typeof(Resource), Name = "ToggleState_Toggle")]
     Toggle,
 }
 
@@ -287,6 +294,18 @@ public enum ITSMode
     MmcGeek
 }
 
+public enum ITSModeServiceControlMessage
+{
+    IntelligentCoolingDisable = 134,
+    IntelligentCoolingEnable = 135,
+    IntelligentCoolingCool = 146,
+    IntelligentCoolingHighPerformance = 148,
+    IntelligentCoolingIntelligent = 163,
+    IntelligentCoolingBsm = 164,
+    IntelligentCoolingEpm = 165,
+    IntelligentCoolingGeek = 172
+}
+
 public enum InstantBootState
 {
     [Display(ResourceType = typeof(Resource), Name = "InstantBootState_Off")]
@@ -355,6 +374,7 @@ public enum LegionSeries
     LOQ = 11,
     YOGA = 12,
     ThinkBook = 13,
+    Motorola = 14,
     Unknown = 255
 }
 
@@ -371,6 +391,14 @@ public enum MicrophoneState
     [Display(ResourceType = typeof(Resource), Name = "MicrophoneState_Off")]
     Off,
     [Display(ResourceType = typeof(Resource), Name = "MicrophoneState_On")]
+    On
+}
+
+public enum HardwareSensorsState
+{
+    [Display(ResourceType = typeof(Resource), Name = "HardwareSensorsState_Off")]
+    Off,
+    [Display(ResourceType = typeof(Resource), Name = "HardwareSensorsState_On")]
     On
 }
 
@@ -417,6 +445,8 @@ public enum NotificationType
     ACAdapterConnected,
     ACAdapterConnectedLowWattage,
     ACAdapterDisconnected,
+    AirplaneModeOn,
+    AirplaneModeOff,
     AutomationNotification,
     CameraOn,
     CameraOff,
@@ -449,6 +479,7 @@ public enum NotificationType
     TouchpadOff,
     UpdateAvailable,
     WhiteKeyboardBacklightChanged,
+    WhiteKeyboardBacklightChangedSpecial,
     WhiteKeyboardBacklightOff,
     ITSModeAuto,
     ITSModeCool,
@@ -543,6 +574,15 @@ public enum PowerModeMappingMode
     WindowsPowerMode,
     [Display(ResourceType = typeof(Resource), Name = "PowerModeMappingMode_WindowsPowerPlan")]
     WindowsPowerPlan,
+}
+
+public enum PowerOverrideKey
+{
+    PowerPlan,
+    PowerModeOnAc,
+    PowerModeOnDc,
+    PowerPlanBalanceOnAc,
+    PowerPlanBalanceOnDc,
 }
 
 public enum PowerModeState
@@ -713,6 +753,39 @@ public enum SpecialKey
     WhiteBacklightOff = 64,
     WhiteBacklight1 = 65,
     WhiteBacklight2 = 66
+}
+
+public enum SpecialKeyLedState
+{
+    MicrophoneOn = 1,
+    MicrophoneOff = 2,
+    SpeakerOn = 4,
+    SpeakerOff = 5,
+}
+
+public enum ThinkBookSpecialKey
+{
+    VoipAnswer = 5,
+    VoipEnd = 6,
+    ServiceKey = 7,
+    LSKClick = 8,
+    VoiceAssistant = 9,
+    VoipAnswer2 = 14,
+    VoipEnd2 = 15,
+    LSK2 = 17,
+    DolbyThreeMode = 18,
+    NightScreenMode = 19,
+    GameLogoOn = 20,
+    GameLogoOff = 21,
+    PluginLEDOn = 22,
+    PluginLEDOff = 23,
+    RGBWave = 27,
+    RGBBreath = 28,
+    RGBSmooth = 29,
+    RGBAlways = 30,
+    RGBOff = 31,
+    ServiceKeyC970 = 39,
+    CameraBackgroundBlur = 40,
 }
 
 public enum SpectrumKeyboardBacklightBrightness
@@ -886,6 +959,8 @@ public enum UpdateChannel
     Beta,
     [Display(ResourceType = typeof(Resource), Name = "UpdateChannel_Dev")]
     Dev,
+    [Display(ResourceType = typeof(Resource), Name = "UpdateChannel_Test")]
+    Test,
 }
 
 public enum WhiteKeyboardBacklightState
@@ -900,11 +975,11 @@ public enum WhiteKeyboardBacklightState
 
 public enum WindowsPowerMode
 {
-    [Display(Name = "Best power efficiency")]
+    [Display(ResourceType = typeof(Resource), Name = "BestPowerEfficiency")]
     BestPowerEfficiency,
-    [Display(Name = "Balanced")]
+    [Display(ResourceType = typeof(Resource), Name = "Balanced")]
     Balanced,
-    [Display(Name = "Best performance")]
+    [Display(ResourceType = typeof(Resource), Name = "BestPerformance")]
     BestPerformance
 }
 

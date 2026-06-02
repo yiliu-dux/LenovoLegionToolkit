@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,6 +40,9 @@ public sealed class PowerStateListener : IListener<PowerStateListener.ChangedEve
     private bool _disposed;
     private HPOWERNOTIFY _handle;
     private PowerAdapterStatus? _lastPowerAdapterState;
+
+    private readonly SemaphoreSlim _notifyLock = new(1, 1);
+    private DateTime _lastNotifyTime = DateTime.MinValue;
 
     public event EventHandler<ChangedEventArgs>? Changed;
 
@@ -160,14 +163,14 @@ public sealed class PowerStateListener : IListener<PowerStateListener.ChangedEve
     private async Task ProcessPowerEventAsync(PowerStateEvent powerStateEvent)
     {
         if (!await _processingLock.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false))
-        {
             return;
-        }
 
         try
         {
             var powerAdapterState = await Power.IsPowerAdapterConnectedAsync().ConfigureAwait(false);
             Log.Instance.Trace($"Handle {powerStateEvent}. [newState={powerAdapterState}]");
+
+            var powerAdapterStateChanged = powerAdapterState != _lastPowerAdapterState;
 
             switch (powerStateEvent)
             {
@@ -180,7 +183,11 @@ public sealed class PowerStateListener : IListener<PowerStateListener.ChangedEve
                     break;
 
                 case PowerStateEvent.StatusChange when powerAdapterState == PowerAdapterStatus.Connected:
-                    await HandleConnectedStatusChangeAsync().ConfigureAwait(false);
+                    if (powerAdapterStateChanged)
+                    {
+                        await HandleConnectedStatusChangeAsync().ConfigureAwait(false);
+                    }
+
                     break;
             }
 
@@ -261,6 +268,29 @@ public sealed class PowerStateListener : IListener<PowerStateListener.ChangedEve
 
     private async Task NotifyDgpuAsync()
     {
+        var now = DateTime.Now;
+        if ((now - _lastNotifyTime).TotalSeconds < 10)
+        {
+            Log.Instance.Trace($"NotifyDgpuAsync skipped due to debounce (last call at {_lastNotifyTime:HH:mm:ss})");
+            return;
+        }
+
+        await _notifyLock.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            if ((DateTime.Now - _lastNotifyTime).TotalSeconds < 10)
+            {
+                Log.Instance.Trace($"NotifyDgpuAsync skipped after lock (debounce)");
+                return;
+            }
+
+            _lastNotifyTime = DateTime.Now;
+        }
+        finally
+        {
+            _notifyLock.Release();
+        }
+
         try
         {
             if (await _dgpuNotify.IsSupportedAsync().ConfigureAwait(false))

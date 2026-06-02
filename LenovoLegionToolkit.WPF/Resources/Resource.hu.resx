@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -60,45 +60,45 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
           <xsd:element name="metadata">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
               </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" use="required" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
             <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="alias" type="xsd:string"/>
+              <xsd:attribute name="name" type="xsd:string"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="data">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+              <xsd:attribute ref="xml:space"/>
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
             <xsd:complexType>
               <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
             </xsd:complexType>
           </xsd:element>
         </xsd:choice>
@@ -166,11 +166,17 @@
   <data name="Add" xml:space="preserve">
     <value>Hozzáadás</value>
   </data>
+  <data name="AddAutomationStepWindow_MultipleSteps" xml:space="preserve">
+    <value>Multiple steps...</value>
+  </data>
   <data name="AddAutomationStepWindow_Title" xml:space="preserve">
     <value>Lépés hozzáadása</value>
   </data>
   <data name="AddNew" xml:space="preserve">
     <value>Új hozzáadása</value>
+  </data>
+  <data name="AirplaneModeAutomationStepControl_Title" xml:space="preserve">
+    <value>Airplane mode</value>
   </data>
   <data name="AlwaysOnUsbAutomationStepControl_Message" xml:space="preserve">
     <value>Töltse az USB eszközöket a számítógép kikapcsolt, alvó vagy hibernált állapota esetén is.</value>
@@ -260,7 +266,7 @@
     <value>Open an argument window for convenient modification of arguments.</value>
   </data>
   <data name="ArgumentWindow_Edit_Title" xml:space="preserve">
-    <value>Edit Arguments</value>
+    <value>Arguments</value>
   </data>
   <data name="ArgumentWindow_Flag_AllowAllCerts" xml:space="preserve">
     <value>Allow All Certificates</value>
@@ -293,13 +299,13 @@
     <value>Enable Lamp Array</value>
   </data>
   <data name="ArgumentWindow_Flag_ExpGpuMode" xml:space="preserve">
-    <value>Experimental GPU Working Mode</value>
+    <value> Experimental GPU Working Mode</value>
   </data>
   <data name="ArgumentWindow_Flag_ProxyPassword" xml:space="preserve">
     <value>Proxy Password</value>
   </data>
   <data name="ArgumentWindow_Flag_ProxyUrl" xml:space="preserve">
-    <value>Proxy URL</value>
+    <value> Proxy URL</value>
   </data>
   <data name="ArgumentWindow_Flag_ProxyUsername" xml:space="preserve">
     <value>Proxy Username</value>
@@ -402,7 +408,7 @@ Csak az aktuális állapotnak megfelelő műveletek fognak futni.</value>
     <value>Exkluzív</value>
   </data>
   <data name="AutomationPipelineControl_Exclusive_ToolTip" xml:space="preserve">
-    <value>Ne hajtson végre további műveleteket, ha ez a művelet fut.</value>
+    <value>When checked, stops further automations from running after this one.</value>
   </data>
   <data name="AutomationPipelineControl_Running" xml:space="preserve">
     <value>Futás...</value>
@@ -460,6 +466,9 @@ Csak az aktuális állapotnak megfelelő műveletek fognak futni.</value>
   </data>
   <data name="AutomationPipelineTriggerConfigurationWindow_Title" xml:space="preserve">
     <value>Beállítás</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
   </data>
   <data name="BalanceModeSettingsWindow_AIEngine_Message" xml:space="preserve">
     <value>Automatikusan érzkékeli egyes játékok futtatását és javítja a processzor, illetve videókártya teljesítményét. A hőmérséklet értéke és a ventilátor zaja megnövekedhet.</value>
@@ -554,6 +563,9 @@ Csak az aktuális állapotnak megfelelő műveletek fognak futni.</value>
   <data name="BatteryPage_FullChargeCapacity_Title" xml:space="preserve">
     <value>Teljes töltöttségi szint</value>
   </data>
+  <data name="BatteryPage_LiveCharge_Title" xml:space="preserve">
+    <value>Current charge</value>
+  </data>
   <data name="BatteryPage_LowLevel" xml:space="preserve">
     <value>Alacsony töltöttség</value>
   </data>
@@ -587,6 +599,18 @@ Ez az idő nem biztos, hogy pontos, ha a laptopot alvó vagy kikapcsolt állapot
   </data>
   <data name="BatteryPage_Title" xml:space="preserve">
     <value>Akkumulátor</value>
+  </data>
+  <data name="BatteryPercentageAutomationPipelineTriggerTabItemContent_Above" xml:space="preserve">
+    <value>Goes above</value>
+  </data>
+  <data name="BatteryPercentageAutomationPipelineTriggerTabItemContent_Below" xml:space="preserve">
+    <value>Goes below</value>
+  </data>
+  <data name="BatteryPercentageAutomationPipelineTriggerTabItemContent_Percentage" xml:space="preserve">
+    <value>Percentage</value>
+  </data>
+  <data name="BiosVersion" xml:space="preserve">
+    <value>BIOS version</value>
   </data>
   <data name="BootLogoWindow_Customize" xml:space="preserve">
     <value>Testreszabás</value>
@@ -646,11 +670,11 @@ A támogatott formátumok a következők: {1}.</value>
   <data name="Close" xml:space="preserve">
     <value>Bezárás</value>
   </data>
-  <data name="CloseAutomationStepControl_Message" xml:space="preserve">
+  <data name="CloseAppAutomationStepControl_Message" xml:space="preserve">
     <value>Close the Lenovo Legion Toolkit</value>
   </data>
-  <data name="CloseAutomationStepControl_Title" xml:space="preserve">
-    <value>Close</value>
+  <data name="CloseAppAutomationStepControl_Title" xml:space="preserve">
+    <value>Close App</value>
   </data>
   <data name="Color_Blue" xml:space="preserve">
     <value>Kék</value>
@@ -662,8 +686,7 @@ A támogatott formátumok a következők: {1}.</value>
     <value>Vörös</value>
   </data>
   <data name="ComboBoxHybridModeAutomationStepControl_Message" xml:space="preserve">
-    <value>Válassza ki a GPU működési módját a számítógép használatának és az energiaellátás körülményeinek megfelelően.
-Az üzemmódok váltása újraindítást igényelhet.</value>
+    <value>Select GPU operating mode based on your computer's usage and power conditions.</value>
   </data>
   <data name="ComboBoxHybridModeAutomationStepControl_Title" xml:space="preserve">
     <value>GPU működési mód</value>
@@ -696,44 +719,26 @@ Az üzemmódok közötti váltás újraindítást igényelhet.</value>
   <data name="CopyAll" xml:space="preserve">
     <value>Összes másolása</value>
   </data>
+  <data name="Cores" xml:space="preserve">
+    <value>Cores</value>
+  </data>
+  <data name="CPU" xml:space="preserve">
+    <value>CPU</value>
+  </data>
   <data name="Create" xml:space="preserve">
     <value>Létrehozás</value>
   </data>
   <data name="CreateAutomationPipelineWindow_Title" xml:space="preserve">
     <value>Művelet létrehozása</value>
   </data>
-  <data name="CustomFanCurve_Accelerate" xml:space="preserve">
-    <value>Accelerate</value>
+  <data name="Customize" xml:space="preserve">
+    <value>Customize</value>
   </data>
-  <data name="CustomFanCurve_Accelerate_Tooltip" xml:space="preserve">
-    <value>Accelerate control's how much PWM is added to the current PWM Value.</value>
+  <data name="CycleGodModePresetAutomationStepControl_Message" xml:space="preserve">
+    <value>Cycle through available Custom Mode presets.</value>
   </data>
-  <data name="CustomFanCurve_Critical_Temp" xml:space="preserve">
-    <value>Critical Temp</value>
-  </data>
-  <data name="CustomFanCurve_Critical_Temp_Tooltip" xml:space="preserve">
-    <value>Force the maximum speed when the temperature is greater than or equal to this temperature to prevent burning out.</value>
-  </data>
-  <data name="CustomFanCurve_Deceleration" xml:space="preserve">
-    <value>Deceleration</value>
-  </data>
-  <data name="CustomFanCurve_Deceleration_Tooltip" xml:space="preserve">
-    <value>Deceleration control's how much PWM is decreased to the current PWM Value.</value>
-  </data>
-  <data name="CustomFanCurve_Fan_Speed" xml:space="preserve">
-    <value>Fan Speed %</value>
-  </data>
-  <data name="CustomFanCurve_PWM_Value" xml:space="preserve">
-    <value>PWM Value</value>
-  </data>
-  <data name="CustomFanCurve_Settings" xml:space="preserve">
-    <value>Settings</value>
-  </data>
-  <data name="CustomFanCurve_Temperature" xml:space="preserve">
-    <value>Temperature °C </value>
-  </data>
-  <data name="CustomFanCurve_Title" xml:space="preserve">
-    <value>Real-Time Monitoring</value>
+  <data name="CycleGodModePresetAutomationStepControl_Title" xml:space="preserve">
+    <value>Cycle Custom Mode preset</value>
   </data>
   <data name="DashboardBattery_AcConnected" xml:space="preserve">
     <value>AC Csatlakoztatva</value>
@@ -759,10 +764,11 @@ Az üzemmódok közötti váltás újraindítást igényelhet.</value>
   <data name="DashboardPage_Title" xml:space="preserve">
     <value>Kezdőlap</value>
   </data>
+  <data name="DaysRemaining" xml:space="preserve">
+    <value>Days remaining</value>
+  </data>
   <data name="DeactivateGPUAutomationStepControl_Message" xml:space="preserve">
-    <value>Letiltja a diszkrét GPU-t, ha az feleslegesen aktív.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog helyesen futni, ha a belső kijelző ki van kapcsolva vagy a hibrid üzemmód nem aktív.</value>
+    <value>Disable discrete GPU if it is active unnecessarily.</value>
   </data>
   <data name="DeactivateGPUAutomationStepControl_Title" xml:space="preserve">
     <value>GPU deaktiválása</value>
@@ -779,6 +785,9 @@ FIGYELMEZTETÉS: Ez a művelet nem fog helyesen futni, ha a belső kijelző ki v
   <data name="Delete" xml:space="preserve">
     <value>Törlés</value>
   </data>
+  <data name="Device" xml:space="preserve">
+    <value>Device</value>
+  </data>
   <data name="DeviceAutomationPipelineTriggerTabItemContent_OnlyConnected" xml:space="preserve">
     <value>Csak a csatlakoztatott eszközök megjelenítése</value>
   </data>
@@ -788,41 +797,11 @@ FIGYELMEZTETÉS: Ez a művelet nem fog helyesen futni, ha a belső kijelző ki v
   <data name="DeviceAutomationPipelineTriggerTabItemContent_OnlySelected" xml:space="preserve">
     <value>Csak a kiválasztott eszközök megjelenítése</value>
   </data>
-  <data name="DeviceInformationWindow_BiosVersion_Title" xml:space="preserve">
-    <value>BIOS verzió</value>
-  </data>
-  <data name="DeviceInformationWindow_Device_Title" xml:space="preserve">
-    <value>Eszköz</value>
-  </data>
   <data name="DeviceInformationWindow_LenovoSupport" xml:space="preserve">
     <value>Lenovo Ügyfélszolgálat</value>
   </data>
-  <data name="DeviceInformationWindow_MachineType_Title" xml:space="preserve">
-    <value>Számítógép típusa</value>
-  </data>
-  <data name="DeviceInformationWindow_Manufacturer_Title" xml:space="preserve">
-    <value>Gyártó</value>
-  </data>
-  <data name="DeviceInformationWindow_Model_Title" xml:space="preserve">
-    <value>Modell</value>
-  </data>
-  <data name="DeviceInformationWindow_Refresh" xml:space="preserve">
-    <value>Újratölt</value>
-  </data>
-  <data name="DeviceInformationWindow_SerialNumber_Title" xml:space="preserve">
-    <value>Sorozatszám</value>
-  </data>
   <data name="DeviceInformationWindow_Title" xml:space="preserve">
     <value>Az eszköz névjegye</value>
-  </data>
-  <data name="DeviceInformationWindow_WarrantyEndDate_Title" xml:space="preserve">
-    <value>Lejárat dátuma</value>
-  </data>
-  <data name="DeviceInformationWindow_WarrantyStartDate_Title" xml:space="preserve">
-    <value>Kezdés dátuma</value>
-  </data>
-  <data name="DeviceInformationWindow_Warranty_Title" xml:space="preserve">
-    <value>Jótállás</value>
   </data>
   <data name="DevicePipelineTriggerTabItemContent_Devices" xml:space="preserve">
     <value>Eszközök</value>
@@ -903,30 +882,48 @@ FIGYELMEZTETÉS: Ez a művelet nem fog helyesen futni, ha a belső kijelző ki v
     <value>Diszkrét GPU</value>
   </data>
   <data name="DisplayBrightnessAutomationStepControl_Message" xml:space="preserve">
-    <value>A beépített kijelző fényerejének módosítása.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző ki van kapcsolva.</value>
+    <value>Change display brightness of the built-in display.</value>
   </data>
   <data name="DisplayBrightnessAutomationStepControl_Title" xml:space="preserve">
     <value>Kijelző fényereje</value>
   </data>
-  <data name="DonatePage_DonateWith" xml:space="preserve">
-    <value>Támogatás ezzel</value>
+  <data name="Displays" xml:space="preserve">
+    <value>Displays</value>
+  </data>
+  <data name="DonatePage_Bartosz_Description" xml:space="preserve">
+    <value>Bartosz created Lenovo Legion Toolkit and authored the foundational architecture that powers every feature in the application today.</value>
+  </data>
+  <data name="DonatePage_Bartosz_Role" xml:space="preserve">
+    <value>Original Creator</value>
+  </data>
+  <data name="DonatePage_BottomMessage" xml:space="preserve">
+    <value>Even if you can't donate, simply using, sharing, and starring the project on GitHub goes a long way. Every bit of support is genuinely appreciated</value>
+  </data>
+  <data name="DonatePage_DrSkinner_Description" xml:space="preserve">
+    <value>Responsible for core feature development, quality assurance, UI/UX design, and overall project direction as the current project lead.</value>
+  </data>
+  <data name="DonatePage_DrSkinner_Role" xml:space="preserve">
+    <value>Core Developer &amp; Project Lead</value>
+  </data>
+  <data name="DonatePage_Kaguya_Description" xml:space="preserve">
+    <value>Specializes in hardware research and reverse engineering, with contributions spanning core feature development and low-level system integration.</value>
+  </data>
+  <data name="DonatePage_Kaguya_Role" xml:space="preserve">
+    <value>Core Developer &amp; Reverser</value>
   </data>
   <data name="DonatePage_Message" xml:space="preserve">
-    <value>A Lenovo Legion Toolkit fejlesztése és karbantartása sok időt vesz igénybe. Ha szívesen használja ezt a szoftvert, akkor támogathatja a jövőjét az Ön által választott összeg felajánlásával.
+    <value>Development and maintenance of Lenovo Legion Toolkit takes a lot of time and effort. If you enjoy using this software, you can support its future by sponsoring the authors who make it possible.
 
-Kattintson az alábbi PayPal-logóra, vagy szkennelje be a QR-kódot a PayPal segítségével történő adományozáshoz.
-
-Előre is köszönjük!</value>
+Thank you for your support!</value>
+  </data>
+  <data name="DonatePage_Sponsor" xml:space="preserve">
+    <value>Sponsor</value>
   </data>
   <data name="DonatePage_Title" xml:space="preserve">
     <value>Támogatás</value>
   </data>
   <data name="DpiScaleAutomationStepControl_Message" xml:space="preserve">
-    <value>A beépített kijelző méretezésének módosítása.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző ki van kapcsolva.</value>
+    <value>Change scaling of the built-in display.</value>
   </data>
   <data name="DpiScaleAutomationStepControl_Title" xml:space="preserve">
     <value>DPI</value>
@@ -964,6 +961,9 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
   <data name="EditSensorWindow_Title" xml:space="preserve">
     <value>Edit Sensor</value>
   </data>
+  <data name="EndDate" xml:space="preserve">
+    <value>End date</value>
+  </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>
   </data>
@@ -990,6 +990,9 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Kilépés</value>
+  </data>
+  <data name="Expired" xml:space="preserve">
+    <value>Expired</value>
   </data>
   <data name="Export" xml:space="preserve">
     <value>Exportálás</value>
@@ -1084,12 +1087,14 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
   <data name="GB" xml:space="preserve">
     <value>GB</value>
   </data>
+  <data name="Generation" xml:space="preserve">
+    <value>Generation</value>
+  </data>
   <data name="GHz" xml:space="preserve">
     <value>Ghz</value>
   </data>
   <data name="GodModePresetAutomationStepControl_Message" xml:space="preserve">
-    <value>Egyéni üzemmód előbeállítás aktiválása.
-Ez a beállítás csak akkor lép hatályba, ha az Egyéni üzemmód engedélyezve van.</value>
+    <value>Apply a specific Custom Mode preset.</value>
   </data>
   <data name="GodModePresetAutomationStepControl_Title" xml:space="preserve">
     <value>Egyéni üzemmód beállítása</value>
@@ -1273,10 +1278,20 @@ Komolyan, legyen óvatos ezzel az opcióval!</value>
   <data name="GodModeSettingsWindow_VantageWarning_Title" xml:space="preserve">
     <value>Az Egyéni mód beállításai nem lesznek megfelelően alkalmazva, ha a Lenovo Vantage vagy annak szolgáltatásai futnak.</value>
   </data>
+  <data name="GPU" xml:space="preserve">
+    <value>GPU</value>
+  </data>
+  <data name="HardwareFeatures" xml:space="preserve">
+    <value>Hardware Features</value>
+  </data>
+  <data name="HardwareSensorsAutomationStepControl_Message" xml:space="preserve">
+    <value>Enable or disable background polling for hardware sensors.</value>
+  </data>
+  <data name="HardwareSensorsAutomationStepControl_Title" xml:space="preserve">
+    <value>Hardware Sensors</value>
+  </data>
   <data name="HDRAutomationStepControl_Message" xml:space="preserve">
-    <value>A nagy dinamikatartomány (HDR) engedélyezése a beépített kijelzőn.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző ki van kapcsolva.</value>
+    <value>Enable high dynamic range (HDR) on the built-in display.</value>
   </data>
   <data name="HDRAutomationStepControl_Title" xml:space="preserve">
     <value>HDR</value>
@@ -1295,6 +1310,15 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
   </data>
   <data name="HideAll" xml:space="preserve">
     <value>Összes elrejtése</value>
+  </data>
+  <data name="Hz" xml:space="preserve">
+    <value>Hz</value>
+  </data>
+  <data name="Icon" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="IconColor" xml:space="preserve">
+    <value>Icon color</value>
   </data>
   <data name="IGPUModeChangeException_Message" xml:space="preserve">
     <value>Ha nem látja a várt eredményt, pár másodperc múlva próbálja meg újra megváltoztatni az üzemmódot.
@@ -1321,9 +1345,6 @@ Ha a dGPU egyáltalán nem reagál, kérjük, indítsa újra a laptopját.</valu
   <data name="Inactive" xml:space="preserve">
     <value>Inaktív</value>
   </data>
-  <data name="IncompatibleDevice_Message" xml:space="preserve">
-    <value>Ez a készülék nem kompatibilis a Lenovo Legion Toolkit-tel.</value>
-  </data>
   <data name="Information" xml:space="preserve">
     <value>Információ</value>
   </data>
@@ -1344,12 +1365,6 @@ Ha a dGPU egyáltalán nem reagál, kérjük, indítsa újra a laptopját.</valu
   </data>
   <data name="ITSModeAutomationStepControl_Title" xml:space="preserve">
     <value>IdeaPad Power Mode</value>
-  </data>
-  <data name="ITSModeControl_Dialog_Message" xml:space="preserve">
-    <value>PowerBattery.dll is missing. Please place it manually to use ITSMode feature.</value>
-  </data>
-  <data name="ITSModeControl_Dialog_Title" xml:space="preserve">
-    <value>Missing Compoment</value>
   </data>
   <data name="ITSModeControl_Message" xml:space="preserve">
     <value>Change IdeaPad Power Mode</value>
@@ -1373,6 +1388,24 @@ Click Yes to disable and No to ignore.</value>
   </data>
   <data name="Keyboard_VantageEnabledWarning_Title" xml:space="preserve">
     <value>A Lenovo Vantage vagy annak szolgáltatásai futnak</value>
+  </data>
+  <data name="KeyDiscovery_AddCustomKey" xml:space="preserve">
+    <value>Add Custom Key</value>
+  </data>
+  <data name="KeyDiscovery_Added" xml:space="preserve">
+    <value>Added</value>
+  </data>
+  <data name="KeyDiscovery_CodeText" xml:space="preserve">
+    <value>Code: {0}</value>
+  </data>
+  <data name="KeyDiscovery_KnownKeyTooltip" xml:space="preserve">
+    <value>Known key</value>
+  </data>
+  <data name="KeyDiscovery_Listening" xml:space="preserve">
+    <value>Listening for key presses... Press ESC to stop.</value>
+  </data>
+  <data name="KeyDiscovery_UnknownKeyTooltip" xml:space="preserve">
+    <value>Unknown key – can be added</value>
   </data>
   <data name="LampArrayRGBKeyboardPage_Aft_Ambient" xml:space="preserve">
     <value>Aft Ambient</value>
@@ -1482,6 +1515,12 @@ Click Yes to disable and No to ignore.</value>
   <data name="Load" xml:space="preserve">
     <value>Betöltés</value>
   </data>
+  <data name="MacAddress" xml:space="preserve">
+    <value>MAC address</value>
+  </data>
+  <data name="MachineType" xml:space="preserve">
+    <value>Machine Type</value>
+  </data>
   <data name="MacroAutomationStepControl_Message" xml:space="preserve">
     <value>Makrók engedélyezése vagy letiltása.</value>
   </data>
@@ -1575,9 +1614,6 @@ Click Yes to disable and No to ignore.</value>
   <data name="MainWindow_NavigationItem_Donate" xml:space="preserve">
     <value>Támogatás</value>
   </data>
-  <data name="MainWindow_NavigationItem_FanCurve" xml:space="preserve">
-    <value>Fan Curve</value>
-  </data>
   <data name="MainWindow_NavigationItem_Keyboard" xml:space="preserve">
     <value>Billentyűzet</value>
   </data>
@@ -1591,7 +1627,7 @@ Click Yes to disable and No to ignore.</value>
     <value>Beállítások</value>
   </data>
   <data name="MainWindow_PawnIO_Warning_Message" xml:space="preserve">
-    <value>You need to install PawnIO first to use hardware sensors!</value>
+    <value>You need install PawnIO first to use the new dashboard!</value>
   </data>
   <data name="MainWindow_PawnIO_Warning_Title" xml:space="preserve">
     <value>Warning</value>
@@ -1620,6 +1656,12 @@ Click Yes to disable and No to ignore.</value>
   <data name="MicrophoneControl_Title" xml:space="preserve">
     <value>Mikrofon</value>
   </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="Motherboard" xml:space="preserve">
+    <value>Motherboard</value>
+  </data>
   <data name="MoveDown" xml:space="preserve">
     <value>Mozgatás le</value>
   </data>
@@ -1633,23 +1675,35 @@ Click Yes to disable and No to ignore.</value>
   <data name="MultipleTriggersAutomationPipelineTrigger_Logic_And" xml:space="preserve">
     <value>Match All (And)</value>
   </data>
+  <data name="MultipleTriggersAutomationPipelineTrigger_Logic_None" xml:space="preserve">
+    <value>No Logic (Separate)</value>
+  </data>
   <data name="MultipleTriggersAutomationPipelineTrigger_Logic_Or" xml:space="preserve">
     <value>Match Any (Or)</value>
   </data>
   <data name="MultipleTriggersAutomationPipelineTrigger_Logic_Title" xml:space="preserve">
     <value>Logic</value>
   </data>
+  <data name="NetworkAdapters" xml:space="preserve">
+    <value>Network adapters</value>
+  </data>
   <data name="No" xml:space="preserve">
     <value>Nem</value>
   </data>
   <data name="NotificationAutomationStepControl_NotificationText" xml:space="preserve">
-    <value>Értesítési szöveg</value>
+    <value>Notification Text (supports $RUN_OUTPUT$)</value>
   </data>
   <data name="NotificationAutomationStepControl_Title" xml:space="preserve">
     <value>Értesítés megjelenítése</value>
   </data>
+  <data name="NotificationAutomationStepControl_ToolTip" xml:space="preserve">
+    <value>You can use $RUN_OUTPUT$ to insert the output of the previous step dynamically.</value>
+  </data>
   <data name="NotificationsSettingsWindow_ACAdapter" xml:space="preserve">
     <value>Hálózati adapter</value>
+  </data>
+  <data name="NotificationsSettingsWindow_AirplaneMode" xml:space="preserve">
+    <value>Airplane mode</value>
   </data>
   <data name="NotificationsSettingsWindow_Automation" xml:space="preserve">
     <value>Műveletek</value>
@@ -1657,8 +1711,8 @@ Click Yes to disable and No to ignore.</value>
   <data name="NotificationsSettingsWindow_Camera" xml:space="preserve">
     <value>Kamera</value>
   </data>
-  <data name="NotificationsSettingsWindow_CapsAndNumLock" xml:space="preserve">
-    <value>Caps Lock és Num Lock</value>
+  <data name="NotificationsSettingsWindow_CapsLock" xml:space="preserve">
+    <value>Caps Lock</value>
   </data>
   <data name="NotificationsSettingsWindow_DontShowNotifications_Message" xml:space="preserve">
     <value>Az Fn billentyűkkel végzett műveletek, például a mikrofon elnémítása esetén az értesítés letiltása.
@@ -1669,6 +1723,9 @@ Engedélyezze ezt az opciót, ha konfliktusok vannak a teljes képernyős alkalm
   </data>
   <data name="NotificationsSettingsWindow_FnLock" xml:space="preserve">
     <value>Fn Lock</value>
+  </data>
+  <data name="NotificationsSettingsWindow_ITSMode" xml:space="preserve">
+    <value>ITS Mode</value>
   </data>
   <data name="NotificationsSettingsWindow_KeyboardBacklight" xml:space="preserve">
     <value>Billentyűzet háttérvilágítás</value>
@@ -1694,6 +1751,12 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   </data>
   <data name="NotificationsSettingsWindow_NotificationPosition_Title" xml:space="preserve">
     <value>Pozíció</value>
+  </data>
+  <data name="NotificationsSettingsWindow_NotificationType" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NotificationsSettingsWindow_NumLock" xml:space="preserve">
+    <value>Num Lock</value>
   </data>
   <data name="NotificationsSettingsWindow_PowerMode" xml:space="preserve">
     <value>Energiagazdálkodási üzemmód</value>
@@ -1721,6 +1784,12 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   </data>
   <data name="Notification_ACAdapterDisconnected" xml:space="preserve">
     <value>Hálózati adapter lecsatlakoztatva</value>
+  </data>
+  <data name="Notification_AirplaneModeOff" xml:space="preserve">
+    <value>Airplane mode off</value>
+  </data>
+  <data name="Notification_AirplaneModeOn" xml:space="preserve">
+    <value>Airplane mode on</value>
   </data>
   <data name="Notification_CameraOff" xml:space="preserve">
     <value>Kamera ki</value>
@@ -1764,6 +1833,27 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   <data name="Notification_PortLightingOn" xml:space="preserve">
     <value>Portok háttérvilágítás bekapcsolva</value>
   </data>
+  <data name="Notification_RGBKeyboardBacklightChanged" xml:space="preserve">
+    <value>RGB Changed</value>
+  </data>
+  <data name="Notification_RGBKeyboardBacklightOff" xml:space="preserve">
+    <value>RGB Off</value>
+  </data>
+  <data name="Notification_SmartKeyDoublePress" xml:space="preserve">
+    <value>Double Press</value>
+  </data>
+  <data name="Notification_SmartKeySinglePress" xml:space="preserve">
+    <value>Single Press</value>
+  </data>
+  <data name="Notification_SpectrumBacklightChanged" xml:space="preserve">
+    <value>Spectrum Changed</value>
+  </data>
+  <data name="Notification_SpectrumBacklightOff" xml:space="preserve">
+    <value>Spectrum Off</value>
+  </data>
+  <data name="Notification_SpectrumBacklightPresetChanged" xml:space="preserve">
+    <value>Spectrum Preset</value>
+  </data>
   <data name="Notification_SpectrumKeyboardBacklight_Backlight" xml:space="preserve">
     <value>Háttérvilágítás {0}</value>
   </data>
@@ -1784,6 +1874,15 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   </data>
   <data name="Notification_WhiteKeyboardBacklight" xml:space="preserve">
     <value>Háttérvilágítás {0}</value>
+  </data>
+  <data name="Notification_WhiteKeyboardBacklightChanged" xml:space="preserve">
+    <value>White Changed</value>
+  </data>
+  <data name="Notification_WhiteKeyboardBacklightOff" xml:space="preserve">
+    <value>White Off</value>
+  </data>
+  <data name="Notification_WhiteKeyboardBacklightSpecial" xml:space="preserve">
+    <value>Backlight changed</value>
   </data>
   <data name="Off" xml:space="preserve">
     <value>Ki</value>
@@ -1811,6 +1910,12 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   </data>
   <data name="OsdAutomationStepControl_Title" xml:space="preserve">
     <value>OSD</value>
+  </data>
+  <data name="OsdLockPositionAutomationStepControl_Message" xml:space="preserve">
+    <value>Set the lock position state of the OSD.</value>
+  </data>
+  <data name="OsdLockPositionAutomationStepControl_Title" xml:space="preserve">
+    <value>OSD Lock Position</value>
   </data>
   <data name="OsdSettings_Appearance_BackgroundColor" xml:space="preserve">
     <value>Background Color</value>
@@ -1905,9 +2010,6 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   <data name="OsdWindow_Title" xml:space="preserve">
     <value>OSD Settings</value>
   </data>
-  <data name="Osd_Chipset" xml:space="preserve">
-    <value>Chipset</value>
-  </data>
   <data name="Osd_Cpu" xml:space="preserve">
     <value>CPU</value>
   </data>
@@ -1947,6 +2049,9 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
   <data name="Osd_Memory_Utilization" xml:space="preserve">
     <value>Utilization</value>
   </data>
+  <data name="Osd_Pch" xml:space="preserve">
+    <value>PCH</value>
+  </data>
   <data name="Osd_PCH_Fan" xml:space="preserve">
     <value>PCH Fan</value>
   </data>
@@ -1960,9 +2065,7 @@ Nincs hatással a többi teljes képernyős ablakokra, de nem lehet kattintani a
     <value>Panel</value>
   </data>
   <data name="OverclockDiscreteGPUAutomationStepControl_Message" xml:space="preserve">
-    <value>Növelje a teljesítményt a diszkrét GPU túlhajtásával.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha nem áll rendelkezésre diszkrét GPU.</value>
+    <value>Increase performance by overclocking discrete GPU.</value>
   </data>
   <data name="OverclockDiscreteGPUAutomationStepControl_Title" xml:space="preserve">
     <value>GPU Overclock</value>
@@ -1981,6 +2084,9 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha nem áll rendelkez
   </data>
   <data name="OverclockDiscreteGPUSettingsWindow_Title" xml:space="preserve">
     <value>GPU Overclock beállítások</value>
+  </data>
+  <data name="Overclocking_UnlockSteps" xml:space="preserve">
+    <value>Unlocking in {0}...</value>
   </data>
   <data name="OverDriveAutomationStepControl_Message" xml:space="preserve">
     <value>A beépített kijelző válaszidejének gyorsítása.</value>
@@ -2140,6 +2246,9 @@ Mindig győződjön meg arról, hogy a megfelelő csomagokat telepíti.</value>
   <data name="PeriodicActionPipelineTriggerTabItemContent_Seconds" xml:space="preserve">
     <value>Seconds</value>
   </data>
+  <data name="PlatformAndCapabilities" xml:space="preserve">
+    <value>Platform &amp; Capabilities</value>
+  </data>
   <data name="PlaySoundAutomationStepControl_Message" xml:space="preserve">
     <value>Az általános zenei formátumok, mint a wav vagy az mp3, támogatottak.</value>
   </data>
@@ -2180,6 +2289,9 @@ A teljesítménymódot az Fn+Q billentyűkombinációval is meg lehet változtat
   <data name="PowerModeControl_Warning" xml:space="preserve">
     <value>A kiválasztott teljesítménymód nem biztos, hogy megfelelően működik hálózati adapter csatlakoztatása nélkül.</value>
   </data>
+  <data name="PowerModes" xml:space="preserve">
+    <value>Power Modes</value>
+  </data>
   <data name="PowerModeUnavailableWithoutACException_Message" xml:space="preserve">
     <value>{0} üzemmód nem érhető el hálózati AC áram nélkül.</value>
     <comment>For example: "{Performance} power mode is not available without AC power."</comment>
@@ -2199,13 +2311,14 @@ A teljesítménymódot az Fn+Q billentyűkombinációval is meg lehet változtat
   <data name="QuickActionAutomationStepControl_Title" xml:space="preserve">
     <value>Gyors művelet</value>
   </data>
+  <data name="RAM" xml:space="preserve">
+    <value>RAM</value>
+  </data>
   <data name="Refresh" xml:space="preserve">
     <value>Frissítés</value>
   </data>
   <data name="RefreshRateAutomationStepControl_Message" xml:space="preserve">
-    <value>A beépített kijelző frissítési sebességének módosítása.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző ki van kapcsolva.</value>
+    <value>Change refresh rate of the built-in display.</value>
   </data>
   <data name="RefreshRateAutomationStepControl_Title" xml:space="preserve">
     <value>Frissítés gyakorisága</value>
@@ -2223,9 +2336,7 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
     <value>Reset</value>
   </data>
   <data name="ResolutionAutomationStepControl_Message" xml:space="preserve">
-    <value>A beépített kijelző felbontásának módosítása.
-
-FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző ki van kapcsolva.</value>
+    <value>Change resolution of the built-in display.</value>
   </data>
   <data name="ResolutionAutomationStepControl_Title" xml:space="preserve">
     <value>Felbontás</value>
@@ -2309,8 +2420,7 @@ FIGYELMEZTETÉS: Ez a művelet nem fog megfelelően futni, ha a belső kijelző 
     <value>Futtatható elérési útvonal</value>
   </data>
   <data name="RunAutomationStepControl_Message" xml:space="preserve">
-    <value>Szkript vagy program futtatása.
-Először győződjön meg róla, hogy a szkript helyesen fut.</value>
+    <value>Run a script or a program.</value>
   </data>
   <data name="RunAutomationStepControl_ProcessCheckInstance" xml:space="preserve">
     <value>Check Instance</value>
@@ -2345,14 +2455,14 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
   <data name="Seconds" xml:space="preserve">
     <value>{0}s</value>
   </data>
-  <data name="SelectSmartKeyPipelinesWindow_List_Description" xml:space="preserve">
-    <value>Válasszon ki egy vagy több gyorsműveletet, hogy végigmenjen</value>
+  <data name="SelectSpecialKeyPipelinesWindow_Configure_Title" xml:space="preserve">
+    <value>Configure {0}</value>
   </data>
-  <data name="SelectSmartKeyPipelinesWindow_List_Empty" xml:space="preserve">
-    <value>Nincsenek gyors műveletek definiálva.</value>
+  <data name="SelectSpecialKeyPipelinesWindow_List_Description" xml:space="preserve">
+    <value>Choose one or more quick actions to cycle through.</value>
   </data>
-  <data name="SelectSmartKeyPipelinesWindow_ShowThisApp" xml:space="preserve">
-    <value>Mutassa ezt az alkalmazást</value>
+  <data name="SelectSpecialKeyPipelinesWindow_List_Empty" xml:space="preserve">
+    <value>No Quick Actions defined.</value>
   </data>
   <data name="SensorItem_BatteryLevel" xml:space="preserve">
     <value>Battery Level</value>
@@ -2436,7 +2546,7 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
     <value>Core Temp</value>
   </data>
   <data name="SensorsControl_GpuMemoryTemperature_Title" xml:space="preserve">
-    <value>VRAM Temp</value>
+    <value>VRAM Temperature</value>
   </data>
   <data name="SensorsControl_GpuVramUtilization_Title" xml:space="preserve">
     <value>VRAM Utilization</value>
@@ -2454,7 +2564,7 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
     <value>Memória órajel</value>
   </data>
   <data name="SensorsControl_Memory_Title" xml:space="preserve">
-    <value>Memória</value>
+    <value>RAM</value>
   </data>
   <data name="SensorsControl_Motherboard_Temperature" xml:space="preserve">
     <value>Board Temperature</value>
@@ -2513,6 +2623,12 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
   <data name="SensorSettingsPage_Used_Memory_GB_Title" xml:space="preserve">
     <value>Used/Total Memory (GB)</value>
   </data>
+  <data name="SerialNumber" xml:space="preserve">
+    <value>Serial number</value>
+  </data>
+  <data name="Series" xml:space="preserve">
+    <value>Series</value>
+  </data>
   <data name="Settings" xml:space="preserve">
     <value>Beállítások</value>
   </data>
@@ -2548,6 +2664,12 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
   </data>
   <data name="SettingsPage_AccentColor_Title" xml:space="preserve">
     <value>Kiemelőszín</value>
+  </data>
+  <data name="SettingsPage_AlwaysOnTop_Message" xml:space="preserve">
+    <value>Keep the app window above all other windows.</value>
+  </data>
+  <data name="SettingsPage_AlwaysOnTop_Title" xml:space="preserve">
+    <value>Pin to Top</value>
   </data>
   <data name="SettingsPage_Autorun_Message" xml:space="preserve">
     <value>A Windows rendszerbe való bejelentkezéskor a tálcára minimalizálva indul.</value>
@@ -2597,14 +2719,14 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
   <data name="SettingsPage_CheckUpdatesButton_Content" xml:space="preserve">
     <value>Ellenőrzés</value>
   </data>
+  <data name="SettingsPage_CheckUpdates_Message" xml:space="preserve">
+    <value>Check now for the latest version.</value>
+  </data>
   <data name="SettingsPage_CheckUpdates_Started_Title" xml:space="preserve">
     <value>Frissítések keresése...</value>
   </data>
   <data name="SettingsPage_CheckUpdates_Title" xml:space="preserve">
     <value>Frissítések ellenőrzése</value>
-  </data>
-  <data name="SettingsPage_ClearBackgroundImage_Title" xml:space="preserve">
-    <value>Image Cleared</value>
   </data>
   <data name="SettingsPage_Clear_BackgroundImage_Title" xml:space="preserve">
     <value>Clear Image</value>
@@ -2624,8 +2746,29 @@ Először győződjön meg róla, hogy a szkript helyesen fut.</value>
   <data name="SettingsPage_Common_RestartRecommended" xml:space="preserve">
     <value>Restart is recommended after changing this option.</value>
   </data>
+  <data name="SettingsPage_CompactMode_Message" xml:space="preserve">
+    <value>Reduce visual clutter to fit more content on screen.</value>
+  </data>
+  <data name="SettingsPage_CompactMode_Title" xml:space="preserve">
+    <value>Compact Mode</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Blur" xml:space="preserve">
+    <value>Blur</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Dim" xml:space="preserve">
+    <value>Dim</value>
+  </data>
   <data name="SettingsPage_Custom_BackgroundImage_Message" xml:space="preserve">
     <value>Custom Background Image</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Stretch_Crop" xml:space="preserve">
+    <value>Crop</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Stretch_Fill" xml:space="preserve">
+    <value>Fill</value>
+  </data>
+  <data name="SettingsPage_Custom_BackgroundImage_Stretch_Fit" xml:space="preserve">
+    <value>Fit</value>
   </data>
   <data name="SettingsPage_Custom_BackgroundImage_Title" xml:space="preserve">
     <value>Custom Background Image</value>
@@ -2758,6 +2901,12 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="SettingsPage_HWiNFO_Title" xml:space="preserve">
     <value>HWiNFO64</value>
   </data>
+  <data name="SettingsPage_Key_Discovery_Message" xml:space="preserve">
+    <value>Find undefined Fn hotkeys in LLT.</value>
+  </data>
+  <data name="SettingsPage_Key_Discovery_Title" xml:space="preserve">
+    <value>Key Discovery</value>
+  </data>
   <data name="SettingsPage_Language_Message" xml:space="preserve">
     <value>Nyelv kiválasztása.</value>
   </data>
@@ -2800,11 +2949,23 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="SettingsPage_Osd_Title" xml:space="preserve">
     <value>Enable OSD</value>
   </data>
+  <data name="SettingsPage_PowerModeMapping_ITSWarning" xml:space="preserve">
+    <value>ITS Mode natively synchronizes power settings, so overriding it here may cause conflicts.</value>
+  </data>
   <data name="SettingsPage_PowerModeMapping_Message" xml:space="preserve">
     <value>A Windows energiagazdálkodási terv vagy a Windows energiaellátási mód automatikus módosítása az energiaellátási módok váltásakor.</value>
   </data>
   <data name="SettingsPage_PowerModeMapping_Title" xml:space="preserve">
     <value>Teljesítmény üzemmód szinkronizálása</value>
+  </data>
+  <data name="SettingsPage_ResetSettings_Confirm" xml:space="preserve">
+    <value>Are you sure you want to reset all settings to defaults? This action cannot be undone and the application will restart.</value>
+  </data>
+  <data name="SettingsPage_ResetSettings_Message" xml:space="preserve">
+    <value>Reset all application settings to their defaults.</value>
+  </data>
+  <data name="SettingsPage_ResetSettings_Title" xml:space="preserve">
+    <value>Reset Settings</value>
   </data>
   <data name="SettingsPage_RestartRequired_Message" xml:space="preserve">
     <value>Restart to apply changes.</value>
@@ -2827,17 +2988,11 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="SettingsPage_SmartFnLock_Title" xml:space="preserve">
     <value>Smart Fn Zár</value>
   </data>
-  <data name="SettingsPage_SmartKeyDoublePressAction_Message" xml:space="preserve">
-    <value>Az Fn+F9 dupla lenyomásához rendelje hozzá a gyors műveletet.</value>
+  <data name="SettingsPage_SmartKeys_Message" xml:space="preserve">
+    <value>Customize the Fn hotkeys.</value>
   </data>
-  <data name="SettingsPage_SmartKeyDoublePressAction_Title" xml:space="preserve">
-    <value>Okos gomb másodlagos művelet</value>
-  </data>
-  <data name="SettingsPage_SmartKeySinglePressAction_Message" xml:space="preserve">
-    <value>Gyors művelet hozzárendelése az Fn+F9 egyszeri megnyomásához.</value>
-  </data>
-  <data name="SettingsPage_SmartKeySinglePressAction_Title" xml:space="preserve">
-    <value>Okos gomb művelete</value>
+  <data name="SettingsPage_SmartKeys_Title" xml:space="preserve">
+    <value>Smart Keys</value>
   </data>
   <data name="SettingsPage_SynchronizeBrightnessToAllPowerPlans_Message" xml:space="preserve">
     <value>Ha be van kapcsolva, akkor a Windows összes energiatakarékossági tervére ugyanaz a fényerőszint lesz érvényben, amikor megváltoztatja azt.</value>
@@ -2860,23 +3015,32 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="SettingsPage_Title" xml:space="preserve">
     <value>Beállítások</value>
   </data>
+  <data name="SettingsPage_UpdateChannel_Message" xml:space="preserve">
+    <value>Choose between stable, beta and dev releases.</value>
+  </data>
   <data name="SettingsPage_UpdateChannel_Title" xml:space="preserve">
     <value>Update Channel</value>
   </data>
+  <data name="SettingsPage_UpdateCheckFrequency_Message" xml:space="preserve">
+    <value>Choose how often to check for new versions.</value>
+  </data>
   <data name="SettingsPage_UpdateCheckFrequency_Title" xml:space="preserve">
-    <value>Frissítések automatikus keresése</value>
+    <value>Update Frequency</value>
+  </data>
+  <data name="SettingsPage_UpdateMethod_Message" xml:space="preserve">
+    <value>Choose how updates are downloaded and installed.</value>
   </data>
   <data name="SettingsPage_UpdateMethod_Title" xml:space="preserve">
-    <value>Update Method</value>
+    <value>Frissítési Metódus</value>
   </data>
   <data name="SettingsPage_UseNewSensorDashboard_Message" xml:space="preserve">
     <value>Use new sensor dashboard instead of the old one.</value>
   </data>
   <data name="SettingsPage_UseNewSensorDashboard_Title" xml:space="preserve">
-    <value>Use New Sensor Dashboard</value>
+    <value>New Sensor Dashboard</value>
   </data>
   <data name="SettingsPage_WindowBackdropType_Info" xml:space="preserve">
-    <value>If you experience visual artifacts on Snackbars in HDR or ACM mode, set this to "None".</value>
+    <value>If you experience visual artifacts on Snackbar Notifications in HDR mode, set this to "None".</value>
   </data>
   <data name="SettingsPage_WindowBackdropType_Message" xml:space="preserve">
     <value>The effect used for the background of the application window.</value>
@@ -2905,6 +3069,21 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="Settings_GodModeFnQSwitchable_Title" xml:space="preserve">
     <value>Egyéni módra váltás az Fn+Q billentyűkombinációval</value>
   </data>
+  <data name="ShowAppAutomationStepControl_Message" xml:space="preserve">
+    <value>Show the Lenovo Legion Toolkit</value>
+  </data>
+  <data name="ShowAppAutomationStepControl_Title" xml:space="preserve">
+    <value>Show App</value>
+  </data>
+  <data name="ShowLess" xml:space="preserve">
+    <value>Show less</value>
+  </data>
+  <data name="ShowMore" xml:space="preserve">
+    <value>Show more</value>
+  </data>
+  <data name="Slot" xml:space="preserve">
+    <value>Slot</value>
+  </data>
   <data name="SpeakerAutomationStepControl_Message" xml:space="preserve">
     <value>Némításkor az összes aktív hangkimeneti eszköz elnémul.</value>
   </data>
@@ -2916,6 +3095,42 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   </data>
   <data name="SpeakerVolumeAutomationStepControl_Title" xml:space="preserve">
     <value>Speaker Volume</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery" xml:space="preserve">
+    <value>Key Discovery</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery_Message" xml:space="preserve">
+    <value>Find key that is not defined in LLT.</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="SpecialKeyDetailWindow_KeyDiscovery_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="SpecialKeyDetail_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="SpecialKeyDetail_Mode" xml:space="preserve">
+    <value>Mode</value>
+  </data>
+  <data name="SpecialKeyDetail_Mode_Description" xml:space="preserve">
+    <value>Choose how this key responds when pressed.</value>
+  </data>
+  <data name="SpecialKeysWindow_Description" xml:space="preserve">
+    <value>Assign custom Quick Actions to Fn keys. Each key can override its default behavior with a custom pipeline. Right-click any key to hide it from this list.</value>
+  </data>
+  <data name="SpecialKeysWindow_HideHiddenKeys" xml:space="preserve">
+    <value>Hide {0} hidden keys</value>
+  </data>
+  <data name="SpecialKeysWindow_ShowHiddenKeys" xml:space="preserve">
+    <value>Show {0} hidden keys</value>
+  </data>
+  <data name="SpecialKey_DriverSuffix" xml:space="preserve">
+    <value>(Driver)</value>
+  </data>
+  <data name="SpecialKey_UnknownKey" xml:space="preserve">
+    <value>Key {0}</value>
   </data>
   <data name="SpectrumKeyboardBacklightBrightnessAutomationStepControl_Message" xml:space="preserve">
     <value>Billentyűzet háttérvilágításának beállítása.</value>
@@ -3037,6 +3252,9 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="SpectrumKeyboardEffectControl_Description_Zones" xml:space="preserve">
     <value>{0} zónák</value>
   </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Start date</value>
+  </data>
   <data name="StatusTrayPopup_Battery" xml:space="preserve">
     <value>Akkumulátor</value>
   </data>
@@ -3076,8 +3294,17 @@ Az opció módosítása után ajánlott az újraindítás.</value>
   <data name="StatusWindow_System_Fan" xml:space="preserve">
     <value>System Fan</value>
   </data>
+  <data name="Storage" xml:space="preserve">
+    <value>Storage</value>
+  </data>
   <data name="SymbolRegularPicker_Title" xml:space="preserve">
     <value>Ikon kiválasztása</value>
+  </data>
+  <data name="TextColor" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="Threads" xml:space="preserve">
+    <value>Threads</value>
   </data>
   <data name="TimeAutomationPipelineTriggerTabItemContent_Sunrise" xml:space="preserve">
     <value>Napkelte</value>
@@ -3089,8 +3316,7 @@ Az opció módosítása után ajánlott az újraindítás.</value>
     <value>Idő</value>
   </data>
   <data name="ToggleHybridModeAutomationStepControl_Message" xml:space="preserve">
-    <value>Lehetővé teszi az integrált és a diszkrét GPU közötti váltást.
-Újraindítást igényel.</value>
+    <value>Allow switching between integrated and discrete GPU.</value>
   </data>
   <data name="ToggleHybridModeAutomationStepControl_Title" xml:space="preserve">
     <value>Hibrid mód</value>
@@ -3139,14 +3365,14 @@ Az egér mozgatása vagy a billentyűzet megnyomása felébreszti a kijelzőket.
   <data name="TurnOffMonitorsControl_TurnOff" xml:space="preserve">
     <value>Kikapcsolás</value>
   </data>
-  <data name="TurnOffWiFiAutomationStepControl_Title" xml:space="preserve">
-    <value>Wi-Fi kikapcsolása</value>
-  </data>
-  <data name="TurnOnWiFiAutomationStepControl_Title" xml:space="preserve">
-    <value>Wi-Fi bekapcsolása</value>
-  </data>
   <data name="UnexpectedException" xml:space="preserve">
     <value>Váratlan kivétel történt:</value>
+  </data>
+  <data name="Unhide" xml:space="preserve">
+    <value>Unhide</value>
+  </data>
+  <data name="Unknown" xml:space="preserve">
+    <value>Unknown</value>
   </data>
   <data name="Unnamed" xml:space="preserve">
     <value>Névtelen</value>
@@ -3177,14 +3403,29 @@ A naplózás automatikusan engedélyezésre kerül, ha a folytatást választja.
   <data name="Update" xml:space="preserve">
     <value>Frissítés</value>
   </data>
+  <data name="UpdateWindow_DownloadError_Title" xml:space="preserve">
+    <value>Update download failed</value>
+  </data>
+  <data name="UpdateWindow_SecurityError_Title" xml:space="preserve">
+    <value>Failed to verify update</value>
+  </data>
   <data name="UpdateWindow_Title" xml:space="preserve">
     <value>Frissítés elérhető</value>
   </data>
   <data name="UpdateWindow_WhatsNew" xml:space="preserve">
     <value>Mik az újdonságok?</value>
   </data>
+  <data name="Used" xml:space="preserve">
+    <value>Used</value>
+  </data>
+  <data name="Valid" xml:space="preserve">
+    <value>Valid</value>
+  </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>
+  </data>
+  <data name="Warranty" xml:space="preserve">
+    <value>Warranty</value>
   </data>
   <data name="Watt" xml:space="preserve">
     <value>W</value>
@@ -3201,6 +3442,9 @@ A naplózás automatikusan engedélyezésre kerül, ha a folytatást választja.
   <data name="WhiteKeyboardBacklightControl_Title" xml:space="preserve">
     <value>Billentyűzet háttérvilágítás</value>
   </data>
+  <data name="WiFiAutomationStepControl_Title" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
   <data name="WiFiConnectedPipelineTriggerTabItemContent_CopyCurrentNetworkName" xml:space="preserve">
     <value>Jelenlegi hálózat nevének másolása</value>
   </data>
@@ -3213,8 +3457,20 @@ A naplózás automatikusan engedélyezésre kerül, ha a folytatást választja.
   <data name="WindowsPowerPlansWindow_DefaultPowerPlan" xml:space="preserve">
     <value>Alapértelmezett</value>
   </data>
+  <data name="WindowsPowerPlansWindow_PowerMode_AC" xml:space="preserve">
+    <value>AC</value>
+  </data>
+  <data name="WindowsPowerPlansWindow_PowerMode_DC" xml:space="preserve">
+    <value>DC</value>
+  </data>
+  <data name="WindowsPowerPlansWindow_PowerMode_Title" xml:space="preserve">
+    <value>Power Mode</value>
+  </data>
   <data name="WindowsPowerPlansWindow_Title" xml:space="preserve">
     <value>Windows Energiasémák</value>
+  </data>
+  <data name="WindowsPowerPlan_Title" xml:space="preserve">
+    <value>Windows Power Plan</value>
   </data>
   <data name="WinKeyAutomationStepControl_Message" xml:space="preserve">
     <value>A beépített billentyűzet Windows gombjának letiltása.</value>

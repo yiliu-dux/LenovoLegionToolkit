@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -81,6 +81,7 @@ public static partial class Compatibility
         "14APH",
         "14IRP",
         "14AKP",
+        "14IRH",
 
         // Chinese variants
         "G5000",
@@ -106,7 +107,7 @@ public static partial class Compatibility
         { "83DG", LegionSeries.Legion_5 }, { "83EW", LegionSeries.Legion_5 }, { "83EG", LegionSeries.Legion_5 },
         { "83JJ", LegionSeries.Legion_5 }, { "82RC", LegionSeries.Legion_5 }, { "82RB", LegionSeries.Legion_5 },
         { "82TB", LegionSeries.Legion_5 }, { "83EF", LegionSeries.Legion_5 }, { "82RE", LegionSeries.Legion_5 },
-        { "82RD", LegionSeries.Legion_5 },
+        { "82RD", LegionSeries.Legion_5 }, { "83Q7", LegionSeries.Legion_5 },
 
         { "83DH", LegionSeries.Legion_Slim_5 }, { "83EX", LegionSeries.Legion_Slim_5 }, { "82Y5", LegionSeries.Legion_Slim_5 },
         { "82Y9", LegionSeries.Legion_Slim_5 }, { "82YA", LegionSeries.Legion_Slim_5 }, { "83D6", LegionSeries.Legion_Slim_5 },
@@ -131,10 +132,13 @@ public static partial class Compatibility
         ("LOQ", LegionSeries.LOQ),
         ("IdeaPad Gaming", LegionSeries.IdeaPad_Gaming),
         ("IdeaPad", LegionSeries.IdeaPad),
+        ("XiaoXin", LegionSeries.IdeaPad),
         ("YOGA", LegionSeries.YOGA),
         ("Lenovo Slim", LegionSeries.Lenovo_Slim),
         ("ThinkBook", LegionSeries.ThinkBook),
-        ("Legion", LegionSeries.Legion_Legacy)
+        ("Legion", LegionSeries.Legion_Legacy),
+        ("Motorola", LegionSeries.Motorola),
+        ("Motobook", LegionSeries.Motorola)
     ];
 
     private static MachineInformation? _machineInformation;
@@ -144,14 +148,28 @@ public static partial class Compatibility
 
     public static async Task<(bool isCompatible, MachineInformation machineInformation)> IsCompatibleAsync()
     {
+        await EnsureFakeMachineInformationLoadedAsync().ConfigureAwait(false);
+
         var mi = await GetMachineInformationAsync().ConfigureAwait(false);
 
         bool isBasicCompatible = await CheckBasicCompatibilityAsync().ConfigureAwait(false);
 
         bool isAllowedVendor = ALLOWED_VENDORS.Contains(mi.Vendor, StringComparer.InvariantCultureIgnoreCase);
 
-        if (!await CheckBasicCompatibilityAsync().ConfigureAwait(false) || !isAllowedVendor)
-            return (false, mi);
+        bool isAllowedModel = AllowedModelsPrefix.Any(prefix =>
+            mi.Model.Contains(prefix, StringComparison.InvariantCultureIgnoreCase));
+
+        bool isCompatible = isBasicCompatible || (isAllowedVendor && isAllowedModel);
+
+        return (isCompatible, mi);
+    }
+
+    private static async Task EnsureFakeMachineInformationLoadedAsync()
+    {
+        if (FakeMachineInformationMode)
+        {
+            return;
+        }
 
         if (File.Exists(FakeMachineInformationPath))
         {
@@ -159,11 +177,6 @@ public static partial class Compatibility
             _fakeMachineInformation = JsonConvert.DeserializeObject<FakeMachineInformation>(jsonString);
             FakeMachineInformationMode = true;
         }
-
-        bool isAllowedModel = AllowedModelsPrefix.Any(allowedModel =>
-            mi.Model.Contains(allowedModel, StringComparison.InvariantCultureIgnoreCase));
-
-        return (isAllowedModel, mi);
     }
 
     public static Task<FakeMachineInformation?> GetFakeMachineInformationAsync()
@@ -200,17 +213,17 @@ public static partial class Compatibility
             Features = features,
             Properties = new()
             {
-                SupportsAlwaysOnAc = GetAlwaysOnAcStatus(),
-                SupportsExtremeMode = GetSupportsExtremeMode(supportedPowerModes, smartFanVersion, legionZoneVersion),
-                SupportsGodModeV1 = GetSupportsGodModeV1(supportedPowerModes, smartFanVersion, legionZoneVersion, biosVersion),
-                SupportsGodModeV2 = GetSupportsGodModeV2(supportedPowerModes, smartFanVersion, legionZoneVersion),
-                SupportsGodModeV3 = GetSupportsGodModeV3(supportedPowerModes, smartFanVersion, legionZoneVersion, generation, model, machineType),
-                SupportsGodModeV4 = GetSupportsGodModeV4(supportedPowerModes, smartFanVersion, legionZoneVersion),
-                SupportsGSync = await GetSupportsGSyncAsync().ConfigureAwait(false),
-                SupportsIGPUMode = await GetSupportsIGPUModeAsync().ConfigureAwait(false),
-                SupportsAIMode = await GetSupportsAIModeAsync().ConfigureAwait(false),
-                SupportsBootLogoChange = GetSupportBootLogoChange(),
-                SupportsITSMode = GetSupportITSMode(model),
+                SupportsAlwaysOnAc = AppFlags.Instance.Debug ? (true, true) : GetAlwaysOnAcStatus(),
+                SupportsExtremeMode = AppFlags.Instance.Debug || GetSupportsExtremeMode(supportedPowerModes, smartFanVersion, legionZoneVersion),
+                SupportsGodModeV1 = AppFlags.Instance.Debug || GetSupportsGodModeV1(supportedPowerModes, smartFanVersion, legionZoneVersion, biosVersion),
+                SupportsGodModeV2 = AppFlags.Instance.Debug || GetSupportsGodModeV2(supportedPowerModes, smartFanVersion, legionZoneVersion),
+                SupportsGodModeV3 = AppFlags.Instance.Debug || GetSupportsGodModeV3(supportedPowerModes, smartFanVersion, legionZoneVersion, generation, model, machineType),
+                SupportsGodModeV4 = AppFlags.Instance.Debug || GetSupportsGodModeV4(supportedPowerModes, smartFanVersion, legionZoneVersion),
+                SupportsGSync = AppFlags.Instance.Debug || await GetSupportsGSyncAsync().ConfigureAwait(false),
+                SupportsIGPUMode = AppFlags.Instance.Debug || await GetSupportsIGPUModeAsync().ConfigureAwait(false),
+                SupportsAIMode = AppFlags.Instance.Debug || await GetSupportsAIModeAsync().ConfigureAwait(false),
+                SupportsBootLogoChange = AppFlags.Instance.Debug || GetSupportBootLogoChange(),
+                SupportsITSMode = AppFlags.Instance.Debug || GetSupportITSMode(model),
                 HasQuietToPerformanceModeSwitchingBug = GetHasQuietToPerformanceModeSwitchingBug(biosVersion),
                 HasGodModeToOtherModeSwitchingBug = GetHasGodModeToOtherModeSwitchingBug(biosVersion),
                 HasReapplyParameterIssue = GetHasReapplyParameterIssue(model, machineType),
@@ -548,7 +561,11 @@ public static partial class Compatibility
         {
             return false;
         }
-        return lower.Contains("IdeaPad".ToLowerInvariant()) || lower.Contains("ThinkBook".ToLowerInvariant()) || lower.Contains("Lenovo Slim".ToLowerInvariant());
+        return lower.Contains("IdeaPad".ToLowerInvariant())
+            || lower.Contains("ThinkBook".ToLowerInvariant()) 
+            || lower.Contains("Lenovo Slim".ToLowerInvariant())
+            || lower.Contains("Motobook".ToLowerInvariant())
+            || lower.Contains("YOGA".ToLowerInvariant());
     }
 
     private static int GetMachineGeneration(string model)
@@ -721,6 +738,7 @@ public static partial class Compatibility
             LegionSeries.Legion_Go => true,
             LegionSeries.LOQ => true,
             LegionSeries.Legion_Legacy => true,
+            LegionSeries.IdeaPad_Gaming => true,
             _ => false
         };
     }

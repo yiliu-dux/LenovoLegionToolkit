@@ -24,8 +24,6 @@
 
 ---
 
-<br />
-
 Lenovo Legion Toolkit (LLT) is a Windows desktop utility created for Lenovo gaming laptops that replaces Lenovo Vantage / Legion Zone / Legion Space.
 
 It runs no background services, uses less memory, uses virtually no CPU, and contains no telemetry. Just like Lenovo Vantage, this application is Windows only.
@@ -34,16 +32,37 @@ _Join the Official Discord: https://discord.gg/TB3ER8ZVdt_ (for releases, suppor
 _Join the Legion Series Discord: https://discord.com/invite/legionseries_<br>
 _Join the LOQ Series Discord: https://discord.gg/3GKzQtwdNf_
 
-<img src="https://github.com/user-attachments/assets/9261f768-191c-4dcb-a603-8fa2d144b049" width="700" />
-
-&nbsp;
-
 # Localization
-This fork has linked to crowdin [LenovoLegionToolkit-Unofficial](https://crowdin.com/project/lenovolegiontoolkit-unofficial)
+This fork has linked to crowdin [LenovoLegionToolkit](https://crowdin.com/project/lenovolegiontoolkit-unofficial)
 
 Contributions to the localization efforts are warmly welcomed and greatly appreciated!
 
+# Screenshots
+
+### Main Window
+<img src="assets/Main_DarkMode.png" width="49%" /> <img src="assets/Main_LightMode.png" width="49%" />
+
+### Pages
+<img src="assets/Battery.png" width="49%" /> <img src="assets/Actions.png" width="49%" />
+<img src="assets/Macro.png" width="49%" />
+
+### Keyboard & Lighting
+<img src="assets/Keyboard_WMI.png" width="49%" /> <img src="assets/Keyboard_DynamicLighting.png" width="49%" />
+
+### On-Screen Display
+<img src="assets/OSD_BarStyle.png" width="49%" />
+
+### Settings
+<img src="assets/Setting_AppBehavior.png" width="49%" /> <img src="assets/Settings_Appearance.png" width="49%" />
+<img src="assets/Settings_Power.png" width="49%" /> <img src="assets/Settings_Display.png" width="49%" />
+<img src="assets/Settings_SmartKeys.png" width="49%" /> <img src="assets/Settings_SoftwareControl.png" width="49%" />
+<img src="assets/Settings_Updates.png" width="49%" /> <img src="assets/Settings_Integrations.png" width="49%" />
+
+---
+
 # Table of Contents
+  - [Localization](#localization)
+  - [Screenshots](#screenshots)
   - [Disclaimer](#disclaimer)
   - [Download](#download)
   - [Compatibility](#compatibility)
@@ -84,6 +103,9 @@ If you installed LLT on a clean Windows install, make sure to have necessary dri
 1. Lenovo Energy Management
 2. Lenovo Vantage Gaming Feature Driver
 
+> [!NOTE]
+> These drivers are not required on Gen 10 and later laptops.
+
 #### Problems with .NET?
 
 If for whatever reason LLT installer did not setup .NET properly:
@@ -120,9 +142,9 @@ You can also find us in:
 
 ## Compatibility
 
-Lenovo Legion Toolkit is made for Lenovo Legion laptops, and other similar laptops like Ideapad Gaming, LOQ and their Chinese variants.
+Lenovo Legion Toolkit is made for Lenovo Legion laptops and the Legion Go, and other similar devices like IdeaPad Gaming, LOQ, Lenovo Slim, and ThinkBook, including their Chinese variants (R-series, Y-series).
 
-Generations 6 (2021), 7 (2022), 8 (2023), 9 (2024), and 10 (2025) are supported, although some features also work on the 5th generation (2020). Issues related to devices older than Gen 6 or that are not Legions are out of scope of this project.
+Generations 6 (2021), 7 (2022), 8 (2023), 9 (2024), 10 (2025), and 11 (2026) are supported, although some features also work on the 5th generation (2020). Issues related to devices older than Gen 6 or that are not Legions are out of scope of this project.
 
 If you are getting an incompatible message on startup, you can check the *Contribution* section down at the bottom, to see how can you help. Keep in mind, that not always we can make all options compatible with all hardware since we do not have access to it.
 
@@ -180,7 +202,7 @@ Other lighting features like both 1 and 3 level white keyboard backlight, panel 
 Lighting that required Corsair iCue is not supported by LLT.
 
 > [!IMPORTANT]
-> Riot Vanguard DRM (used in Valorant for example) is known to cause issues with RGB controls. If you don't see RGB settings and have it installed, make sure it doesn't run on startup or uninstall it._
+> Riot Vanguard DRM (used in Valorant for example) is known to cause issues with RGB controls. If you don't see RGB settings and have it installed, make sure it doesn't run on startup or uninstall it.
 
 ### Hybrid Mode and GPU Working Modes
 
@@ -294,8 +316,8 @@ LLT automatically adds some variables to the process environment that can be acc
 - When AC power adapter is disconnected
 	- `LLT_IS_AC_ADAPTER_CONNECTED=FALSE`
 - When Power Mode is changed:
-	- `LLT_POWER_MODE=<value>`, where `value` is one of: `1` - Quiet, `2` - Balance, `3` - Performance, `255` - Custom
-	- `LLT_POWER_MODE_NAME=<value>`, where `value` is one of: `QUIET`, `BALANCE`, `PERFORMANCE`, `CUSTOM`
+	- `LLT_POWER_MODE=<value>`, where `value` is one of: `1` - Quiet, `2` - Balance, `3` - Performance, `223` - Extreme, `255` - Custom
+	- `LLT_POWER_MODE_NAME=<value>`, where `value` is one of: `QUIET`, `BALANCE`, `PERFORMANCE`, `EXTREME`, `CUSTOM`
 - When game is running
 	- `LLT_IS_GAME_RUNNING=TRUE`
 - When game closes
@@ -338,6 +360,23 @@ LLT automatically adds some variables to the process environment that can be acc
 	- `LLT_STARTUP=TRUE`
 - On resume
 	- `LLT_RESUME=TRUE`
+- When Hybrid Mode is changed
+	- `LLT_HYBRID_MODE=<value>`, where `value` is one of: `1` - dGPU Only, `2` - Hybrid, `3` - Hybrid Auto, `4` - Hybrid IGPU Only, `5` - UMA
+	- `LLT_HYBRID_MODE_NAME=<value>`, where `value` is one of: `DGPU Only`, `Hybrid`, `Hybrid Auto`, `Hybrid IGPU`, `UMA`
+- When device is connected
+	- `LLT_DEVICE_CONNECTED=TRUE`
+	- `LLT_DEVICE_INSTANCE_IDS=<value>`, where `value` is comma separated list of device instance IDs
+- When device is disconnected
+	- `LLT_DEVICE_CONNECTED=FALSE`
+	- `LLT_DEVICE_INSTANCE_IDS=<value>`, where `value` is comma separated list of device instance IDs
+- When user becomes active
+	- `LLT_IS_USER_ACTIVE=TRUE`
+- When user becomes inactive
+	- `LLT_IS_USER_ACTIVE=FALSE`
+- When session is locked
+	- `LLT_SESSION_LOCKED=TRUE`
+- When session is unlocked
+	- `LLT_SESSION_LOCKED=FALSE`
 
 </details>
 
@@ -349,7 +388,7 @@ If "Wait for exit" is checked, LLT will capture the output from standard output 
 
 It is possible to control some features of LLT directly from the command line. The CLI executable is called `llt.exe` and can be found in the install directory.
 
-For CLI to work properly, LLT needs to run in the background and CLI option needs to be enabled in LLT settings. You can also chose to add `llt.exe` to your PATH variable for easier access.
+For CLI to work properly, LLT needs to run in the background and CLI option needs to be enabled in LLT settings. You can also choose to add `llt.exe` to your PATH variable for easier access.
 
 CLI does not need to be run as Administrator.
 
@@ -367,7 +406,7 @@ CLI does not need to be run as Administrator.
 * `llt spectrum brightness get` - get current brightness Spectrum RGB is set to
 * `llt spectrum brightness set <brightness>` - set Spectrum RGB brightness to `<brightness>`
 * `llt rgb get` - get current 4-zone RGB preset
-* `llt rgb set <profile>` - set 4-zone RGB to `<preset>`
+* `llt rgb set <preset>` - set 4-zone RGB to `<preset>`
 
 </details>
 
@@ -403,7 +442,6 @@ LLT makes use of several open-source libraries:
 * **LibreHardwareMonitor** ([LibreHardwareMonitor/LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor))
 * **PawnIO** ([namazso/PawnIO](https://github.com/namazso/PawnIO))
 * **CoordinateSharp** ([Tronald/CoordinateSharp](https://github.com/Tronald/CoordinateSharp))
-* **UniversalFanControl.Lib** ([XKaguya/UniversalFanControl.Lib](https://www.nuget.org/packages/UniversalFanControl.Lib))
 * **ZenStates-Core** ([irusanov/ZenStates-Core](https://github.com/irusanov/ZenStates-Core))
 * **PresentMonFps** ([lemutec/PresentMonFps](https://github.com/lemutec/PresentMonFps))
 
@@ -467,13 +505,13 @@ If you want to remove them instead, make sure that you uninstall all 3, otherwis
 
 LLT makes use of many low-level Windows APIs that can be falsely flagged by antiviruses as suspicious, resulting in a false-positive. LLT is open source and can easily be audited by anyone who has any doubts as to what this software does. All installers are built directly on GitHub with GitHub Actions, so that there is no doubt what they contain. 
 
-To ensure authenticity, the installer executable is signed with a project certificate. This signature allows the application's custom updater to verify that the installer hasn't been tampered with and originated from the official build process.
+To ensure authenticity, the installer executable and `Lenovo Legion Toolkit.exe` itself is signed with a project certificate. This signature allows the application's custom updater to verify that the installer hasn't been tampered with and originated from the official build process.
 
 If you downloaded the installer from this project's website or GitHub, you shouldn't worry - the warning is a false-positive. 
 
 #### Can I customize hotkeys?
 
-You can customize Fn+F9 hotkey in LLT settings. Other hotkeys can't be customized.
+You can customize hotkeys in LLT settings.
 
 #### Can I customize Conservation mode threshold?
 
@@ -483,7 +521,7 @@ No. Conservation mode threshold is set in firmware to 60% (2021 and earlier) or 
 
 No, it isn't possible to customize how the fan works in power modes other than Custom.
 
-#### Why can't I switch to Performance or Custom Power Mode on battery?
+#### Why can't I switch to Performance, Extreme or Custom Power Mode on battery?
 
 Starting with version 2.11.0, LLT's behavior was aligned with Vantage and Legion Zone and it does not allow using them without an appropriate power source.
 
@@ -502,9 +540,14 @@ Sometimes new motherboard does not contain correct model numbers and serial numb
 
 #### Why isn't a game detected, even though Actions are configured properly?
 
-Game detection feature is built on top of Windows' game detection, meaning LLT will react to EXE files that Windows considers "a game". That also means that if you nuked Xbox Game Bar from your installation, there is 99.9% chance this feature will not work.
+Game detection mode can be configured in LLT settings. There are four options:
 
-Windows probably doesn't recognize all games properly, but you can mark any program as game in Xbox Game Bar settings (Win+G). You can find list of recognized games in registry: `HKEY_CURRENT_USER\System\GameConfigStore\Children`.
+- **Auto** (default) — combines all methods below
+- **Discrete GPU** — reacts when any process starts using the discrete GPU
+- **Game Config Store** — reacts to games registered in Windows via Xbox Game Bar (`HKEY_CURRENT_USER\System\GameConfigStore\Children`). You can mark any program as a game in Xbox Game Bar settings (Win+G)
+- **Game Mode** — reacts when Windows activates Game Mode for the foreground process
+
+If a game is not detected, check which detection mode is configured in LLT settings and ensure the game meets the criteria for that mode.
 
 #### Can I use other RGB software while using LLT?
 
@@ -520,7 +563,7 @@ Only options natively supported by hardware are available; adding support for cu
 
 #### Can you add fan control to other models?
 
-Fan control is available on Gen 7 and later models. Older models will not be supported due to technical limitations. For discussions about fan control experimental support, join the **Official Discord**.
+Fan control is available on Gen 7 and later models. Older models will not be supported due to technical limitations. For discussions about fan control experimental support, join the [**Official Discord**](https://discord.gg/TB3ER8ZVdt).
 
 #### Why don't I see the custom tooltip when I hover LLT icon in tray?
 
@@ -566,6 +609,7 @@ Some, less frequently needed, features or options can be enabled by using additi
 * `--force-disable-rgbkb` - disables all lighting features for 4-zone RGB keyboards
 * `--force-disable-spectrumkb` - disables all lighting features for Spectrum per-key RGB keyboards
 * `--force-disable-lenovolighting` - disables all lighting features related to panel logo, ports backlight and some white backlit keyboards
+* `--enable-lamp-array` - enables Lamp Array (Windows Dynamic Lighting) support for compatible keyboards
 * `--experimental-gpu-working-mode` - changes GPU Working Mode switch to use experimental method, that is used by LegionZone _(No support is provided when this argument is used)_
 * `--proxy-url=example.com` - specifies proxy server URL that LLT should use
 * `--proxy-username=some_username` - if applicable, specifies proxy server username to use
@@ -601,7 +645,7 @@ In all troubleshooting situations, logs provide important information. **Always*
 5. In `Run` (Win+R) type `"%LOCALAPPDATA%\LenovoLegionToolkit\log"`.
 
 ## Questions?
-If you have a general question, please use [GitHub Discussions](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/discussions) or join our **Official Discord**. 
+If you have a general question, please use [GitHub Discussions](https://github.com/LenovoLegionToolkit-Team/LenovoLegionToolkit/discussions) or join our [**Official Discord**](https://discord.gg/TB3ER8ZVdt). 
 
 ## Contribution
 
@@ -611,7 +655,7 @@ Pull Requests are also welcome, but make sure to check out [CONTRIBUTING.md](CON
 #### Compatibility
 
 > [!IMPORTANT]
-> If your laptop is not part of Legion, IdeaPad Gaming or LOQ series, this software is not for you. Do not open compatibility requests for other devices.
+> If your laptop is not a Legion, Legion Go, IdeaPad Gaming, LOQ, Lenovo Slim, or ThinkBook, this software is not for you. Do not open compatibility requests for other device types.
 
 It would be great to expand the list of compatible devices, but to do it your help is needed!
 

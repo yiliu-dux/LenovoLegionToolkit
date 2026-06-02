@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,6 +33,8 @@ public partial class SettingsAppBehaviorControl
     private readonly DashboardSettings _dashboardSettings = IoCContainer.Resolve<DashboardSettings>();
     private readonly AutomationProcessor _automationProcessor = IoCContainer.Resolve<AutomationProcessor>();
     private readonly OsdSettings _OsdSettings = IoCContainer.Resolve<OsdSettings>();
+    private readonly SensorsControlSettings _sensorsControlSettings = IoCContainer.Resolve<SensorsControlSettings>();
+    private readonly HardwareSensorSettings _hardwareSensorSettings = IoCContainer.Resolve<HardwareSensorSettings>();
 
     private bool _isRefreshing = true;
 
@@ -49,6 +52,8 @@ public partial class SettingsAppBehaviorControl
         _minimizeOnCloseToggle.IsChecked = _settings.Store.MinimizeOnClose;
         _useNewSensorDashboardToggle.IsChecked = _settings.Store.UseNewSensorDashboard;
         _lockWindowSizeToggle.IsChecked = _settings.Store.LockWindowSize;
+        _alwaysOnTopToggle.IsChecked = _settings.Store.AlwaysOnTop;
+        _compactModeToggle.IsChecked = _settings.Store.CompactMode;
         _enableLoggingToggle.IsChecked = _settings.Store.EnableLogging;
 
         var useGpu = _settings.Store.GameDetection.UseDiscreteGPU;
@@ -78,6 +83,8 @@ public partial class SettingsAppBehaviorControl
         _useNewSensorDashboardToggle.Visibility = Visibility.Visible;
         _hardwareSensorsToggle.Visibility = Visibility.Visible;
         _lockWindowSizeToggle.Visibility = Visibility.Visible;
+        _alwaysOnTopToggle.Visibility = Visibility.Visible;
+        _compactModeToggle.Visibility = Visibility.Visible;
         _osdToggle.Visibility = Visibility.Visible;
 
         _hardwareSensorsToggle.IsChecked = _settings.Store.EnableHardwareSensors;
@@ -155,6 +162,39 @@ public partial class SettingsAppBehaviorControl
 
         _settings.Store.LockWindowSize = state.Value;
         _settings.SynchronizeStore();
+
+        App.MainWindowInstance?.ApplyWindowLock(state.Value);
+    }
+
+    private void CompactModeToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isRefreshing || !IsLoaded)
+            return;
+
+        var state = _compactModeToggle.IsChecked;
+        if (state is null)
+            return;
+
+        _settings.Store.CompactMode = state.Value;
+        _settings.SynchronizeStore();
+
+        SnackbarHelper.Show(Resource.SettingsPage_CompactMode_Title, Resource.SettingsPage_RestartRequired_Message, SnackbarType.Success);
+    }
+
+    private void AlwaysOnTopToggle_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isRefreshing || !IsLoaded)
+            return;
+
+        var state = _alwaysOnTopToggle.IsChecked;
+        if (state is null)
+            return;
+
+        _settings.Store.AlwaysOnTop = state.Value;
+        _settings.SynchronizeStore();
+
+        if (App.MainWindowInstance is { } w)
+            w.Topmost = state.Value;
     }
 
     private async void EnableLoggingToggle_Click(object sender, RoutedEventArgs e)
@@ -190,6 +230,8 @@ public partial class SettingsAppBehaviorControl
         AppFlags.Instance.IsTraceEnabled = state.Value;
         _settings.Store.EnableLogging = state.Value;
         _settings.SynchronizeStore();
+
+        await Compatibility.PrintMachineInfoAsync().ConfigureAwait(false);
 
         mainWindow._openLogIndicator.Visibility = Utils.BooleanToVisibilityConverter.Convert(_settings.Store.EnableLogging);
     }
@@ -250,12 +292,17 @@ public partial class SettingsAppBehaviorControl
             {
                 App.Current.OsdWindow.Hide();
             }
+            _OsdSettings.SynchronizeStore();
         }
 
         _settings.Store.EnableHardwareSensors = state.Value;
         _settings.SynchronizeStore();
-        _OsdSettings.SynchronizeStore();
-        
+
+        if (state.Value)
+        {
+            _hardwareSensorSettings.EnsureFileExists();
+        }
+
         _useNewSensorDashboardCardControl.Visibility = state.Value ? Visibility.Visible : Visibility.Collapsed;
         _osdCardControl.Visibility = state.Value ? Visibility.Visible : Visibility.Collapsed;
         
@@ -275,7 +322,13 @@ public partial class SettingsAppBehaviorControl
 
         _settings.Store.UseNewSensorDashboard = state.Value;
         _settings.SynchronizeStore();
-        
+
+        if (state.Value)
+        {
+            _sensorsControlSettings.EnsureFileExists();
+            _hardwareSensorSettings.EnsureFileExists();
+        }
+
         MessagingCenter.Publish(new SensorDashboardSwappedMessage());
     }
 
@@ -449,5 +502,44 @@ public partial class SettingsAppBehaviorControl
 
         var window = new SensorSettingsWindow { Owner = Window.GetWindow(this) };
         window.ShowDialog();
+    }
+
+    private async void ResetSettings_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isRefreshing || !IsLoaded)
+            return;
+
+        var confirmed = await MessageBoxHelper.ShowAsync(
+            Resource.SettingsPage_ResetSettings_Title,
+            Resource.SettingsPage_ResetSettings_Confirm
+        );
+
+        if (!confirmed)
+            return;
+
+        try
+        {
+            App.IsRestoringSettings = true;
+
+            var files = Directory.GetFiles(Folders.AppData);
+            foreach (var file in files)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (Exception ex)
+                {
+                    Log.Instance.Trace($"Failed to delete {file} during reset.", ex);
+                }
+            }
+
+            Process.Start(new ProcessStartInfo(Environment.ProcessPath!) { UseShellExecute = true });
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            Log.Instance.Trace($"Failed to reset settings.", ex);
+        }
     }
 }
